@@ -1,0 +1,118 @@
+METODE Δ "DELTA" (Simbol Perubahan)
+
+(Discover - Explore - Launch - Transform - Assess)
+  •  Discover (Memahami): Menemukan konsep melalui investigasi
+  •  Explore (Memahami): Mengeksplorasi berbagai kemungkinan
+  •  Launch (Mengaplikasi): Meluncurkan solusi dalam konteks nyata
+  •  Transform (Merefleksi): Mentransformasi pemahaman melalui refleksi
+  •  Assess (Merefleksi): Menilai perkembangan pemahaman
+
+Filosofi DELTA:
+Δ (Delta) dalam matematika melambangkan perubahan atau selisih. Strategi ini bertujuan menciptakan perubahan bermakna dalam pemahaman matematika siswa melalui proses berjenjang.
+
+🔍 TAHAP 1: DISCOVER (Memahami)
+"Menemukan Konsep melalui Investigasi Mandiri"
+
+Aktivitas Pembelajaran:
+· Problem-Based Launch: Guru memberikan masalah kontekstual yang memicu rasa ingin tahu
+  Contoh: "Bagaimana menghitung optimasi keuntungan dalam usaha produksi kaos?"
+· Guided Inquiry: Siswa mengeksplorasi konsep melalui:
+  · Eksperimen matematika
+  · Analisis kasus nyata
+  · Diskusi kelompok terpandu
+· Resource Exploration: Menggunakan berbagai sumber (video, artikel, data riil)
+
+Peran Guru:
+· Sebagai fasilitator yang memandu investigasi
+· Memberikan scaffolding sesuai kebutuhan
+· Memastikan semua siswa terlibat aktif
+
+Indikator Keberhasilan:
+· Siswa dapat mengajukan pertanyaan relevan
+· Muncul rasa ingin tahu dan keterlibatan intelektual
+
+---
+
+🧭 TAHAP 2: EXPLORE (Memahami)
+"Mengeksplorasi Konsep secara Mendalam"
+
+Aktivitas Pembelajaran:
+· Concept Mapping: Membuat peta konsep hubungan antar variabel
+· Pattern Recognition: Mengidentifikasi pola matematis dalam data
+· Multiple Representation: Menyajikan konsep dalam berbagai bentuk (grafik, tabel, persamaan)
+
+Tools yang Digunakan:
+· Software matematika (GeoGebra, Desmos)
+· Manipulatif virtual/physical
+· Data sets dari dunia industri
+
+Contoh Penerapan:
+Pada topik fungsi linear:
+· Mengeksplorasi hubungan antara harga jual dan jumlah permintaan
+· Menganalisis dampak perubahan variabel terhadap hasil
+
+---
+
+🚀 TAHAP 3: LAUNCH (Mengaplikasi)
+"Meluncurkan Solusi dalam Konteks Nyata"
+
+Bentuk Penerapan:
+· Project Implementation: Menerapkan konsep dalam proyek nyata
+· Simulation & Modeling: Membuat model matematika situasi riil
+· Problem Solving: Menyelesaikan masalah autentik dari industri
+
+Contoh Konkret untuk SMK:
+1. Bisnis & Manajemen:
+   · Membuat proposal usaha dengan analisis break-even point
+   · Simulasi investasi dan bunga majemuk
+2. Teknik:
+   · Menghitung kebutuhan material konstruksi
+   · Optimasi biaya produksi
+3. Teknologi:
+   · Algoritma untuk optimasi sistem
+   · Analisis data menggunakan statistika
+
+Assessment:
+· Rubrik penilaian berbasis kinerja
+· Fokus pada proses dan produk
+
+---
+
+🔄 TAHAP 4: TRANSFORM (Merefleksi)
+"Mentransformasi Pengalaman menjadi Pembelajaran Bermakna"
+
+Aktivitas Reflektif:
+· Journaling: Membuat jurnal refleksi matematis
+· Peer Feedback: Saling memberikan umpan balik konstruktif
+· Metacognitive Discussion: Diskusi tentang strategi belajar
+
+Pertanyaan Pemantik Refleksi:
+· "Apa yang paling menantang dalam proses ini?"
+· "Strategi mana yang paling efektif? Mengapa?"
+· "Bagaimana konsep ini dapat diterapkan dalam kehidupan/career?"
+· "Apa yang akan saya lakukan berbeda lain kali?"
+
+Teknik Refleksi:
+· Think-Pair-Share: Refleksi individu lalu berpasangan
+· Exit Tickets: Kartu refleksi di akhir pembelajaran
+· Learning Portfolio: Kumpulan bukti perkembangan belajar
+
+---
+
+📊 TAHAP 5: ASSESS (Merefleksi)
+"Menilai Perkembangan Pemahaman secara Holistik"
+
+Bentuk Assessment:
+· Formative Assessment:
+  · Kuis singkat pemahaman konsep
+  · Observasi partisipasi aktif
+  · Self-assessment checklist
+· Summative Assessment:
+  · Presentasi proyek akhir
+  · Portofolio pembelajaran
+  · Tes aplikasi konsep
+
+Assessment for Learning:
+· Fokus pada perkembangan, bukan hanya hasil akhir
+· Umpan balik yang membangun dan spesifik
+· Kesempatan perbaikan berkelanjutan

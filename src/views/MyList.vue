@@ -1,0 +1,85 @@
+<template>
+  <div class="max-w-7xl mx-auto px-4 md:px-12 text-white min-h-[80vh]">
+    <h1 class="text-3xl font-bold mb-8 mt-4">Daftar Saya</h1>
+
+    <div v-if="myList.length === 0" class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/50">
+      <div class="text-6xl mb-4">📂</div>
+      <h2 class="text-xl font-bold text-gray-300">Belum ada konten di daftar Anda</h2>
+      <p class="text-gray-500 mt-2">Tandai materi atau kuis favorit Anda untuk melihatnya di sini.</p>
+      <router-link to="/student" class="mt-6 bg-red-600 px-6 py-2 rounded text-white font-bold hover:bg-red-700 transition">
+        Cari Konten
+      </router-link>
+    </div>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+       <div 
+         v-for="item in myList" 
+         :key="item.id"
+         class="bg-gray-800 rounded-md overflow-hidden hover:scale-105 transition duration-300 cursor-pointer relative group"
+         @click="$router.push(`/student/material/${item.id}`)"
+       >
+          <!-- Placeholder Image -->
+          <div class="h-40 w-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center p-4">
+            <h4 class="text-lg font-bold text-center text-white">{{ item.title }}</h4>
+          </div>
+          
+          <div class="p-4">
+             <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-green-400">Saved</span>
+                <button @click.stop="removeFromList(item.id)" class="text-gray-400 hover:text-red-500" title="Hapus dari daftar">
+                   ✕
+                </button>
+             </div>
+             <h3 class="font-bold text-gray-100 truncate">{{ item.title }}</h3>
+             <p class="text-xs text-gray-400">{{ item.major_target || 'General' }}</p>
+          </div>
+       </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const myList = ref<any[]>([]);
+const router = useRouter();
+
+const getStorageKey = () => {
+    const studentData = localStorage.getItem('student');
+    if (!studentData) return null;
+    const student = JSON.parse(studentData);
+    return `myList_${student.id || student.nisn}`;
+};
+
+const loadList = () => {
+    const key = getStorageKey();
+    if (!key) {
+        // Not logged in, maybe redirect or show empty
+        return; 
+    }
+    
+    const saved = localStorage.getItem(key);
+    if (saved) {
+        myList.value = JSON.parse(saved);
+    }
+};
+
+const removeFromList = (id: string) => {
+    const key = getStorageKey();
+    if (!key) return;
+
+    myList.value = myList.value.filter(m => m.id !== id);
+    localStorage.setItem(key, JSON.stringify(myList.value));
+};
+
+onMounted(() => {
+    const key = getStorageKey();
+    if (!key) {
+        alert("Silakan login untuk melihat daftar saya.");
+        router.push('/login');
+    } else {
+        loadList();
+    }
+});
+</script>
