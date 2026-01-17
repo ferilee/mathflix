@@ -59,6 +59,32 @@
                  </label>
             </div>
         </div>
+
+        <!-- Embedded Tool Section (Explore Stage) -->
+        <div class="border-t pt-4 mt-4">
+             <label class="block text-sm font-bold text-gray-700 mb-2">Simulasi Interaktif (Untuk Tahap EXPLORE)</label>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div>
+                     <label class="block text-xs font-medium text-gray-500">Tipe Tool</label>
+                     <select v-model="form.tool_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
+                         <option value="">Tidak Ada</option>
+                         <option value="geogebra">GeoGebra</option>
+                         <option value="desmos">Desmos</option>
+                         <option value="generic">Website Lain (Generic)</option>
+                     </select>
+                 </div>
+                 <div class="md:col-span-2">
+                     <label class="block text-xs font-medium text-gray-500">URL Embed / Link Simulasi</label>
+                     <input 
+                       v-model="form.embedded_tool_url" 
+                       type="text" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                       placeholder="https://www.geogebra.org/material/iframe/id/..."
+                     />
+                     <p v-if="form.tool_type === 'geogebra'" class="text-[10px] text-gray-400 mt-1">Gunakan link 'Embed' dari GeoGebra, bukan link view biasa.</p>
+                 </div>
+             </div>
+        </div>
       </div>
 
       <!-- DELTA Tabs -->
@@ -156,7 +182,10 @@ interface MaterialForm {
     description: string;
     major_target: string;
     teacher_name: string;
+    teacher_name: string;
     is_featured: boolean;
+    embedded_tool_url: string;
+    tool_type: string;
 }
 
 const form = ref<MaterialForm>({
@@ -164,7 +193,9 @@ const form = ref<MaterialForm>({
   description: '',
   major_target: 'Semua',
   teacher_name: 'Feri Dwi Hermawan', // Default
-  is_featured: false
+  is_featured: false,
+  embedded_tool_url: '',
+  tool_type: ''
 });
 
 const showPreview = ref(false);
@@ -198,6 +229,8 @@ onMounted(async () => {
       form.value.major_target = data.major_target || 'Semua';
       form.value.teacher_name = data.teacher_name || 'Feri Dwi Hermawan';
       form.value.is_featured = !!data.is_featured;
+      form.value.embedded_tool_url = data.embedded_tool_url || '';
+      form.value.tool_type = data.tool_type || '';
       
       // Parse content back to DELTA sections
       parseContent(data.content);

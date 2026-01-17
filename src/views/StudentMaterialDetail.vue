@@ -68,6 +68,25 @@
 
              <!-- Content Body -->
              <div class="p-8 flex-1">
+                 
+                 <!-- Embedded Tool (Explore Stage) -->
+                 <div v-if="deltaStages[activeStageIndex].key === 'explore' && material?.embedded_tool_url" class="mb-8">
+                     <div class="bg-gray-100 p-2 rounded-lg border border-gray-300">
+                        <div class="aspect-w-16 aspect-h-9 w-full h-[500px]">
+                            <iframe 
+                                :src="material.embedded_tool_url" 
+                                width="100%" 
+                                height="100%" 
+                                style="border:0" 
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                        <div class="text-center text-xs text-gray-500 mt-2">
+                            Interactive Simulation provided by {{ material.tool_type || 'External Tool' }}
+                        </div>
+                     </div>
+                 </div>
+
                  <MathRenderer :content="currentStageContent" />
                  
                  <div v-if="!currentStageContent || currentStageContent === '<p><br></p>'" class="text-center text-gray-400 py-10 italic">

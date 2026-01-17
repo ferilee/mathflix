@@ -18,7 +18,9 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'material/:id', component: () => import('../views/StudentMaterialDetail.vue') },
             { path: 'announcements', component: () => import('../views/StudentAnnouncements.vue') },
             { path: 'discuss', component: () => import('../views/StudentDiscuss.vue') },
-            { path: 'assignments', component: () => import('../views/StudentAssignments.vue') }
+            { path: 'assignments', component: () => import('../views/StudentAssignments.vue') },
+            { path: 'reflections', component: () => import('../views/StudentReflections.vue') },
+            { path: 's-badges', component: () => import('../views/StudentBadges.vue') }
         ]
     },
     {
@@ -95,6 +97,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'AdminAssignments',
                 component: () => import('../views/AdminAssignments.vue'),
                 meta: { title: 'Manajemen Tugas' }
+            },
+            {
+                path: 'reflections',
+                name: 'AdminReflections',
+                component: () => import('../views/AdminReflections.vue'),
+                meta: { title: 'Jurnal Siswa' }
             }
         ]
     }

@@ -27,6 +27,9 @@
         <router-link to="/admin/assignments" class="nav-item">
            Tugas
         </router-link>
+        <router-link to="/admin/reflections" class="nav-item">
+           Jurnal Siswa
+        </router-link>
       </nav>
       <div class="p-4 border-t border-slate-700 text-sm text-slate-400">
         V 1.0.0
