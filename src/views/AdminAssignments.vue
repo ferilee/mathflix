@@ -15,7 +15,15 @@
                 <input v-model="form.title" placeholder="Judul Tugas" class="border p-2 rounded">
                 <input v-model="form.due_date" type="datetime-local" class="border p-2 rounded">
             </div>
-            <textarea v-model="form.description" placeholder="Deskripsi Tugas" class="w-full border p-2 rounded mb-4" rows="3"></textarea>
+            <div class="mb-4 bg-white">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Deskripsi Tugas (Rich Text / LaTeX)</label>
+                <QuillEditor 
+                    v-model:content="form.description" 
+                    content-type="html" 
+                    theme="snow" 
+                    toolbar="minimal" 
+                />
+            </div>
             
             <div class="mb-6 bg-gray-50 p-4 rounded border">
                 <h3 class="font-bold mb-3">Target Tugas</h3>
@@ -82,8 +90,12 @@
             
             <div v-for="assign in assignments" :key="assign.id" class="bg-white p-4 rounded shadow border flex justify-between items-start">
                 <div>
-                    <h3 class="font-bold text-lg">{{ assign.title }}</h3>
-                    <p class="text-gray-600 mb-2">{{ assign.description }}</p>
+                    <h3 class="font-bold text-lg hover:text-indigo-600 cursor-pointer" @click="$router.push(`/admin/assignments/${assign.id}`)">
+                        {{ assign.title }}
+                    </h3>
+                    <div class="text-gray-600 mb-2 line-clamp-3">
+                         <MathRenderer :content="assign.description" />
+                    </div>
                     <div class="flex gap-4 text-xs text-gray-500">
                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                             Target: 
@@ -108,6 +120,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import MathRenderer from '../components/MathRenderer.vue';
 import api from '../api';
 
 const students = ref<any[]>([]);
@@ -162,7 +177,7 @@ const createAssignment = async () => {
         
         // Reset form
         form.title = '';
-        form.description = '';
+        form.description = ''; // Quill v-model binds here
         form.due_date = '';
         form.target_grade = null;
         form.target_major = null;
@@ -192,3 +207,10 @@ const deleteAssignment = async (id: string) => {
 
 onMounted(loadData);
 </script>
+
+<style scoped>
+:deep(.ql-editor) {
+    min-height: 150px;
+    background: white;
+}
+</style>

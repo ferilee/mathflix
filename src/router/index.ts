@@ -19,6 +19,7 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'announcements', component: () => import('../views/StudentAnnouncements.vue') },
             { path: 'discuss', component: () => import('../views/StudentDiscuss.vue') },
             { path: 'assignments', component: () => import('../views/StudentAssignments.vue') },
+            { path: 'assignments/:id', component: () => import('../views/StudentAssignmentDetail.vue') },
             { path: 'reflections', component: () => import('../views/StudentReflections.vue') },
             { path: 's-badges', component: () => import('../views/StudentBadges.vue') }
         ]
@@ -97,6 +98,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'AdminAssignments',
                 component: () => import('../views/AdminAssignments.vue'),
                 meta: { title: 'Manajemen Tugas' }
+            },
+            {
+                path: 'assignments/:id',
+                name: 'AdminAssignmentDetail',
+                component: () => import('../views/AdminAssignmentDetail.vue'),
+                meta: { title: 'Detail Pengumpulan' }
             },
             {
                 path: 'reflections',

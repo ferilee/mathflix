@@ -3,7 +3,7 @@
     <!-- Sidebar (Desktop) -->
     <aside class="w-64 bg-slate-800 text-white flex-col hidden md:flex">
       <div class="p-6 text-2xl font-bold tracking-wide border-b border-slate-700">
-        Mathflix Admin
+        Mathflix Guru
       </div>
       <nav class="flex-1 px-4 py-6 space-y-2">
         <router-link to="/admin/dashboard" class="nav-item">
@@ -42,7 +42,7 @@
         <h1 class="text-xl font-semibold text-gray-800">
           {{ routeName }}
         </h1>
-        <div class="text-sm text-gray-500">Admin User</div>
+        <div class="text-sm text-gray-500">Guru / Pengajar</div>
       </header>
       <div class="p-6">
         <router-view></router-view>
