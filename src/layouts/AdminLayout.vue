@@ -21,6 +21,12 @@
         <router-link to="/admin/announcements" class="nav-item">
            Pengumuman
         </router-link>
+        <router-link to="/admin/discuss" class="nav-item">
+           Diskusi
+        </router-link>
+        <router-link to="/admin/assignments" class="nav-item">
+           Tugas
+        </router-link>
       </nav>
       <div class="p-4 border-t border-slate-700 text-sm text-slate-400">
         V 1.0.0
@@ -61,6 +67,10 @@
       <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span>Info</span>
+      </router-link>
+      <router-link to="/admin/discuss" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Diskusi</span>
       </router-link>
     </div>
   </div>

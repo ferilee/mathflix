@@ -9,12 +9,14 @@
             <li><router-link to="/student" class="hover:text-white transition">Home</router-link></li>
             <li><router-link to="/student/leaderboard" class="hover:text-white transition">Leaderboard</router-link></li>
             <li><router-link to="/student/my-list" class="hover:text-white transition">Daftar Saya</router-link></li>
+            <li><router-link to="/student/assignments" class="hover:text-white transition">Tugas Saya</router-link></li>
             <li>
                 <router-link to="/student/announcements" class="hover:text-white transition relative">
                     Pengumuman
                     <span v-if="hasNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
                 </router-link>
             </li>
+            <li><router-link to="/student/discuss" class="hover:text-white transition">Diskusi</router-link></li>
           </ul>
         </div>
         <div class="flex items-center gap-4 text-sm font-medium relative">
@@ -24,7 +26,7 @@
              class="flex items-center gap-3 cursor-pointer"
              @click="showMenu = !showMenu"
            >
-               <span class="hidden sm:block">{{ student.name }}</span>
+               <span class="hidden sm:block">{{ student.full_name }}</span>
                <div v-if="student.photo_profile" class="w-8 h-8 rounded bg-gray-700 overflow-hidden">
                    <img :src="student.photo_profile" alt="Profile" class="w-full h-full object-cover">
                </div>
@@ -79,6 +81,10 @@
          </div>
          <span>Info</span>
       </router-link>
+      <router-link to="/student/discuss" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+         <span>Diskusi</span>
+      </router-link>
     </div>
 
     <!-- Developer Widget (Modal) -->
@@ -132,7 +138,7 @@ const logout = () => {
 };
 
 const initials = computed(() => {
-    return student.value?.name ? student.value.name.charAt(0).toUpperCase() : 'S';
+    return student.value?.full_name ? student.value.full_name.charAt(0).toUpperCase() : 'S';
 });
 
 onMounted(() => {

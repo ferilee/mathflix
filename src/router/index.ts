@@ -16,7 +16,9 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'leaderboard', component: () => import('../views/Leaderboard.vue') },
             { path: 'my-list', component: () => import('../views/MyList.vue') },
             { path: 'material/:id', component: () => import('../views/StudentMaterialDetail.vue') },
-            { path: 'announcements', component: () => import('../views/StudentAnnouncements.vue') }
+            { path: 'announcements', component: () => import('../views/StudentAnnouncements.vue') },
+            { path: 'discuss', component: () => import('../views/StudentDiscuss.vue') },
+            { path: 'assignments', component: () => import('../views/StudentAssignments.vue') }
         ]
     },
     {
@@ -81,6 +83,18 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'AdminAnnouncements',
                 component: () => import('../views/AdminAnnouncements.vue'),
                 meta: { title: 'Kelola Pengumuman' }
+            },
+            {
+                path: 'discuss',
+                name: 'AdminDiscuss',
+                component: () => import('../views/AdminDiscuss.vue'),
+                meta: { title: 'Moderasi Diskusi' }
+            },
+            {
+                path: 'assignments',
+                name: 'AdminAssignments',
+                component: () => import('../views/AdminAssignments.vue'),
+                meta: { title: 'Manajemen Tugas' }
             }
         ]
     }
