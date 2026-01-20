@@ -216,8 +216,9 @@ const processCSV = async (csvText: string) => {
     if (lines[0] && lines[0].toLowerCase().includes('nisn')) startIndex = 1;
 
     for (let i = startIndex; i < lines.length; i++) {
-        if (!lines[i]) continue;
-        const cols = lines[i].split(',');
+        const line = lines[i];
+        if (!line) continue;
+        const cols = line.split(',');
         if (cols.length >= 2) {
             studentsToImport.push({
                 nisn: cols[0]?.trim() || '',
