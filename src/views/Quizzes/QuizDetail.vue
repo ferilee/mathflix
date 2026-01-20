@@ -1,50 +1,50 @@
 <template>
-  <div class="bg-white p-6 rounded shadow">
+  <div class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold">Detail Kuis: {{ quiz?.title }}</h2>
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Detail Kuis: {{ quiz?.title }}</h2>
       <div class="space-x-2">
-        <button @click="$router.push('/admin/quizzes')" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">
+        <button @click="$router.push('/admin/quizzes')" class="px-4 py-2 border rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 dark:border-slate-600 transition">
           Kembali
         </button>
          <router-link 
           :to="`/admin/quizzes/${route.params.id}/questions/new`"
-          class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+          class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
         >
           Tambah Soal
         </router-link>
       </div>
     </div>
     
-    <div v-if="loading" class="text-center py-4">Loading...</div>
+    <div v-if="loading" class="text-center py-4 text-gray-500">Loading...</div>
     
     <div v-else class="space-y-6">
       <!-- Quiz Info -->
-      <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded">
+      <div class="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-700/50 p-4 rounded border dark:border-slate-700">
          <div>
-           <span class="text-sm text-gray-500 block">Judul</span>
-           <span class="font-medium">{{ quiz?.title }}</span>
+           <span class="text-sm text-gray-500 dark:text-gray-400 block">Judul</span>
+           <span class="font-medium text-gray-900 dark:text-white">{{ quiz?.title }}</span>
          </div>
          <div>
-           <span class="text-sm text-gray-500 block">Nilai KKM</span>
-           <span class="font-medium">{{ quiz?.passing_score }}</span>
+           <span class="text-sm text-gray-500 dark:text-gray-400 block">Nilai KKM</span>
+           <span class="font-medium text-gray-900 dark:text-white">{{ quiz?.passing_score }}</span>
          </div>
       </div>
 
       <!-- Questions List -->
-      <h3 class="text-lg font-bold border-b pb-2">Daftar Soal</h3>
+      <h3 class="text-lg font-bold border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-white">Daftar Soal</h3>
       
-      <div v-if="questions.length === 0" class="text-center text-gray-500 py-4">
+      <div v-if="questions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-4">
         Belum ada soal.
       </div>
 
-      <div v-for="(q, index) in questions" :key="q.id" class="border rounded p-4 relative">
+      <div v-for="(q, index) in questions" :key="q.id" class="border dark:border-gray-700 rounded p-4 relative bg-white dark:bg-slate-800 transition-colors shadow-sm">
         <div class="flex justify-between">
-          <div class="font-bold text-lg mb-2">Soal {{ index + 1 }} <span class="text-xs bg-gray-200 px-2 py-1 rounded ml-2">{{ q.question_type }}</span></div>
-           <button @click="deleteQuestion(q.id)" class="text-red-600 text-sm hover:underline">Hapus</button>
+          <div class="font-bold text-lg mb-2 text-gray-800 dark:text-white">Soal {{ index + 1 }} <span class="text-xs bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded ml-2">{{ q.question_type }}</span></div>
+           <button @click="deleteQuestion(q.id)" class="text-red-600 dark:text-red-400 text-sm hover:underline">Hapus</button>
         </div>
         
         <!-- Render question text with math -->
-        <div class="bg-gray-50 p-3 rounded mb-3">
+        <div class="bg-gray-50 dark:bg-slate-900 p-3 rounded mb-3 text-gray-900 dark:text-gray-200">
           <MathRenderer :content="q.question_text" />
         </div>
 
@@ -54,7 +54,7 @@
             <!-- Multiple Choice & True/False -->
             <div v-if="q.question_type === 'multiple_choice' || q.question_type === 'true_false'" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div v-for="(opt, i) in q.options" :key="i" 
-                    :class="{'text-green-600 font-bold': opt === q.correct_answer, 'text-gray-700': opt !== q.correct_answer}"
+                    :class="{'text-green-600 dark:text-green-400 font-bold': opt === q.correct_answer, 'text-gray-700 dark:text-gray-300': opt !== q.correct_answer}"
                 >
                     {{ String.fromCharCode(65 + (i as number)) }}. {{ opt }}
                     <span v-if="opt === q.correct_answer">✓</span>
@@ -64,24 +64,24 @@
             <!-- Multiple Answer -->
             <div v-else-if="q.question_type === 'multiple_answer'" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                  <div v-for="(opt, i) in q.options" :key="i"
-                     :class="{'text-green-600 font-bold': isCorrectMultiple(q.correct_answer, opt), 'text-gray-700': !isCorrectMultiple(q.correct_answer, opt)}"
+                     :class="{'text-green-600 dark:text-green-400 font-bold': isCorrectMultiple(q.correct_answer, opt), 'text-gray-700 dark:text-gray-300': !isCorrectMultiple(q.correct_answer, opt)}"
                  >
                     [ {{ isCorrectMultiple(q.correct_answer, opt) ? 'X' : ' ' }} ] {{ opt }}
                  </div>
             </div>
 
             <!-- Short Answer -->
-            <div v-else-if="q.question_type === 'short_answer'" class="text-gray-900">
+            <div v-else-if="q.question_type === 'short_answer'" class="text-gray-900 dark:text-gray-200">
                 <span class="font-medium">Kunci Jawaban:</span> 
-                <span class="text-green-600 font-bold ml-2">{{ q.correct_answer }}</span>
+                <span class="text-green-600 dark:text-green-400 font-bold ml-2">{{ q.correct_answer }}</span>
             </div>
 
             <!-- Matching -->
             <div v-else-if="q.question_type === 'matching'" class="space-y-1">
-                 <div v-for="(opt, i) in q.options" :key="i" class="flex items-center space-x-2 border-b pb-1 last:border-0">
-                    <span class="font-medium text-gray-800">{{ getMatchingPair(opt).left }}</span>
+                 <div v-for="(opt, i) in q.options" :key="i" class="flex items-center space-x-2 border-b dark:border-gray-700 pb-1 last:border-0 text-gray-800 dark:text-gray-200">
+                    <span class="font-medium">{{ getMatchingPair(opt).left }}</span>
                     <span class="text-gray-400">---</span>
-                    <span class="font-bold text-green-700">{{ getMatchingPair(opt).right }}</span>
+                    <span class="font-bold text-green-700 dark:text-green-400">{{ getMatchingPair(opt).right }}</span>
                  </div>
             </div>
 

@@ -46,9 +46,6 @@
                    Logged in as <br> <span class="text-white font-bold">{{ student?.nisn }}</span>
                </div>
                
-               <button @click="$router.push('/student/s-badges'); showMenu = false" class="text-left px-4 py-2 hover:bg-gray-800 text-yellow-500 flex items-center gap-2">
-                  <span>🏆</span> Pencapaian Saya
-               </button>
 
                <button @click="showDevInfo = true; showMenu = false" class="text-left px-4 py-2 hover:bg-gray-800 text-indigo-400 flex items-center gap-2">
                   <span>ℹ</span> Tentang Aplikasi
@@ -65,19 +62,35 @@
       <router-view />
     </div>
 
+    <!-- Expandable Menu (FAB) -->
+    <div class="md:hidden fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
+      <transition name="fade">
+        <div v-if="showMenu" class="flex flex-col gap-2 mb-2">
+          <router-link to="/student/leaderboard" class="bg-red-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2h-6c-1.1 0-2 .9-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4c0-1.1-.9-2-2-2Z"/></svg>
+            <span class="text-sm font-bold pr-2">Leaderboard</span>
+          </router-link>
+          <router-link to="/student/my-list" class="bg-red-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span class="text-sm font-bold pr-2">Daftar Saya</span>
+          </router-link>
+          <router-link to="/student/s-badges" class="bg-red-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            <span class="text-sm font-bold pr-2">Pencapaian</span>
+          </router-link>
+        </div>
+      </transition>
+      <button @click="showMenu = !showMenu" class="bg-yellow-500 text-black p-4 rounded-full shadow-lg hover:bg-yellow-400 transition transform hover:scale-105">
+         <svg v-if="!showMenu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+         <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
     <!-- Bottom Navigation (Mobile Only) -->
     <div class="md:hidden fixed bottom-0 w-full bg-black/90 border-t border-gray-800 flex justify-around p-3 z-50 text-xs backdrop-blur-md">
       <router-link to="/student" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Home</span>
-      </router-link>
-      <router-link to="/student/leaderboard" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2h-6c-1.1 0-2 .9-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4c0-1.1-.9-2-2-2Z"/></svg>
-        <span>Leaderboard</span>
-      </router-link>
-      <router-link to="/student/my-list" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-         <span>Daftar Saya</span>
       </router-link>
       <router-link to="/student/assignments" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
@@ -155,6 +168,7 @@ const initials = computed(() => {
 });
 
 onMounted(() => {
+    document.documentElement.classList.add('dark');
     window.addEventListener('scroll', handleScroll);
     loadStudent();
     checkNotifications();
@@ -165,4 +179,10 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll));
 
 <style scoped>
 /* Custom scrollbar hide if needed */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
 </style>

@@ -53,16 +53,16 @@
           </div>
 
           <!-- Active Stage Content -->
-          <div v-if="currentStageContent" class="bg-white text-gray-900 rounded-lg shadow-xl overflow-hidden min-h-[400px] flex flex-col">
+          <div v-if="currentStageContent" class="bg-[#181818] text-white rounded-lg shadow-xl overflow-hidden min-h-[400px] flex flex-col border border-[#333]">
              
              <!-- Stage Header -->
-             <div class="bg-gray-50 p-6 border-b border-gray-200 flex justify-between items-center">
+             <div class="bg-[#141414] p-6 border-b border-[#333] flex justify-between items-center">
                  <div>
-                    <h2 class="text-2xl font-bold text-indigo-700">{{ deltaStages[activeStageIndex].label }}</h2>
-                    <p class="text-gray-500 text-sm">{{ deltaStages[activeStageIndex].desc }}</p>
+                    <h2 class="text-2xl font-bold text-[#E50914]">{{ deltaStages[activeStageIndex]?.label }}</h2>
+                    <p class="text-gray-400 text-sm">{{ deltaStages[activeStageIndex]?.desc }}</p>
                  </div>
-                 <div class="text-4xl opacity-20">
-                    {{ deltaStages[activeStageIndex].icon }}
+                 <div class="text-4xl opacity-20 text-white">
+                    {{ deltaStages[activeStageIndex]?.icon }}
                  </div>
              </div>
 
@@ -70,8 +70,8 @@
              <div class="p-8 flex-1">
                  
                  <!-- Embedded Tool (Explore Stage) -->
-                 <div v-if="deltaStages[activeStageIndex].key === 'explore' && material?.embedded_tool_url" class="mb-8">
-                     <div class="bg-gray-100 p-2 rounded-lg border border-gray-300">
+                 <div v-if="deltaStages[activeStageIndex]?.key === 'explore' && material?.embedded_tool_url" class="mb-8">
+                     <div class="bg-[#2F2F2F] p-2 rounded-lg border border-[#333]">
                         <div class="aspect-w-16 aspect-h-9 w-full h-[500px]">
                             <iframe 
                                 :src="material.embedded_tool_url" 
@@ -87,19 +87,21 @@
                      </div>
                  </div>
 
-                 <MathRenderer :content="currentStageContent" />
+                 <div class="prose prose-invert max-w-none text-gray-300">
+                    <MathRenderer :content="currentStageContent" />
+                 </div>
                  
-                 <div v-if="!currentStageContent || currentStageContent === '<p><br></p>'" class="text-center text-gray-400 py-10 italic">
+                 <div v-if="!currentStageContent || currentStageContent === '<p><br></p>'" class="text-center text-gray-500 py-10 italic">
                     Konten untuk tahapan ini belum tersedia.
                  </div>
              </div>
 
              <!-- Stage Footer / Navigation -->
-             <div class="bg-gray-50 p-6 border-t border-gray-200 flex justify-end">
+             <div class="bg-[#141414] p-6 border-t border-[#333] flex justify-end">
                 <button 
                   v-if="activeStageIndex === currentUnlockedIndex && activeStageIndex < 4"
                   @click="unlockNextStage"
-                  class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-indigo-700 hover:scale-105 transition flex items-center gap-2"
+                  class="bg-[#E50914] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-red-700 hover:scale-105 transition flex items-center gap-2"
                 >
                   Selesaikan & Lanjut ➜
                 </button>
@@ -113,7 +115,7 @@
                  <button 
                   v-else
                   @click="selectStage(activeStageIndex + 1)"
-                  class="text-indigo-600 font-bold hover:underline"
+                  class="text-[#E50914] font-bold hover:underline hover:text-red-400"
                 >
                   Lanjut ke Tahap Berikutnya →
                 </button>
@@ -126,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../api';
 import MathRenderer from '../components/MathRenderer.vue';
@@ -149,7 +151,9 @@ const activeStageIndex = ref(0);
 const currentUnlockedIndex = ref(0);
 
 const currentStageContent = computed(() => {
-    const key = deltaStages[activeStageIndex.value].key;
+    const stage = deltaStages[activeStageIndex.value];
+    if (!stage) return '';
+    const key = stage.key;
     return parsedContent.value[key] || '';
 });
 

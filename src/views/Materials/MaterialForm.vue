@@ -1,85 +1,98 @@
 <template>
-  <div class="bg-white p-6 rounded shadow">
-    <h2 class="text-2xl font-bold mb-6">{{ isEdit ? 'Edit Materi (Mode DELTA)' : 'Tambah Materi Baru (Strategi DELTA)' }}</h2>
+  <div class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">{{ isEdit ? 'Edit Materi (Mode DELTA)' : 'Tambah Materi Baru (Strategi DELTA)' }}</h2>
 
     <form @submit.prevent="saveMaterial" class="space-y-6">
       
       <!-- Top Fields -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Judul Materi</label>
-          <input 
+          <FloatingInput 
             v-model="form.title" 
-            type="text" 
-            required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-            placeholder="Contoh: Optimasi Produksi"
+            label="Judul Materi (Contoh: Optimasi Produksi)" 
+            id="title" 
+            required 
           />
         </div>
         
         <!-- Teacher Name -->
         <div>
-           <label class="block text-sm font-medium text-gray-700">Nama Pengajar (Guru)</label>
-           <input 
+           <FloatingInput 
              v-model="form.teacher_name" 
-             type="text" 
-             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2 bg-gray-50"
-             placeholder="Nama Guru..."
+             label="Nama Pengajar (Guru)" 
+             id="teacher" 
            />
         </div>
         
         <!-- Description Field -->
         <div class="md:col-span-2">
-           <label class="block text-sm font-medium text-gray-700">Deskripsi Singkat (untuk Hero/Card)</label>
-           <textarea 
-             v-model="form.description" 
-             rows="2"
-             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-             placeholder="Deskripsi singkat yang muncul di dashboard..."
-           ></textarea>
+           <div class="relative z-0 w-full mb-6 group">
+                <textarea 
+                  v-model="form.description" 
+                  name="description" 
+                  id="description" 
+                  rows="2" 
+                  class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" 
+                  placeholder=" " 
+                ></textarea>
+                <label 
+                  for="description" 
+                  class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                >
+                  Deskripsi Singkat (untuk Hero/Card)
+                </label>
+           </div>
         </div>
 
         <div class="flex gap-4">
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700">Jurusan Target</label>
-                <select 
-                    v-model="form.major_target" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                >
-                    <option value="TKJ">TKJ</option>
-                    <option value="RPL">RPL</option>
-                    <option value="Multimedia">Multimedia</option>
-                    <option value="Semua">Semua</option>
-                </select>
+                <div class="relative z-0 w-full mb-6 group">
+                    <select 
+                        v-model="form.major_target" 
+                        id="major"
+                        class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    >
+                        <option class="text-black" value="TKJ">TKJ</option>
+                        <option class="text-black" value="RPL">RPL</option>
+                        <option class="text-black" value="Multimedia">Multimedia</option>
+                        <option class="text-black" value="Semua">Semua</option>
+                    </select>
+                    <label 
+                        for="major" 
+                        class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    >
+                        Jurusan Target
+                    </label>
+                </div>
             </div>
-            <div class="flex items-end pb-3">
+            <div class="flex items-end pb-8">
                  <label class="flex items-center space-x-2 cursor-pointer">
                     <input type="checkbox" v-model="form.is_featured" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
-                    <span class="text-sm font-medium text-gray-900">Featured Topic?</span>
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-300">Featured Topic?</span>
                  </label>
             </div>
         </div>
 
         <!-- Embedded Tool Section (Explore Stage) -->
-        <div class="border-t pt-4 mt-4">
-             <label class="block text-sm font-bold text-gray-700 mb-2">Simulasi Interaktif (Untuk Tahap EXPLORE)</label>
-             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="border-t dark:border-gray-700 pt-4 mt-4 md:col-span-2">
+             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Simulasi Interaktif (Untuk Tahap EXPLORE)</label>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div>
-                     <label class="block text-xs font-medium text-gray-500">Tipe Tool</label>
-                     <select v-model="form.tool_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-                         <option value="">Tidak Ada</option>
-                         <option value="geogebra">GeoGebra</option>
-                         <option value="desmos">Desmos</option>
-                         <option value="generic">Website Lain (Generic)</option>
-                     </select>
+                     <div class="relative z-0 w-full mb-6 group">
+                         <select v-model="form.tool_type" id="tool_type" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
+                             <option class="text-black" value="">Tidak Ada</option>
+                             <option class="text-black" value="geogebra">GeoGebra</option>
+                             <option class="text-black" value="desmos">Desmos</option>
+                             <option class="text-black" value="generic">Website Lain (Generic)</option>
+                         </select>
+                         <label for="tool_type" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Tipe Tool</label>
+                     </div>
                  </div>
                  <div class="md:col-span-2">
-                     <label class="block text-xs font-medium text-gray-500">URL Embed / Link Simulasi</label>
-                     <input 
+                     <FloatingInput 
                        v-model="form.embedded_tool_url" 
-                       type="text" 
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                       placeholder="https://www.geogebra.org/material/iframe/id/..."
+                       label="URL Embed / Link Simulasi"
+                       id="embed_url"
                      />
                      <p v-if="form.tool_type === 'geogebra'" class="text-[10px] text-gray-400 mt-1">Gunakan link 'Embed' dari GeoGebra, bukan link view biasa.</p>
                  </div>
@@ -88,34 +101,34 @@
       </div>
 
       <!-- DELTA Tabs -->
-      <div class="border rounded-lg overflow-hidden">
+      <div class="border dark:border-gray-700 rounded-lg overflow-hidden">
         <!-- Tab Headers -->
-        <div class="flex overflow-x-auto bg-gray-50 border-b">
+        <div class="flex overflow-x-auto bg-gray-50 dark:bg-slate-900 border-b dark:border-gray-700">
            <button 
              v-for="stage in stages" 
              :key="stage.key"
              type="button"
              @click="activeTab = stage.key"
              class="px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap"
-             :class="activeTab === stage.key ? 'bg-white border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'"
+             :class="activeTab === stage.key ? 'bg-white dark:bg-slate-800 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800'"
            >
              {{ stage.label }}
            </button>
         </div>
 
         <!-- Tab Content -->
-        <div class="p-6 bg-white min-h-[400px]">
+        <div class="p-6 bg-white dark:bg-slate-800 min-h-[400px]">
            <!-- Stage Guidance -->
-           <div class="mb-4 p-4 bg-blue-50 text-blue-800 rounded text-sm">
+           <div v-if="currentStageInfo" class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded text-sm">
               <h4 class="font-bold mb-1">{{ currentStageInfo.title }} ({{ currentStageInfo.label }})</h4>
               <p>{{ currentStageInfo.description }}</p>
-              <ul class="list-disc list-inside mt-2 text-xs text-blue-700">
+              <ul class="list-disc list-inside mt-2 text-xs text-blue-700 dark:text-blue-300">
                  <li v-for="(tip, i) in currentStageInfo.tips" :key="i">{{ tip }}</li>
               </ul>
            </div>
 
            <!-- Editor -->
-           <div class="h-64 mb-12">
+           <div class="h-64 mb-12 bg-white dark:bg-gray-700 text-black dark:text-white rounded">
              <QuillEditor 
                 v-model:content="deltaContent[activeTab]" 
                 content-type="html" 
@@ -132,15 +145,15 @@
       </div>
 
       <!-- Live Preview (Aggregated) -->
-      <div class="mt-8 border-t pt-4">
-        <button type="button" @click="showPreview = !showPreview" class="text-sm font-bold text-indigo-600 hover:underline mb-2">
+      <div class="mt-8 border-t dark:border-gray-700 pt-4">
+        <button type="button" @click="showPreview = !showPreview" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline mb-2">
             {{ showPreview ? 'Sembunyikan Preview' : 'Tampilkan Live Preview (Gabungan)' }}
         </button>
-        <div v-if="showPreview" class="bg-gray-50 p-4 rounded border min-h-[100px] space-y-8">
+        <div v-if="showPreview" class="bg-gray-50 dark:bg-slate-900 p-4 rounded border dark:border-gray-700 min-h-[100px] space-y-8">
            <div v-for="stage in stages" :key="stage.key">
               <div v-if="deltaContent[stage.key] && deltaContent[stage.key] !== '<p><br></p>'">
-                  <h3 class="text-lg font-bold text-gray-800 mb-2 border-b">{{ stage.label }}</h3>
-                  <MathRenderer :content="deltaContent[stage.key]" />
+                  <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 border-b dark:border-gray-700">{{ stage.label }}</h3>
+                  <MathRenderer :content="deltaContent[stage.key] || ''" />
               </div>
            </div>
         </div>
@@ -151,7 +164,7 @@
         <button 
           type="button" 
           @click="$router.back()"
-          class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           Batal
         </button>
@@ -171,6 +184,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import MathRenderer from '../../components/MathRenderer.vue';
+import FloatingInput from '../../components/FloatingInput.vue';
 import api from '../../api';
 
 const route = useRoute();
@@ -181,7 +195,6 @@ interface MaterialForm {
     title: string;
     description: string;
     major_target: string;
-    teacher_name: string;
     teacher_name: string;
     is_featured: boolean;
     embedded_tool_url: string;

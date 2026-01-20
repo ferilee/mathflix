@@ -1,22 +1,29 @@
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Manajemen Tugas (Class-Based)</h1>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Manajemen Tugas (Class-Based)</h1>
 
     <div v-if="loading" class="p-8 text-center text-gray-500">Memuat data...</div>
     <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{{ error }}</div>
     
     <div v-else>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Manajemen Tugas</h2>
+            <button @click="showForm = !showForm" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-bold shadow transition">
+                {{ showForm ? 'Tutup Form' : 'Buat Tugas' }}
+            </button>
+        </div>
+
         <!-- Create Assignment -->
-        <div class="bg-white p-6 rounded shadow mb-8">
-            <h2 class="font-bold mb-4">Buat Tugas Baru</h2>
+        <div v-if="showForm" class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-8 transition-colors">
+            <h2 class="font-bold mb-4 text-gray-800 dark:text-white">Buat Tugas Baru</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input v-model="form.title" placeholder="Judul Tugas" class="border p-2 rounded">
-                <input v-model="form.due_date" type="datetime-local" class="border p-2 rounded">
+                <input v-model="form.title" placeholder="Judul Tugas" class="border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                <input v-model="form.due_date" type="datetime-local" class="border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
             </div>
-            <div class="mb-4 bg-white">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Deskripsi Tugas (Rich Text / LaTeX)</label>
+            <div class="mb-4 bg-white dark:bg-slate-700 rounded text-black dark:text-white">
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1 px-2 pt-2">Deskripsi Tugas (Rich Text / LaTeX)</label>
                 <QuillEditor 
                     v-model:content="form.description" 
                     content-type="html" 
@@ -25,26 +32,26 @@
                 />
             </div>
             
-            <div class="mb-6 bg-gray-50 p-4 rounded border">
-                <h3 class="font-bold mb-3">Target Tugas</h3>
+            <div class="mb-6 bg-gray-50 dark:bg-slate-900 p-4 rounded border dark:border-slate-700">
+                <h3 class="font-bold mb-3 text-gray-800 dark:text-white">Target Tugas</h3>
                 
                 <!-- Target Mode Switcher -->
-                <div class="flex gap-4 mb-4 border-b pb-4">
+                <div class="flex gap-4 mb-4 border-b dark:border-gray-700 pb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" v-model="targetMode" value="class" name="targetMode">
-                        <span class="font-bold text-gray-700">Kelas / Kelompok</span>
+                        <span class="font-bold text-gray-700 dark:text-gray-300">Kelas / Kelompok</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" v-model="targetMode" value="individual" name="targetMode">
-                        <span class="font-bold text-gray-700">Privat / Individu</span>
+                        <span class="font-bold text-gray-700 dark:text-gray-300">Privat / Individu</span>
                     </label>
                 </div>
 
                 <!-- Class Mode Selectors -->
                 <div v-if="targetMode === 'class'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Tingkat Kelas</label>
-                        <select v-model="form.target_grade" class="w-full border p-2 rounded">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Tingkat Kelas</label>
+                        <select v-model="form.target_grade" class="w-full border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
                             <option :value="null">Semua Tingkat (10, 11, 12)</option>
                             <option :value="10">Kelas 10</option>
                             <option :value="11">Kelas 11</option>
@@ -52,8 +59,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Jurusan</label>
-                        <select v-model="form.target_major" class="w-full border p-2 rounded">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
+                        <select v-model="form.target_major" class="w-full border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
                             <option :value="null">Semua Jurusan</option>
                             <option value="RPL">RPL</option>
                             <option value="TKJ">TKJ</option>
@@ -64,40 +71,43 @@
 
                 <!-- Student List (Always visible but serves different purpose) -->
                 <div class="mt-4">
-                     <label class="block text-sm font-bold text-gray-700 mb-2">
+                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                         {{ targetMode === 'class' ? 'Tambahan Siswa (Opsional)' : 'Pilih Siswa (Wajib)' }}
                      </label>
-                     <div class="h-40 overflow-y-auto border p-2 rounded bg-white">
+                     <div class="h-40 overflow-y-auto border dark:border-slate-600 p-2 rounded bg-white dark:bg-slate-700 dark:text-white">
                          <div v-for="s in students" :key="s.id" class="flex items-center gap-2 mb-1">
                              <input type="checkbox" :value="s.id" v-model="form.target_students">
                              <span class="text-sm">{{ s.full_name }} ({{ s.grade_level }} {{ s.major }})</span>
                          </div>
                      </div>
-                     <p v-if="targetMode === 'class'" class="text-xs text-gray-500 mt-1">Siswa yang dipilih akan menerima tugas ini <b>selain</b> target kelas diatas.</p>
-                     <p v-else class="text-xs text-gray-500 mt-1">Tugas hanya akan dikirim ke siswa yang dipilih.</p>
+                     <p v-if="targetMode === 'class'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Siswa yang dipilih akan menerima tugas ini <b>selain</b> target kelas diatas.</p>
+                     <p v-else class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tugas hanya akan dikirim ke siswa yang dipilih.</p>
                 </div>
             </div>
 
             <div class="flex justify-end">
-                <button @click="createAssignment" class="bg-indigo-600 text-white px-6 py-2 rounded">Buat Tugas</button>
+                <button @click="createAssignment" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-bold shadow transition">
+                    Simpan Tugas
+                </button>
             </div>
         </div>
 
         <!-- List Assignments -->
+
         <div class="space-y-4">
-            <h2 class="font-bold text-xl">Daftar Tugas Aktif</h2>
+            <h2 class="font-bold text-xl text-gray-800 dark:text-white">Daftar Tugas Aktif</h2>
             <div v-if="assignments.length === 0" class="text-gray-500 italic">Belum ada tugas.</div>
             
-            <div v-for="assign in assignments" :key="assign.id" class="bg-white p-4 rounded shadow border flex justify-between items-start">
+            <div v-for="assign in assignments" :key="assign.id" class="bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-slate-700 flex justify-between items-start transition-colors">
                 <div>
-                    <h3 class="font-bold text-lg hover:text-indigo-600 cursor-pointer" @click="$router.push(`/admin/assignments/${assign.id}`)">
+                    <h3 class="font-bold text-lg hover:text-indigo-600 cursor-pointer dark:text-white" @click="$router.push(`/admin/assignments/${assign.id}`)">
                         {{ assign.title }}
                     </h3>
-                    <div class="text-gray-600 mb-2 line-clamp-3">
+                    <div class="text-gray-600 dark:text-gray-300 mb-2 line-clamp-3">
                          <MathRenderer :content="assign.description" />
                     </div>
-                    <div class="flex gap-4 text-xs text-gray-500">
-                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded">
                             Target: 
                             {{ assign.target_grade ? 'Kelas ' + assign.target_grade : 'Semua Kelas' }} 
                             - 
@@ -107,7 +117,7 @@
                     </div>
                 </div>
                 <div class="text-right">
-                     <button @click="deleteAssignment(assign.id)" class="text-red-500 hover:text-red-700 text-sm underline mb-1">Hapus</button>
+                     <button @click="deleteAssignment(assign.id)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm underline mb-1">Hapus</button>
                     <div class="text-xs text-gray-400">
                         Created: {{ new Date(assign.created_at).toLocaleDateString() }}
                     </div>
@@ -129,6 +139,7 @@ const students = ref<any[]>([]);
 const assignments = ref<any[]>([]);
 const loading = ref(true);
 const error = ref('');
+const showForm = ref(false);
 const targetMode = ref('class'); // 'class' or 'individual'
 
 const form = reactive({

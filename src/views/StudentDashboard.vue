@@ -161,7 +161,18 @@ const addToMyList = (material: any) => {
   }
 };
 
-onMounted(fetchData);
+const intervalId = ref<any>(null);
+
+onMounted(() => {
+    fetchData();
+    // Poll every 5 seconds for live updates
+    intervalId.value = setInterval(fetchData, 5000);
+});
+
+import { onUnmounted } from 'vue';
+onUnmounted(() => {
+    if (intervalId.value) clearInterval(intervalId.value);
+});
 </script>
 
 <style scoped>

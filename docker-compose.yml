@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../API-Mathflix-update
+    container_name: mathflix-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_PATH=/app/data/sqlite.db
+    volumes:
+      - ./data:/app/data
+    restart: always
+
+  frontend:
+    build:
+      context: .
+    container_name: mathflix-frontend
+    ports:
+      - "9001:80"
+    depends_on:
+      - api
+    restart: always
+
+# Ensure the data directory exists or is created by the container
+# The API uses SQLite, likely at ./mathflix.db or src/db/mathflix.db.
+# We need to ensure persistence. 
+# Check where db is configured. usually ./mathflix.db

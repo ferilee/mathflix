@@ -4,16 +4,17 @@
 
      <!-- Create Post -->
      <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 border border-gray-700">
-        <textarea 
+        <FloatingTextarea
             v-model="newPostContent"
-            placeholder="Apa yang ingin kamu diskusikan hari ini?"
-            class="w-full bg-gray-900 text-white rounded p-3 mb-3 border border-gray-600 focus:border-red-600 focus:outline-none"
-            rows="3"
-        ></textarea>
-        <div class="flex justify-end">
+            label="Apa yang ingin kamu diskusikan hari ini?"
+            id="post-content"
+            class="mb-2"
+        />
+        
+        <div class="flex justify-end items-center mt-4">
              <button 
                 @click="createPost" 
-                :disabled="!newPostContent.trim()" 
+                :disabled="!isValidPost" 
                 class="bg-red-600 px-6 py-2 rounded-full font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
              >
                 Posting
@@ -79,18 +80,21 @@
                    </div>
                </div>
 
-               <!-- Comment Input (Always visible or only when open? Open is better UX usually, or separate. Let's keep input always visible for quick reply) -->
-               <div v-if="!post.is_locked" class="flex gap-2">
-                   <input 
-                     v-model="post.newComment" 
-                     placeholder="Tulis komentar..." 
-                     class="flex-1 bg-gray-900 border border-gray-600 rounded-full px-4 py-2 text-sm focus:border-red-600 focus:outline-none"
-                     @keyup.enter="createComment(post)"
-                     @focus="post.showComments = true" 
-                   >
+               <!-- Comment Input -->
+               <div v-if="!post.is_locked" class="flex gap-2 items-center mt-4">
+                   <div class="flex-1">
+                       <FloatingInput
+                           v-model="post.newComment"
+                           label="Tulis komentar..."
+                           :id="`comment-${post.id}`"
+                           class="!mb-0"
+                           @keyup.enter="createComment(post)"
+                           @focus="post.showComments = true"
+                       />
+                   </div>
                    <button 
                      @click="createComment(post)" 
-                     class="bg-gray-700 p-2 rounded-full hover:bg-gray-600"
+                     class="bg-gray-700 p-2 rounded-full hover:bg-gray-600 mb-1"
                    >
                      🚀
                    </button>
@@ -109,7 +113,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
+import FloatingInput from '../components/FloatingInput.vue';
+import FloatingTextarea from '../components/FloatingTextarea.vue';
 import api from '../api';
 
 const posts = ref<any[]>([]);
@@ -119,19 +125,21 @@ const student = ref<any>(null);
 
 const timer = ref<any>(null);
 
+const showEmbedInput = ref(false);
+const newEmbedCode = ref('');
+
+// Computeds
+const isValidPost = computed(() => {
+    return newPostContent.value.trim() !== '';
+});
+
+// API Methods
 const loadPosts = async () => {
     try {
         const { data } = await api.get('/discussions');
-        // Merge data to preserve input states if possible, or just replace
-        // Simple replace is safesty for now, input state is local to post object, wait...
-        // If we replace posts, we lose 'newComment' inputs. 
-        // Better strategy: Update existing or append new.
-        // For simplicity in this iteration: Replace but try to preserve inputs? 
-        // Actually, let's just replace. The "newComment" is on the post object. 
-        // If user is typing, it might get wiped. 
-        // Let's only update if we are not typing? Or better: map properly.
         
-        const newPosts = data.map((p: any) => {
+        // Merge strategy: Update posts but keep UI state
+        posts.value = data.map((p: any) => {
             const existing = posts.value.find(ep => ep.id === p.id);
             return { 
                 ...p, 
@@ -139,7 +147,6 @@ const loadPosts = async () => {
                 showComments: existing ? existing.showComments : false
             };
         });
-        posts.value = newPosts;
     } catch (e) {
         console.error(e);
     } finally {
@@ -148,18 +155,31 @@ const loadPosts = async () => {
 };
 
 const createPost = async () => {
-    if (!newPostContent.value.trim()) return;
+    if (!isValidPost.value) return;
     try {
-        const { data } = await api.post('/discussions', {
+        const payload: any = {
             content: newPostContent.value,
             author_id: student.value.id || 'unknown',
             author_name: student.value.full_name || 'Siswa',
-            author_role: 'student'
+            author_role: 'student',
+            embed_code: showEmbedInput.value ? newEmbedCode.value : undefined // Send valid embed code or undefined
+        };
+
+        const { data } = await api.post('/discussions', payload);
+        
+        // Optimistic
+        posts.value.unshift({ 
+            ...data, 
+            comments: [], 
+            newComment: '', 
+            showComments: true 
         });
-        // Optimistic / Immediate update
-        posts.value.unshift({ ...data, comments: [], newComment: '', showComments: true });
+        
+        // Reset
         newPostContent.value = '';
-        // No need to reload immediately
+        newEmbedCode.value = '';
+        showEmbedInput.value = false;
+        
     } catch (e) {
         alert('Gagal membuat postingan');
     }
@@ -175,7 +195,6 @@ const createComment = async (post: any) => {
             author_role: 'student'
         });
         
-        // Optimistic update
         if (!post.comments) post.comments = [];
         post.comments.push(data);
         post.newComment = '';
@@ -194,11 +213,9 @@ onMounted(() => {
     const s = localStorage.getItem('student');
     if (s) student.value = JSON.parse(s);
     loadPosts();
-    // Auto refresh every 5s
     timer.value = setInterval(loadPosts, 5000);
 });
 
-import { onUnmounted } from 'vue';
 onUnmounted(() => {
     if (timer.value) clearInterval(timer.value);
 });

@@ -110,6 +110,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'AdminReflections',
                 component: () => import('../views/AdminReflections.vue'),
                 meta: { title: 'Jurnal Siswa' }
+            },
+            {
+                path: 'grading',
+                name: 'AdminGrading',
+                component: () => import('../views/AdminGrading.vue'),
+                meta: { title: 'Rekap Penilaian' }
             }
         ]
     }

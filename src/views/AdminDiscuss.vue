@@ -1,13 +1,13 @@
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Moderasi Diskusi</h1>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Moderasi Diskusi</h1>
 
     <!-- Create Post (As Teacher) -->
-    <div class="bg-white p-6 rounded shadow mb-8">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 transition-colors">
        <h2 class="font-bold mb-4">Buat Pengumuman / Diskusi Baru</h2>
        <textarea 
          v-model="newPostContent"
-         class="w-full border p-3 rounded mb-2"
+         class="w-full border p-3 rounded mb-2 dark:bg-slate-700 dark:text-white dark:border-slate-600"
          rows="3"
          placeholder="Tulis sesuatu sebagai Guru..."
        ></textarea>
@@ -17,13 +17,13 @@
     </div>
 
     <!-- Feed -->
-    <div class="space-y-6">
-       <div v-for="post in posts" :key="post.id" class="bg-white p-6 rounded shadow border" :class="{'border-l-4 border-l-indigo-600': post.author_role !== 'student'}">
+    <div class="space-y-6 mt-6">
+       <div v-for="post in posts" :key="post.id" class="bg-white dark:bg-slate-800 p-6 rounded shadow border dark:border-slate-700 transition-colors" :class="{'border-l-4 border-l-indigo-600': post.author_role !== 'student'}">
            <div class="flex justify-between items-start mb-4">
                <div>
-                   <h3 class="font-bold text-lg">
+                   <h3 class="font-bold text-lg text-gray-800 dark:text-white">
                        {{ post.author_name }} 
-                       <span class="text-xs bg-gray-200 px-2 py-1 rounded ml-2">{{ post.author_role }}</span>
+                       <span class="text-xs bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded ml-2">{{ post.author_role }}</span>
                    </h3>
                    <span class="text-xs text-gray-400">{{ new Date(post.created_at).toLocaleString() }}</span>
                </div>
@@ -31,25 +31,25 @@
                    <button 
                      @click="toggleLock(post)" 
                      class="text-xs px-3 py-1 rounded border"
-                     :class="post.is_locked ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 'bg-gray-100 text-gray-600'"
+                     :class="post.is_locked ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 dark:border-slate-600'"
                    >
                      {{ post.is_locked ? 'Unlock' : 'Lock' }}
                    </button>
-                   <button @click="deletePost(post.id)" class="text-xs px-3 py-1 rounded bg-red-100 text-red-600 border border-red-200 hover:bg-red-200">
+                   <button @click="deletePost(post.id)" class="text-xs px-3 py-1 rounded bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-400">
                        Hapus
                    </button>
                </div>
            </div>
 
-           <p class="text-gray-800 mb-4 whitespace-pre-line">{{ post.content }}</p>
+           <p class="text-gray-800 dark:text-gray-200 mb-4 whitespace-pre-line">{{ post.content }}</p>
 
            <!-- Comments -->
-           <div class="bg-gray-50 p-4 rounded text-sm relative">
-               <h4 class="font-bold mb-2 text-gray-500 text-xs uppercase tracking-wider">Komentar</h4>
-               <div v-for="comment in post.comments" :key="comment.id" class="mb-3 border-b pb-2 last:border-0 hover:bg-gray-100 p-2 rounded group">
+           <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded text-sm relative transition-colors">
+               <h4 class="font-bold mb-2 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Komentar</h4>
+               <div v-for="comment in post.comments" :key="comment.id" class="mb-3 border-b dark:border-gray-700 pb-2 last:border-0 hover:bg-gray-100 dark:hover:bg-slate-800 p-2 rounded group transition-colors">
                   <div class="flex justify-between items-start">
-                      <div>
-                          <span class="font-bold">{{ comment.author_name }}</span>: {{ comment.content }}
+                      <div class="dark:text-gray-300">
+                          <span class="font-bold text-gray-900 dark:text-white">{{ comment.author_name }}</span>: {{ comment.content }}
                           <div class="text-[10px] text-gray-400">{{ new Date(comment.created_at).toLocaleString() }}</div>
                       </div>
                       <button @click="deleteComment(comment.id)" class="text-red-500 opacity-0 group-hover:opacity-100 text-xs">✕</button>
@@ -58,8 +58,8 @@
 
                <!-- Reply as Admin -->
                <div class="flex gap-2 mt-4">
-                   <input v-model="post.newComment" placeholder="Balas sebagai Guru..." class="flex-1 border p-2 rounded">
-                   <button @click="createComment(post)" class="bg-indigo-600 text-white px-4 py-2 rounded text-xs">Kirim</button>
+                   <input v-model="post.newComment" placeholder="Balas sebagai Guru..." class="flex-1 border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                   <button @click="createComment(post)" class="bg-indigo-600 text-white px-4 py-2 rounded text-xs hover:bg-indigo-700">Kirim</button>
                </div>
            </div>
        </div>

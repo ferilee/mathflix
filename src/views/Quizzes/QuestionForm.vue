@@ -1,25 +1,25 @@
 <template>
-  <div class="bg-white p-6 rounded shadow">
-    <h2 class="text-2xl font-bold mb-6">Tambah Soal Baru</h2>
+  <div class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Tambah Soal Baru</h2>
 
     <form @submit.prevent="saveQuestion" class="space-y-6">
       
       <!-- Question Type -->
       <div>
-        <label class="block text-sm font-medium text-gray-700">Tipe Soal</label>
-        <select v-model="form.question_type" @change="resetOptions" class="mt-1 block w-full rounded border p-2">
-          <option value="multiple_choice">Pilihan Ganda (Multiple Choice)</option>
-          <option value="multiple_answer">Pilihan Ganda Kompleks (Multiple Answer)</option>
-          <option value="true_false">Benar / Salah (True/False)</option>
-          <option value="short_answer">Isian Singkat (Short Answer)</option>
-          <option value="matching">Menjodohkan (Matching)</option>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Soal</label>
+        <select v-model="form.question_type" @change="resetOptions" class="mt-1 block w-full rounded border p-2 bg-white dark:bg-slate-700 dark:text-white dark:border-gray-600">
+          <option class="text-black" value="multiple_choice">Pilihan Ganda (Multiple Choice)</option>
+          <option class="text-black" value="multiple_answer">Pilihan Ganda Kompleks (Multiple Answer)</option>
+          <option class="text-black" value="true_false">Benar / Salah (True/False)</option>
+          <option class="text-black" value="short_answer">Isian Singkat (Short Answer)</option>
+          <option class="text-black" value="matching">Menjodohkan (Matching)</option>
         </select>
       </div>
 
       <!-- Question Text -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Pertanyaan (Teks & LaTeX)</label>
-        <div class="h-48 mb-12">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pertanyaan (Teks & LaTeX)</label>
+        <div class="h-48 mb-12 bg-white dark:bg-gray-700 rounded text-black dark:text-white">
            <QuillEditor 
             v-model:content="form.question_text" 
             content-type="html" 
@@ -30,9 +30,9 @@
       </div>
 
       <!-- Question Preview -->
-      <div class="mt-4 border-t pt-4">
-        <label class="block text-sm font-medium text-gray-500 mb-2">Preview Pertanyaan</label>
-        <div class="bg-gray-50 p-4 rounded border">
+      <div class="mt-4 border-t dark:border-gray-700 pt-4">
+        <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Preview Pertanyaan</label>
+        <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded border dark:border-gray-700 text-black dark:text-white">
           <MathRenderer :content="form.question_text" />
         </div>
       </div>
