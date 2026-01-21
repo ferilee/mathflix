@@ -1,12 +1,9 @@
-version: '3.8'
-
 services:
-  frontend:
+  mathflix-frontend:
     image: ghcr.io/ferilee/mathflix:latest
     container_name: mathflix-frontend
     ports:
       - "9001:80"
-    restart: always
-    # If the API is also containerized and running on the same network, you might want to add it here
-    # or ensure they share a network.
-    # For standalone frontend testing/deployment:
+    environment:
+      - VITE_API_URL=http://api-mathflix:3000
+    restart: unless-stopped
