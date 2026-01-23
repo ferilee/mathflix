@@ -33,7 +33,14 @@ const router = useRouter();
 const route = useRoute();
 const TOUR_KEY = "demo_tour_done";
 
-const steps = [
+type TourStep = {
+  route: string;
+  selector: string;
+  title: string;
+  body: string;
+};
+
+const steps: TourStep[] = [
   {
     route: "/student",
     selector: '[data-tour="hero"]',
@@ -64,10 +71,15 @@ const currentIndex = ref(0);
 const active = ref(false);
 const position = ref({ top: 80, left: 20 });
 
-const step = computed(() => steps[currentIndex.value]);
+const step = computed<TourStep>(() => steps[currentIndex.value] ?? steps[0]!);
 
 const computePosition = () => {
-  const target = document.querySelector(step.value.selector) as HTMLElement | null;
+  const currentStep = step.value;
+  if (!currentStep) {
+    position.value = { top: 80, left: 20 };
+    return;
+  }
+  const target = document.querySelector(currentStep.selector) as HTMLElement | null;
   if (!target) {
     position.value = { top: 80, left: 20 };
     return;
@@ -80,14 +92,20 @@ const computePosition = () => {
 
 const goToStep = async (index: number) => {
   if (index < 0 || index >= steps.length) return;
-  const targetStep = steps[index];
+  const targetStep = steps[index] ?? steps[0];
+  if (!targetStep) return;
   if (route.path !== targetStep.route) {
     await router.push(targetStep.route);
   }
   currentIndex.value = index;
   await nextTick();
   setTimeout(() => {
-    const target = document.querySelector(step.value.selector);
+    const currentStep = step.value;
+    if (!currentStep) {
+      finish();
+      return;
+    }
+    const target = document.querySelector(currentStep.selector);
     if (!target) {
       if (currentIndex.value < steps.length - 1) {
         next();

@@ -211,7 +211,6 @@ onMounted(() => {
     }
 });
 
-import { onUnmounted } from 'vue';
 onUnmounted(() => {
     if (pollingInterval) clearInterval(pollingInterval);
 });

@@ -246,7 +246,7 @@ const getAssignmentTimestamp = (assignment: any) => {
 
 const checkAssignmentNotifications = async (): Promise<string | null> => {
     if (demoMode.value) return null;
-    if (!student.value) return;
+    if (!student.value) return null;
     try {
         const { data } = await api.get('/assignments/my-assignments', {
             headers: { 'X-Student-ID': student.value.id }
