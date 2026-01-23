@@ -12,8 +12,8 @@
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-       <div 
-         v-for="item in myList" 
+       <div
+         v-for="item in myList"
          :key="item.id"
          class="bg-gray-800 rounded-md overflow-hidden hover:scale-105 transition duration-300 cursor-pointer relative group"
          @click="$router.push(`/student/material/${item.id}`)"
@@ -22,7 +22,7 @@
           <div class="h-40 w-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center p-4">
             <h4 class="text-lg font-bold text-center text-white">{{ item.title }}</h4>
           </div>
-          
+
           <div class="p-4">
              <div class="flex justify-between items-center mb-2">
                 <span class="text-xs font-bold text-green-400">Saved</span>
@@ -44,24 +44,35 @@ import { useRouter } from 'vue-router';
 
 const myList = ref<any[]>([]);
 const router = useRouter();
+const student = ref<any>(null);
 
 const getStorageKey = () => {
     const studentData = localStorage.getItem('student');
     if (!studentData) return null;
-    const student = JSON.parse(studentData);
-    return `myList_${student.id || student.nisn}`;
+    const parsed = JSON.parse(studentData);
+    return `myList_${parsed.id || parsed.nisn}`;
+};
+
+const isMaterialAllowed = (material: any) => {
+    if (!student.value) return false;
+    const targetGrade = material?.target_grade;
+    const targetMajor = material?.major_target;
+    const matchesGrade = targetGrade === null || targetGrade === undefined || Number(targetGrade) === Number(student.value.grade_level);
+    const matchesMajor = !targetMajor || targetMajor === 'Semua' || targetMajor === student.value.major;
+    return matchesGrade && matchesMajor;
 };
 
 const loadList = () => {
     const key = getStorageKey();
     if (!key) {
         // Not logged in, maybe redirect or show empty
-        return; 
+        return;
     }
-    
+
     const saved = localStorage.getItem(key);
     if (saved) {
-        myList.value = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        myList.value = student.value ? parsed.filter(isMaterialAllowed) : parsed;
     }
 };
 
@@ -79,6 +90,10 @@ onMounted(() => {
         alert("Silakan login untuk melihat daftar saya.");
         router.push('/login');
     } else {
+        const savedStudent = localStorage.getItem('student');
+        if (savedStudent) {
+            student.value = JSON.parse(savedStudent);
+        }
         loadList();
     }
 });

@@ -7,17 +7,17 @@
           <button @click="$router.back()" class="text-gray-300 hover:text-white mb-4 flex items-center gap-2">
             ← Kembali
           </button>
-          
+
           <div class="flex flex-wrap gap-3 mb-2">
              <span class="bg-red-600 text-white px-3 py-1 text-xs font-bold rounded uppercase tracking-wider">{{ material?.major_target || 'General' }}</span>
-             
+
              <!-- Instructor Badge -->
              <div class="flex items-center gap-2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full border border-gray-600">
                 <div class="w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-bold">I</div>
                 <span class="text-xs text-gray-200">Instructor: <span class="text-white font-bold">{{ material?.teacher_name || 'Feri Dwi Hermawan' }}</span></span>
              </div>
           </div>
-          
+
           <h1 class="text-4xl md:text-5xl font-bold">{{ material?.title }}</h1>
        </div>
     </div>
@@ -25,13 +25,16 @@
     <!-- Content Area -->
     <div class="max-w-4xl mx-auto p-6 md:p-12">
        <div v-if="loading" class="text-center py-10">Loading material...</div>
-       
+       <div v-else-if="accessDenied" class="bg-red-900/40 border border-red-500/50 text-red-100 p-6 rounded-lg text-center">
+          <h2 class="text-xl font-bold mb-2">Akses Ditolak</h2>
+          <p class="text-sm text-red-200">{{ accessMessage }}</p>
+       </div>
        <div v-else class="space-y-8">
-          
+
           <!-- Progression Cards -->
           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-             <button 
-               v-for="(stage, index) in deltaStages" 
+             <button
+               v-for="(stage, index) in deltaStages"
                :key="stage.key"
                @click="selectStage(index)"
                :disabled="index > currentUnlockedIndex"
@@ -54,7 +57,7 @@
 
           <!-- Active Stage Content -->
           <div v-if="currentStageContent" class="bg-[#181818] text-white rounded-lg shadow-xl overflow-hidden min-h-[400px] flex flex-col border border-[#333]">
-             
+
              <!-- Stage Header -->
              <div class="bg-[#141414] p-6 border-b border-[#333] flex justify-between items-center">
                  <div>
@@ -68,21 +71,21 @@
 
              <!-- Content Body -->
              <div class="p-8 flex-1">
-                 
-                 <!-- Embedded Tool (Explore Stage) -->
-                 <div v-if="deltaStages[activeStageIndex]?.key === 'explore' && material?.embedded_tool_url" class="mb-8">
+
+                 <!-- Embedded Tool (Per-Stage) -->
+                 <div v-if="currentStageEmbedUrl" class="mb-8">
                      <div class="bg-[#2F2F2F] p-2 rounded-lg border border-[#333]">
                         <div class="aspect-w-16 aspect-h-9 w-full h-[500px]">
-                            <iframe 
-                                :src="material.embedded_tool_url" 
-                                width="100%" 
-                                height="100%" 
-                                style="border:0" 
+                            <iframe
+                                :src="currentStageEmbedUrl"
+                                width="100%"
+                                height="100%"
+                                style="border:0"
                                 allowfullscreen
                             ></iframe>
                         </div>
                         <div class="text-center text-xs text-gray-500 mt-2">
-                            Interactive Simulation provided by {{ material.tool_type || 'External Tool' }}
+                            Interactive Simulation provided by {{ currentStageToolType || 'External Tool' }}
                         </div>
                      </div>
                  </div>
@@ -90,7 +93,7 @@
                  <div class="prose prose-invert max-w-none text-gray-300">
                     <MathRenderer :content="currentStageContent" />
                  </div>
-                 
+
                  <div v-if="!currentStageContent || currentStageContent === '<p><br></p>'" class="text-center text-gray-500 py-10 italic">
                     Konten untuk tahapan ini belum tersedia.
                  </div>
@@ -98,21 +101,21 @@
 
              <!-- Stage Footer / Navigation -->
              <div class="bg-[#141414] p-6 border-t border-[#333] flex justify-end">
-                <button 
+                <button
                   v-if="activeStageIndex === currentUnlockedIndex && activeStageIndex < 4"
                   @click="unlockNextStage"
                   class="bg-[#E50914] text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-red-700 hover:scale-105 transition flex items-center gap-2"
                 >
                   Selesaikan & Lanjut ➜
                 </button>
-                <button 
+                <button
                   v-else-if="activeStageIndex === 4"
                   @click="$router.push('/student')"
                   class="bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-green-700 hover:scale-105 transition"
                 >
                   Selesai Belajar 🎉
                 </button>
-                 <button 
+                 <button
                   v-else
                   @click="selectStage(activeStageIndex + 1)"
                   class="text-[#E50914] font-bold hover:underline hover:text-red-400"
@@ -128,15 +131,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import api from '../api';
 import MathRenderer from '../components/MathRenderer.vue';
+import { isDemoMode, getDemoMaterialById, getDemoStudent } from '../utils/demo';
 
 const route = useRoute();
+const router = useRouter();
 const materialId = route.params.id as string;
 const material = ref<any>(null);
 const loading = ref(true);
+const student = ref<any>(null);
+const accessDenied = ref(false);
+const accessMessage = ref('');
+const activityStart = ref<number | null>(null);
+const activityLogged = ref(false);
+const demoMode = isDemoMode();
 
 const deltaStages = [
     { key: 'discover', label: '1. DISCOVER', desc: 'Menemukan Konsep', icon: '🔍' },
@@ -157,12 +168,75 @@ const currentStageContent = computed(() => {
     return parsedContent.value[key] || '';
 });
 
+const currentStageEmbedUrl = computed(() => {
+    const stage = deltaStages[activeStageIndex.value];
+    if (!stage || !material.value) return '';
+    const key = stage.key;
+    return (material.value as any)[`${key}_tool_url`] || '';
+});
+
+const currentStageToolType = computed(() => {
+    const stage = deltaStages[activeStageIndex.value];
+    if (!stage || !material.value) return '';
+    const key = stage.key;
+    return (material.value as any)[`${key}_tool_type`] || '';
+});
+
+
+const isMaterialAllowed = (target: any, viewer: any) => {
+    if (!viewer) return false;
+    const targetGrade = target?.target_grade;
+    const targetMajor = target?.major_target;
+    const matchesGrade = targetGrade === null || targetGrade === undefined || Number(targetGrade) === Number(viewer.grade_level);
+    const matchesMajor = !targetMajor || targetMajor === 'Semua' || targetMajor === viewer.major;
+    return matchesGrade && matchesMajor;
+};
+
+const buildAccessMessage = (target: any) => {
+    const parts: string[] = [];
+    if (target?.target_grade !== null && target?.target_grade !== undefined) {
+        parts.push(`kelas ${target.target_grade}`);
+    }
+    if (target?.major_target && target.major_target !== 'Semua') {
+        parts.push(`jurusan ${target.major_target}`);
+    }
+    if (parts.length === 0) {
+        return 'Materi ini tidak tersedia untuk akun Anda.';
+    }
+    return `Materi ini khusus untuk siswa ${parts.join(' ')}.`;
+};
+
 const fetchMaterial = async () => {
   try {
+    if (demoMode) {
+        student.value = getDemoStudent();
+        material.value = getDemoMaterialById(materialId);
+        if (!material.value) {
+            accessDenied.value = true;
+            accessMessage.value = 'Materi demo tidak ditemukan.';
+            return;
+        }
+        parseContent(material.value.content);
+        loadProgress();
+        startActivity();
+        return;
+    }
+    const saved = localStorage.getItem('student');
+    if (!saved) {
+        router.push(`/login?redirect=/student/material/${materialId}`);
+        return;
+    }
+    student.value = JSON.parse(saved);
     const { data } = await api.get(`/materials/${materialId}`);
     material.value = data;
+    if (!isMaterialAllowed(data, student.value)) {
+        accessDenied.value = true;
+        accessMessage.value = buildAccessMessage(data);
+        return;
+    }
     parseContent(data.content);
     loadProgress();
+    startActivity();
   } catch (e) {
     console.error("Failed to load material", e);
   } finally {
@@ -173,7 +247,7 @@ const fetchMaterial = async () => {
 const parseContent = (html: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    
+
     deltaStages.forEach(stage => {
         const section = doc.querySelector(`div[data-stage="${stage.key}"]`);
         if (section) {
@@ -211,12 +285,12 @@ const loadProgress = () => {
     const saved = localStorage.getItem(key);
     if (saved) {
         currentUnlockedIndex.value = parseInt(saved);
-        activeStageIndex.value = headerProgress(parseInt(saved)); 
+        activeStageIndex.value = headerProgress(parseInt(saved));
     }
 };
 
 const headerProgress = (max: number) => {
-   return max < 4 ? max : 0; 
+   return max < 4 ? max : 0;
 }
 
 const selectStage = (index: number) => {
@@ -230,19 +304,72 @@ const unlockNextStage = () => {
         const next = activeStageIndex.value + 1;
         if (next > currentUnlockedIndex.value) {
             currentUnlockedIndex.value = next;
-            
+
             const key = getProgressKey();
             if (key) {
                 localStorage.setItem(key, next.toString());
             }
         }
         activeStageIndex.value = next;
-        
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
+const getActivityPayload = () => {
+    if (!student.value?.id || !material.value?.id || activityLogged.value) return null;
+    if (!activityStart.value) return null;
+    const endedAt = Date.now();
+    const durationSeconds = Math.round((endedAt - activityStart.value) / 1000);
+    if (durationSeconds < 5) return null;
+    return {
+        student_id: student.value.id,
+        material_id: material.value.id,
+        started_at: activityStart.value,
+        ended_at: endedAt,
+        duration_seconds: durationSeconds
+    };
+};
+
+const logActivity = async (useBeacon = false) => {
+    if (demoMode) return;
+    const payload = getActivityPayload();
+    if (!payload) return;
+    activityLogged.value = true;
+    const baseURL = (api as any).defaults?.baseURL || '';
+    const url = baseURL ? `${baseURL}/activity` : '/activity';
+
+    if (useBeacon && navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+        return;
+    }
+
+    try {
+        await api.post('/activity', payload);
+    } catch (e) {
+        console.error("Failed to log activity", e);
+    }
+};
+
+const startActivity = () => {
+    activityStart.value = Date.now();
+    activityLogged.value = false;
+};
+
+const handleUnload = () => {
+    logActivity(true);
+};
+
 onMounted(fetchMaterial);
+onMounted(() => {
+    window.addEventListener('beforeunload', handleUnload);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', handleUnload);
+    logActivity(false);
+});
 </script>
 
 <style>

@@ -1,16 +1,22 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
-import router from './router'
+import { createApp } from "vue";
+import "./style.css";
+import App from "./App.vue";
+import router from "./router";
 
 // Import KaTeX CSS
-import 'katex/dist/katex.min.css';
+import "katex/dist/katex.min.css";
 
 // Import Quill CSS
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(router)
+app.use(router);
 
-app.mount('#app')
+app.mount("#app");
+
+if (import.meta.env.DEV && "serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister());
+  });
+}

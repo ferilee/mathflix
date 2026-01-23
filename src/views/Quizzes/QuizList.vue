@@ -2,7 +2,7 @@
   <div class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Manajemen Kuis</h2>
-      <button 
+      <button
         @click="showForm = !showForm"
         class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-bold shadow transition"
       >
@@ -24,7 +24,26 @@
             <option value="classic">Tampilan Klasik (Formulir)</option>
             <option value="millionaire">Tampilan Millionaire (Game Show)</option>
         </select>
-        
+        <div class="md:col-span-2 flex items-center gap-2">
+          <input id="use_bank" v-model="form.use_bank" type="checkbox" class="h-4 w-4">
+          <label for="use_bank" class="text-sm text-gray-700 dark:text-gray-200">Gunakan Bank Soal (dinamis per siswa)</label>
+        </div>
+        <div v-if="form.use_bank" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input v-model.number="form.question_count" type="number" min="1" max="100" placeholder="Jumlah soal" class="border p-2 rounded bg-white dark:bg-slate-800 dark:text-white dark:border-gray-600" />
+          <input v-model.number="form.difficulty_mix.easy" type="number" min="0" placeholder="Mudah" class="border p-2 rounded bg-white dark:bg-slate-800 dark:text-white dark:border-gray-600" />
+          <input v-model.number="form.difficulty_mix.medium" type="number" min="0" placeholder="Sedang" class="border p-2 rounded bg-white dark:bg-slate-800 dark:text-white dark:border-gray-600" />
+          <input v-model.number="form.difficulty_mix.hard" type="number" min="0" placeholder="Sulit" class="border p-2 rounded bg-white dark:bg-slate-800 dark:text-white dark:border-gray-600" />
+        </div>
+
+        <div class="md:col-span-2 border-t dark:border-gray-600 pt-4">
+             <ImageUploader
+                v-model="form.image_url"
+                label="Cover Kuis (Aesthetic Netflix)"
+                placeholder="Upload gambar kuis..."
+                :previewTitle="form.title || 'Kuis Baru'"
+            />
+        </div>
+
         <div class="md:col-span-2 flex justify-end">
           <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-bold">Simpan</button>
         </div>
@@ -40,6 +59,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Materi Terkait</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">KKM</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mode</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Bank</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
           </tr>
         </thead>
@@ -49,14 +69,18 @@
             <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ getMaterialTitle(quiz.material_id) }}</td>
             <td class="px-6 py-4 whitespace-nowrap">{{ quiz.passing_score }}</td>
             <td class="px-6 py-4 whitespace-nowrap capitalize">{{ quiz.style || 'millionaire' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-xs">
+              <span v-if="quiz.use_bank" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Dinamis</span>
+              <span v-else class="text-gray-400">Manual</span>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <router-link 
+              <router-link
                 :to="`/admin/quizzes/${quiz.id}`"
                 class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-4 font-bold"
               >
                 Lihat Soal
               </router-link>
-              <button 
+              <button
                 @click="deleteQuiz(quiz.id)"
                 class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 font-bold"
               >
@@ -65,8 +89,8 @@
             </td>
           </tr>
            <tr v-if="quizzes.length === 0">
-            <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Belum ada kuis.</td>
-          </tr>
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Belum ada kuis.</td>
+           </tr>
         </tbody>
       </table>
     </div>
@@ -76,6 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../api';
+import ImageUploader from '../../components/ImageUploader.vue';
 
 interface Quiz {
   id: string;
@@ -83,6 +108,8 @@ interface Quiz {
   title: string;
   passing_score: number;
   style?: string;
+  image_url?: string;
+  use_bank?: boolean;
 }
 
 interface Material {
@@ -97,13 +124,21 @@ const form = ref({
   title: '',
   material_id: '',
   passing_score: 75,
-  style: 'millionaire'
+  style: 'millionaire',
+  image_url: '',
+  use_bank: false,
+  question_count: 10,
+  difficulty_mix: {
+    easy: 4,
+    medium: 4,
+    hard: 2
+  }
 });
 
 const fetchData = async () => {
   try {
     const [quizzesRes, materialsRes] = await Promise.all([
-      api.get('/quizzes').catch(() => ({ data: [] })), 
+      api.get('/quizzes').catch(() => ({ data: [] })),
       api.get('/materials').catch(() => ({ data: [] }))
     ]);
     quizzes.value = quizzesRes.data;
@@ -120,10 +155,24 @@ const getMaterialTitle = (id: string) => {
 
 const createQuiz = async () => {
   try {
-    await api.post('/quizzes', form.value);
+    const payload = {
+      ...form.value,
+      difficulty_mix: form.value.use_bank ? form.value.difficulty_mix : undefined,
+      question_count: form.value.use_bank ? form.value.question_count : undefined
+    };
+    await api.post('/quizzes', payload);
     await fetchData();
     showForm.value = false;
-    form.value = { title: '', material_id: '', passing_score: 75, style: 'millionaire' };
+    form.value = {
+      title: '',
+      material_id: '',
+      passing_score: 75,
+      style: 'millionaire',
+      image_url: '',
+      use_bank: false,
+      question_count: 10,
+      difficulty_mix: { easy: 4, medium: 4, hard: 2 }
+    };
   } catch (e) {
     alert("Gagal membuat kuis");
   }

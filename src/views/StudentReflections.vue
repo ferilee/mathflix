@@ -8,7 +8,7 @@
           <div class="lg:col-span-1">
               <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 sticky top-4">
                   <h2 class="font-bold text-xl mb-4">Tulis Jurnal Baru</h2>
-                  
+
                   <div class="mb-4">
                       <label class="block text-gray-400 text-sm mb-2">Topik (Opsional)</label>
                       <input v-model="form.topic" placeholder="Misal: Fungsi Linear" class="w-full bg-gray-900 border border-gray-700 text-white p-2 rounded focus:outline-none focus:border-indigo-500">
@@ -64,10 +64,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import api from '../api';
+import { isDemoMode, getDemoReflections, saveDemoReflections } from '../utils/demo';
 
 const reflections = ref<any[]>([]);
 const loading = ref(true);
 const loadingSubmit = ref(false);
+const demoMode = isDemoMode();
 
 const form = reactive({
     content: '',
@@ -86,6 +88,11 @@ const getMoodEmoji = (mood: string) => {
 };
 
 const loadReflections = async () => {
+    if (demoMode) {
+        reflections.value = getDemoReflections();
+        loading.value = false;
+        return;
+    }
     const studentData = localStorage.getItem('student');
     if (!studentData) return;
     const student = JSON.parse(studentData);
@@ -106,6 +113,23 @@ const loadReflections = async () => {
 const submitReflection = async () => {
     if (!form.content.trim()) return alert("Isi jurnal tidak boleh kosong!");
 
+    if (demoMode) {
+        const newItem = {
+            id: `demo-ref-${Date.now()}`,
+            content: form.content,
+            mood: form.mood,
+            topic: form.topic,
+            created_at: new Date().toISOString()
+        };
+        const next = [newItem, ...getDemoReflections()];
+        saveDemoReflections(next);
+        reflections.value = next;
+        form.content = '';
+        form.mood = 'neutral';
+        form.topic = '';
+        return;
+    }
+
     const studentData = localStorage.getItem('student');
     if (!studentData) return;
     const student = JSON.parse(studentData);
@@ -115,7 +139,7 @@ const submitReflection = async () => {
         await api.post('/reflections', form, {
             headers: { 'X-Student-ID': student.id }
         });
-        
+
         // Check for Badges
         const { data: badgeData } = await api.post('/badges/check', {}, {
             headers: { 'X-Student-ID': student.id }
@@ -125,7 +149,7 @@ const submitReflection = async () => {
             const names = badgeData.new_badges.map((b: any) => b.icon + ' ' + b.name).join(', ');
             alert(`🎉 Selamat! Kamu mendapatkan lencana baru: ${names}`);
         }
-        
+
         // Reset and Reload
         form.content = '';
         form.mood = 'neutral';

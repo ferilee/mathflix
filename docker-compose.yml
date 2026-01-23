@@ -1,14 +1,14 @@
-version: '3.8'
-
 services:
   api:
     build:
-      context: ../API-Mathflix-update
+      context: /home/ferilee/API-Mathflix-update
     container_name: mathflix-api
     ports:
       - "3000:3000"
     environment:
       - DB_PATH=/app/data/sqlite.db
+    env_file:
+      - .env
     volumes:
       - ./data:/app/data
     restart: always
@@ -19,11 +19,26 @@ services:
     container_name: mathflix-frontend
     ports:
       - "9001:80"
+    env_file:
+      - .env
     depends_on:
       - api
     restart: always
 
+  minio:
+    image: minio/minio
+    container_name: mathflix-minio
+    ports:
+      - "9000:9000"
+      - "9005:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password123
+    volumes:
+      - ./minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: always
 # Ensure the data directory exists or is created by the container
 # The API uses SQLite, likely at ./mathflix.db or src/db/mathflix.db.
-# We need to ensure persistence. 
+# We need to ensure persistence.
 # Check where db is configured. usually ./mathflix.db

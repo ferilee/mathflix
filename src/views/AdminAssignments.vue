@@ -5,7 +5,7 @@
 
     <div v-if="loading" class="p-8 text-center text-gray-500">Memuat data...</div>
     <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{{ error }}</div>
-    
+
     <div v-else>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white">Manajemen Tugas</h2>
@@ -17,24 +17,58 @@
         <!-- Create Assignment -->
         <div v-if="showForm" class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-8 transition-colors">
             <h2 class="font-bold mb-4 text-gray-800 dark:text-white">Buat Tugas Baru</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <input v-model="form.title" placeholder="Judul Tugas" class="border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
                 <input v-model="form.due_date" type="datetime-local" class="border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
             </div>
-            <div class="mb-4 bg-white dark:bg-slate-700 rounded text-black dark:text-white">
+            <div class="mb-4 bg-white dark:bg-slate-700 rounded text-black">
                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1 px-2 pt-2">Deskripsi Tugas (Rich Text / LaTeX)</label>
-                <QuillEditor 
-                    v-model:content="form.description" 
-                    content-type="html" 
-                    theme="snow" 
-                    toolbar="minimal" 
+                <QuillEditor
+                    v-model:content="form.description"
+                    content-type="html"
+                    theme="snow"
+                    toolbar="minimal"
                 />
             </div>
-            
+
+            <div class="mb-6 bg-white dark:bg-slate-800 rounded-lg shadow border dark:border-slate-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-gray-800 dark:text-white">Rubrik Penilaian</h3>
+                    <button
+                        type="button"
+                        @click="addRubricItem"
+                        class="text-xs font-bold text-indigo-600 dark:text-indigo-300 hover:underline"
+                    >
+                        + Tambah Kriteria
+                    </button>
+                </div>
+                <div v-if="form.rubric.length === 0" class="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Belum ada rubrik. Tambahkan kriteria untuk penilaian terstruktur.
+                </div>
+                <div v-else class="space-y-3">
+                    <div
+                        v-for="(item, idx) in form.rubric"
+                        :key="item.id"
+                        class="grid grid-cols-1 md:grid-cols-6 gap-3 bg-gray-50 dark:bg-slate-700 p-3 rounded border dark:border-slate-600"
+                    >
+                        <input v-model="item.title" placeholder="Nama Kriteria" class="md:col-span-2 border p-2 rounded dark:bg-slate-800 dark:text-white dark:border-slate-600" />
+                        <input v-model.number="item.max_score" type="number" min="1" placeholder="Skor Maks" class="md:col-span-1 border p-2 rounded dark:bg-slate-800 dark:text-white dark:border-slate-600" />
+                        <input v-model="item.description" placeholder="Deskripsi (opsional)" class="md:col-span-2 border p-2 rounded dark:bg-slate-800 dark:text-white dark:border-slate-600" />
+                        <button
+                            type="button"
+                            @click="removeRubricItem(idx)"
+                            class="text-red-600 hover:text-red-700 text-sm font-bold"
+                        >
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="mb-6 bg-gray-50 dark:bg-slate-900 p-4 rounded border dark:border-slate-700">
                 <h3 class="font-bold mb-3 text-gray-800 dark:text-white">Target Tugas</h3>
-                
+
                 <!-- Target Mode Switcher -->
                 <div class="flex gap-4 mb-4 border-b dark:border-gray-700 pb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
@@ -62,9 +96,7 @@
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Jurusan</label>
                         <select v-model="form.target_major" class="w-full border p-2 rounded dark:bg-slate-700 dark:text-white dark:border-slate-600">
                             <option :value="null">Semua Jurusan</option>
-                            <option value="RPL">RPL</option>
-                            <option value="TKJ">TKJ</option>
-                            <option value="DPIB">DPIB</option>
+                            <option v-for="major in MAJOR_OPTIONS" :key="major.value" :value="major.value">{{ major.label }}</option>
                         </select>
                     </div>
                 </div>
@@ -97,7 +129,7 @@
         <div class="space-y-4">
             <h2 class="font-bold text-xl text-gray-800 dark:text-white">Daftar Tugas Aktif</h2>
             <div v-if="assignments.length === 0" class="text-gray-500 italic">Belum ada tugas.</div>
-            
+
             <div v-for="assign in assignments" :key="assign.id" class="bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-slate-700 flex justify-between items-start transition-colors">
                 <div>
                     <h3 class="font-bold text-lg hover:text-indigo-600 cursor-pointer dark:text-white" @click="$router.push(`/admin/assignments/${assign.id}`)">
@@ -108,9 +140,9 @@
                     </div>
                     <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
                         <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded">
-                            Target: 
-                            {{ assign.target_grade ? 'Kelas ' + assign.target_grade : 'Semua Kelas' }} 
-                            - 
+                            Target:
+                            {{ assign.target_grade ? 'Kelas ' + assign.target_grade : 'Semua Kelas' }}
+                            -
                             {{ assign.target_major ? assign.target_major : 'Semua Jurusan' }}
                         </span>
                         <span class="flex items-center">🕒 Due: {{ new Date(assign.due_date).toLocaleString() }}</span>
@@ -134,6 +166,7 @@ import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import MathRenderer from '../components/MathRenderer.vue';
 import api from '../api';
+import { MAJOR_OPTIONS } from '../constants/majors';
 
 const students = ref<any[]>([]);
 const assignments = ref<any[]>([]);
@@ -148,8 +181,35 @@ const form = reactive({
     due_date: '',
     target_grade: null as number | null,
     target_major: null as string | null,
-    target_students: [] as string[]
+    target_students: [] as string[],
+    rubric: [] as Array<{ id: string; title: string; description?: string; max_score: number }>
 });
+
+const createRubricItem = () => ({
+    id: `rubric_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    title: '',
+    description: '',
+    max_score: 10
+});
+
+const addRubricItem = () => {
+    form.rubric.push(createRubricItem());
+};
+
+const removeRubricItem = (index: number) => {
+    form.rubric.splice(index, 1);
+};
+
+const normalizeRubric = () => {
+    return form.rubric
+        .filter(item => item.title && item.max_score)
+        .map(item => ({
+            id: item.id,
+            title: item.title.trim(),
+            description: item.description?.trim() || '',
+            max_score: Number(item.max_score)
+        }));
+};
 
 const loadData = async () => {
     loading.value = true;
@@ -159,8 +219,8 @@ const loadData = async () => {
              api.get('/assignments'),
              api.get('/students')
         ]);
-        assignments.value = Array.isArray(aRes.data) ? aRes.data : [];
-        students.value = Array.isArray(sRes.data) ? sRes.data : [];
+        assignments.value = Array.isArray(aRes.data) ? aRes.data : aRes.data?.data || [];
+        students.value = Array.isArray(sRes.data) ? sRes.data : sRes.data?.data || [];
     } catch (e: any) {
         console.error("Error loading data:", e);
         error.value = 'Gagal memuat data: ' + (e.message || e);
@@ -171,21 +231,21 @@ const loadData = async () => {
 
 const createAssignment = async () => {
     if (!form.title || !form.due_date) return alert('Judul dan Tanggal harus diisi!');
-    
+
     // Prepare payload
-    const payload = { ...form };
-    
+    const payload = { ...form, rubric: normalizeRubric() };
+
     if (targetMode.value === 'individual') {
         if (form.target_students.length === 0) return alert('Pilih minimal satu siswa untuk tugas individu!');
         // Set Class Filters to Non-Matching to ensure privacy
-        payload.target_grade = -1; 
+        payload.target_grade = -1;
         payload.target_major = 'NONE';
     }
 
     try {
         await api.post('/assignments', payload);
         alert('Tugas berhasil dibuat!');
-        
+
         // Reset form
         form.title = '';
         form.description = ''; // Quill v-model binds here
@@ -193,8 +253,9 @@ const createAssignment = async () => {
         form.target_grade = null;
         form.target_major = null;
         form.target_students = [];
+        form.rubric = [];
         targetMode.value = 'class';
-        
+
         loadData();
     } catch (e: any) {
         console.error(e);
@@ -206,7 +267,7 @@ const createAssignment = async () => {
 
 const deleteAssignment = async (id: string) => {
     if (!confirm('Apakah anda yakin ingin menghapus tugas ini?')) return;
-    
+
     try {
         await api.delete(`/assignments/${id}`);
         // Remove from local list to avoid full reload

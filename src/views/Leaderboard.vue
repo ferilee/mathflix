@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto p-6 text-white min-h-[80vh]">
     <h1 class="text-4xl font-extrabold text-yellow-500 mb-8 text-center uppercase tracking-widest drop-shadow-md">
-       🏆 Leaderboard 
+       🏆 Leaderboard
     </h1>
 
     <div v-if="loading" class="text-center py-10">Loading ranks...</div>
@@ -12,9 +12,9 @@
           <div class="col-span-6">Student</div>
           <div class="col-span-4 text-right">Points</div>
        </div>
-       
-       <div 
-        v-for="(entry, index) in leaderboard" 
+
+       <div
+        v-for="(entry, index) in leaderboard"
         :key="index"
         class="grid grid-cols-12 p-4 border-b border-gray-700/50 items-center hover:bg-gray-700/50 transition"
         :class="{
@@ -30,9 +30,9 @@
           </div>
           <div class="col-span-6 flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">
-                  {{ entry.student_name.charAt(0) }}
+                  {{ getInitial(entry.student_name) }}
               </div>
-              <span class="font-medium text-lg">{{ entry.student_name }}</span>
+              <span class="font-medium text-lg">{{ getDisplayName(entry.student_name) }}</span>
           </div>
           <div class="col-span-4 text-right font-mono text-xl text-green-400">
               {{ entry.total_score }} XP
@@ -53,12 +53,21 @@ import api from '../api';
 const leaderboard = ref<any[]>([]);
 const loading = ref(true);
 
+const getDisplayName = (name: string | null | undefined) => {
+  return name && name.trim() ? name : 'Siswa';
+};
+
+const getInitial = (name: string | null | undefined) => {
+  const display = getDisplayName(name);
+  return display.charAt(0).toUpperCase();
+};
+
 const fetchLeaderboard = async () => {
   try {
     // Try fetching from specific endpoint
     // If 404, we might need a backup strategy or I'll implement the endpoint.
     const { data } = await api.get('/leaderboard');
-    leaderboard.value = data;
+    leaderboard.value = Array.isArray(data) ? data : [];
   } catch (e) {
     console.error("Failed to fetch leaderboard", e);
     // Fallback: Fetch all results and aggregate manually if API missing (not ideal but safe fallback)

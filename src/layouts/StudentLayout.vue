@@ -9,21 +9,32 @@
             <li><router-link to="/student" class="hover:text-white transition">Home</router-link></li>
             <li><router-link to="/student/leaderboard" class="hover:text-white transition">Leaderboard</router-link></li>
             <li><router-link to="/student/my-list" class="hover:text-white transition">Daftar Saya</router-link></li>
-            <li><router-link to="/student/assignments" class="hover:text-white transition">Tugas Saya</router-link></li>
+            <li>
+                <router-link to="/student/assignments" class="hover:text-white transition relative">
+                    Tugas Saya
+                    <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
+                </router-link>
+            </li>
             <li><router-link to="/student/reflections" class="hover:text-white transition">Jurnal</router-link></li>
+            <li><router-link to="/student/s-badges" class="hover:text-white transition">Pencapaian</router-link></li>
             <li>
                 <router-link to="/student/announcements" class="hover:text-white transition relative">
                     Pengumuman
                     <span v-if="hasNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
                 </router-link>
             </li>
-            <li><router-link to="/student/discuss" class="hover:text-white transition">Diskusi</router-link></li>
+            <li>
+                <router-link to="/student/discuss" class="hover:text-white transition relative">
+                    Diskusi
+                    <span v-if="hasDiscussNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
+                </router-link>
+            </li>
           </ul>
         </div>
         <div class="flex items-center gap-4 text-sm font-medium relative">
            <!-- Profile Dropdown Trigger -->
-           <div 
-             v-if="student" 
+           <div
+             v-if="student"
              class="flex items-center gap-3 cursor-pointer"
              @click="showMenu = !showMenu"
            >
@@ -35,24 +46,41 @@
                    {{ initials }}
                </div>
            </div>
-           
+
            <!-- Login Button if no user -->
-           <router-link v-else to="/login" class="bg-red-600 px-4 py-1 rounded hover:bg-red-700">Masuk</router-link>
+           <button
+             v-else
+             @click="showLoginModal = true"
+             class="bg-red-600 px-6 py-2 rounded-full font-bold hover:bg-red-700 transition transform hover:scale-105 active:scale-95 shadow-lg shadow-red-600/20"
+           >
+             Masuk
+           </button>
 
 
            <!-- Dropdown Menu -->
-           <div v-if="showMenu" class="absolute top-full right-0 mt-2 w-48 bg-black/90 border border-gray-700 rounded shadow-xl py-2 flex flex-col z-50">
-               <div class="px-4 py-2 border-b border-gray-700 text-xs text-gray-400">
-                   Logged in as <br> <span class="text-white font-bold">{{ student?.nisn }}</span>
-               </div>
-               
+           <transition name="fade">
+             <div v-if="showMenu" class="absolute top-full right-0 mt-3 w-56 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-2 flex flex-col z-[100] backdrop-blur-xl">
+                 <div class="px-4 py-3 border-b border-gray-800">
+                     <div class="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">NISN</div>
+                     <div class="text-sm font-bold text-white">{{ student?.nisn }}</div>
+                 </div>
 
-               <button @click="showDevInfo = true; showMenu = false" class="text-left px-4 py-2 hover:bg-gray-800 text-indigo-400 flex items-center gap-2">
-                  <span>ℹ</span> Tentang Aplikasi
-               </button>
-               
-               <button @click="logout" class="text-left px-4 py-2 hover:bg-gray-800 text-red-500">Keluar</button>
-           </div>
+                 <button @click="showDevInfo = true; showMenu = false" class="text-left px-4 py-3 hover:bg-gray-800/50 text-indigo-400 flex items-center gap-3 transition">
+                    <span class="text-lg">ℹ️</span>
+                    <span class="text-sm font-semibold">Tentang Aplikasi</span>
+                 </button>
+
+                 <button v-if="demoMode" @click="resetDemoSession" class="text-left px-4 py-3 hover:bg-gray-800/50 text-yellow-400 flex items-center gap-3 transition">
+                    <span class="text-lg">🧹</span>
+                    <span class="text-sm font-semibold">Reset Demo</span>
+                 </button>
+
+                 <button @click="logout" class="text-left px-4 py-3 hover:bg-red-900/10 text-red-500 flex items-center gap-3 transition border-t border-gray-800">
+                   <span class="text-lg">🚪</span>
+                   <span class="text-sm font-semibold">Keluar</span>
+                 </button>
+             </div>
+           </transition>
         </div>
       </div>
     </nav>
@@ -92,8 +120,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Home</span>
       </router-link>
-      <router-link to="/student/assignments" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+      <router-link to="/student/assignments" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white relative" active-class="text-red-600">
+         <div class="relative">
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+             <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border border-black"></span>
+         </div>
          <span>Tugas</span>
       </router-link>
       <router-link to="/student/reflections" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
@@ -107,28 +138,43 @@
          </div>
          <span>Info</span>
       </router-link>
-      <router-link to="/student/discuss" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white" active-class="text-red-600">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <router-link to="/student/discuss" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white relative" active-class="text-red-600">
+         <div class="relative">
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+             <span v-if="hasDiscussNotification" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border border-black"></span>
+         </div>
          <span>Diskusi</span>
       </router-link>
     </div>
 
-    <!-- Developer Widget (Modal) -->
-    <DeveloperWidget :is-open="showDevInfo" @close="showDevInfo = false" />
+     <!-- Login Modal -->
+     <LoginModal :is-open="showLoginModal" @close="showLoginModal = false" />
+
+     <!-- Developer Widget (Modal) -->
+     <DeveloperWidget :is-open="showDevInfo" @close="showDevInfo = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import DeveloperWidget from '../components/DeveloperWidget.vue';
+import LoginModal from '../components/LoginModal.vue';
+import api from '../api';
+import { isDemoMode, enableDemo, resetDemo, getDemoStudent } from '../utils/demo';
 
 const router = useRouter();
+const route = useRoute();
 const isScrolled = ref(false);
 const student = ref<any>(null);
 const showMenu = ref(false);
 const showDevInfo = ref(false);
+const showLoginModal = ref(false);
 const hasNotification = ref(false);
+const hasAssignmentNotification = ref(false);
+const hasDiscussNotification = ref(false);
+let pollingInterval: any = null;
+const demoMode = ref(isDemoMode());
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
@@ -138,28 +184,121 @@ const loadStudent = () => {
     const saved = localStorage.getItem('student');
     if (saved) {
         student.value = JSON.parse(saved);
+    } else if (demoMode.value) {
+        enableDemo();
+        student.value = getDemoStudent();
     }
 };
 
-import api from '../api';
-
 const checkNotifications = async () => {
+    if (demoMode.value || !student.value?.id) return;
     try {
-        const { data } = await api.get('/announcements');
-        if (data.length > 0) {
-            const latest = data[0].created_at;
-            const lastRead = localStorage.getItem('lastReadAnnouncement');
-            if (!lastRead || new Date(latest) > new Date(lastRead)) {
-                hasNotification.value = true;
-            }
-        }
+        const { data } = await api.get('/announcements', { params: { student_id: student.value.id } });
+        const announcements = Array.isArray(data) ? data : data?.data || [];
+        hasNotification.value = announcements.some((item: any) => !item.has_read);
     } catch (e) {
         // ignore
     }
 };
 
+const markAllAnnouncementsRead = async () => {
+    if (demoMode.value || !student.value?.id) return;
+    try {
+        const { data } = await api.get('/announcements', { params: { student_id: student.value.id } });
+        const announcements = Array.isArray(data) ? data : data?.data || [];
+        const unread = announcements.filter((item: any) => !item.has_read);
+        await Promise.all(
+            unread.map((item: any) => api.post(`/announcements/${item.id}/read`, { student_id: student.value.id }))
+        );
+        hasNotification.value = false;
+    } catch (e) {
+        // ignore
+    }
+};
+
+const checkDiscussNotifications = async (): Promise<void> => {
+    if (demoMode.value || !student.value?.id) return;
+    try {
+        const { data } = await api.get('/discussions', { params: { user_id: student.value.id } });
+        const discussions = Array.isArray(data) ? data : data?.data || [];
+        hasDiscussNotification.value = discussions.some((d: any) => d.has_unread);
+    } catch (e) {
+        // ignore
+    }
+};
+
+const markAllDiscussionsRead = async () => {
+    if (demoMode.value || !student.value?.id) return;
+    try {
+        const { data } = await api.get('/discussions', { params: { user_id: student.value.id } });
+        const discussions = Array.isArray(data) ? data : data?.data || [];
+        const unread = discussions.filter((d: any) => d.has_unread);
+        await Promise.all(unread.map((d: any) => api.post(`/discussions/${d.id}/read`, { user_id: student.value.id })));
+        hasDiscussNotification.value = false;
+    } catch (e) {
+        // ignore
+    }
+};
+
+const getAssignmentTimestamp = (assignment: any) => {
+    return assignment?.created_at || assignment?.updated_at || assignment?.due_date || null;
+};
+
+const checkAssignmentNotifications = async (): Promise<string | null> => {
+    if (demoMode.value) return null;
+    if (!student.value) return;
+    try {
+        const { data } = await api.get('/assignments/my-assignments', {
+            headers: { 'X-Student-ID': student.value.id }
+        });
+        const assignments = Array.isArray(data) ? data : data?.data || [];
+        const latestTimestamp = assignments
+            .map(getAssignmentTimestamp)
+            .filter(Boolean)
+            .sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime())[0];
+        if (!latestTimestamp) {
+            hasAssignmentNotification.value = false;
+            return null;
+        }
+        const lastReadKey = `lastReadAssignment_${student.value.id || student.value.nisn}`;
+        const lastRead = localStorage.getItem(lastReadKey);
+        if (!lastRead || new Date(latestTimestamp) > new Date(lastRead)) {
+            hasAssignmentNotification.value = true;
+        } else {
+            hasAssignmentNotification.value = false;
+        }
+        return latestTimestamp;
+    } catch (e) {
+        // ignore
+        return null;
+    }
+};
+
+const markAssignmentsRead = (latestTimestamp?: string | null) => {
+    if (!student.value) return;
+    const lastReadKey = `lastReadAssignment_${student.value.id || student.value.nisn}`;
+    if (latestTimestamp) {
+        localStorage.setItem(lastReadKey, latestTimestamp);
+    } else {
+        localStorage.setItem(lastReadKey, new Date().toISOString());
+    }
+    hasAssignmentNotification.value = false;
+};
+
 const logout = () => {
+    if (demoMode.value) {
+        resetDemo();
+        demoMode.value = false;
+    }
     localStorage.removeItem('student');
+    router.push('/login');
+};
+
+const resetDemoSession = () => {
+    resetDemo();
+    demoMode.value = false;
+    student.value = null;
+    showMenu.value = false;
     router.push('/login');
 };
 
@@ -171,10 +310,38 @@ onMounted(() => {
     document.documentElement.classList.add('dark');
     window.addEventListener('scroll', handleScroll);
     loadStudent();
-    checkNotifications();
+    if (!demoMode.value) {
+        checkNotifications();
+        checkAssignmentNotifications();
+        checkDiscussNotifications();
+        pollingInterval = setInterval(() => {
+            checkNotifications();
+            checkAssignmentNotifications();
+            checkDiscussNotifications();
+        }, 5000);
+    }
 });
 
-onUnmounted(() => window.removeEventListener('scroll', handleScroll));
+watch(() => route.path, (path) => {
+    if (path.startsWith('/student/assignments')) {
+        checkAssignmentNotifications().then((latestTimestamp) => {
+            if (latestTimestamp) {
+                markAssignmentsRead(latestTimestamp);
+            }
+        });
+    }
+    if (path.startsWith('/student/announcements')) {
+        markAllAnnouncementsRead();
+    }
+    if (path.startsWith('/student/discuss')) {
+        markAllDiscussionsRead();
+    }
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+    if (pollingInterval) clearInterval(pollingInterval);
+});
 </script>
 
 <style scoped>

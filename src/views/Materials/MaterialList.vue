@@ -20,8 +20,7 @@
         </div>
         <select v-model="filterMajor" class="border rounded px-4 py-2 bg-transparent dark:text-white dark:border-gray-600 dark:bg-slate-700">
             <option class="text-black" value="">Semua Jurusan</option>
-            <option class="text-black" value="TKJ">TKJ</option>
-            <option class="text-black" value="RPL">RPL</option>
+            <option v-for="major in MAJOR_OPTIONS" :key="major.value" :value="major.value" class="text-black">{{ major.label }}</option>
         </select>
     </div>
 
@@ -58,6 +57,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import api from '../../api';
+import { MAJOR_OPTIONS } from '../../constants/majors';
 
 const materials = ref<any[]>([]);
 const search = ref('');

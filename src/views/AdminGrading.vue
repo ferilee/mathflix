@@ -5,7 +5,7 @@
         <h2 class="text-xl font-bold text-gray-800 dark:text-white">Rekap Penilaian Siswa</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400">Total skor kuis, rata-rata, dan keaktifan.</p>
       </div>
-      <button 
+      <button
         @click="downloadCSV"
         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold flex items-center gap-2 shadow transition"
       >
@@ -19,19 +19,17 @@
     <!-- Filters -->
     <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="md:col-span-2">
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Cari Nama atau NISN..." 
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Cari Nama atau NISN..."
               class="w-full border p-2 rounded bg-gray-50 dark:bg-slate-700 dark:border-gray-600 dark:text-white"
             />
         </div>
         <div>
             <select v-model="filterMajor" class="w-full border p-2 rounded bg-gray-50 dark:bg-slate-700 dark:border-gray-600 dark:text-white">
                 <option value="">Semua Jurusan</option>
-                <option value="TKJ">TKJ</option>
-                <option value="RPL">RPL</option>
-                <option value="Multimedia">Multimedia</option>
+                <option v-for="major in MAJOR_OPTIONS" :key="major.value" :value="major.value">{{ major.label }}</option>
             </select>
         </div>
         <div>
@@ -97,8 +95,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import api from '../api';
+import { MAJOR_OPTIONS } from '../constants/majors';
 
 interface StudentGrade {
     id: string;
@@ -114,6 +113,7 @@ interface StudentGrade {
 
 const students = ref<StudentGrade[]>([]);
 const loading = ref(true);
+let pollingInterval: any = null;
 
 // Filters
 const searchQuery = ref('');
@@ -122,11 +122,11 @@ const filterGrade = ref('');
 
 const filteredStudents = computed(() => {
     return students.value.filter(s => {
-        const matchesSearch = s.full_name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+        const matchesSearch = s.full_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                               s.nisn.includes(searchQuery.value);
         const matchesMajor = filterMajor.value ? s.major === filterMajor.value : true;
         const matchesGrade = filterGrade.value ? s.grade_level == Number(filterGrade.value) : true;
-        
+
         return matchesSearch && matchesMajor && matchesGrade;
     });
 });
@@ -137,14 +137,19 @@ const classAverage = computed(() => {
     return (total / filteredStudents.value.length).toFixed(1);
 });
 
-const fetchData = async () => {
+const fetchData = async (isPolling = false) => {
     try {
+        if (!isPolling) {
+            loading.value = true;
+        }
         const { data } = await api.get('/grading');
         students.value = data;
     } catch (e) {
         console.error("Gagal memuat data grading", e);
     } finally {
-        loading.value = false;
+        if (!isPolling) {
+            loading.value = false;
+        }
     }
 };
 
@@ -160,7 +165,7 @@ const downloadCSV = () => {
 
     // Defines headers
     const headers = ['NISN', 'Nama Lengkap', 'Jurusan', 'Kelas', 'Quiz Total', 'Quiz Avg', 'Jml Refleksi', 'Jml Badges'];
-    
+
     // Map data to CSV row format
     const rows = filteredStudents.value.map(s => [
         s.nisn,
@@ -191,5 +196,12 @@ const downloadCSV = () => {
     document.body.removeChild(link);
 };
 
-onMounted(fetchData);
+onMounted(() => {
+    fetchData();
+    pollingInterval = setInterval(() => fetchData(true), 5000);
+});
+
+onUnmounted(() => {
+    if (pollingInterval) clearInterval(pollingInterval);
+});
 </script>

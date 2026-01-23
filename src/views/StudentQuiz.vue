@@ -18,7 +18,7 @@
                 </div>
                 <div class="text-xl text-blue-200">Total Hadiah ({{ Math.floor((result?.score / 100) * questions.length) }} Benar)</div>
              </div>
-             
+
              <div class="text-2xl font-bold text-green-400 mb-6" v-if="result?.score > 75">🎉 LUAR BIASA! 🎉</div>
              <div class="text-xl text-gray-300 mb-6" v-else>Terima kasih telah bermain!</div>
 
@@ -30,7 +30,7 @@
 
         <!-- Game Interface -->
         <div v-else class="w-full max-w-6xl flex flex-col md:flex-row h-screen md:h-auto md:py-10 z-10 relative overflow-hidden">
-            
+
             <!-- Mobile Money Ladder (Collapsible/Drawer) -->
             <div class="md:hidden absolute top-0 right-0 z-50">
                <button @click="showMobileLadder = !showMobileLadder" class="bg-blue-900 border border-yellow-500 text-yellow-400 px-3 py-1 rounded-bl-lg text-xs font-bold shadow-lg">
@@ -38,13 +38,13 @@
                </button>
                <div v-if="showMobileLadder" class="bg-blue-950/95 border-l border-b border-yellow-500 p-2 rounded-bl-xl shadow-2xl max-h-[50vh] overflow-y-auto w-48 transition-all">
                   <div class="text-[10px] text-gray-400 text-center mb-1 italic">*Uang ini hanya khayalan</div>
-                  <div v-for="(q, i) in questions" :key="q.id" 
+                  <div v-for="(q, i) in questions" :key="q.id"
                        class="flex justify-between items-center px-2 py-1 mb-0.5 text-[10px] font-bold rounded"
                        :class="{
                           'bg-yellow-500 text-black border border-white': (questions.length - 1 - i) === currentQuestionIndex,
                           'text-yellow-200': (questions.length - 1 - i) > currentQuestionIndex,
                           'text-gray-500': (questions.length - 1 - i) < currentQuestionIndex,
-                          'text-white': (questions.length - 1 - i) % 5 === 4 
+                          'text-white': (questions.length - 1 - i) % 5 === 4
                        }">
                       <span class="w-4 text-center">{{ questions.length - i }}</span>
                       <span class="flex-1 text-right">Rp {{ formatCurrency((questions.length - i) * 1000000) }}</span>
@@ -68,7 +68,7 @@
                              <div class="w-10 h-8 md:w-14 md:h-10 border-2 border-yellow-500 rounded-full flex items-center justify-center bg-blue-950 text-yellow-500 font-bold text-xs shadow-lg hover:bg-yellow-500 hover:text-black transition">👥</div>
                          </button>
                      </div>
-                     
+
                      <!-- Current Level Indicator -->
                      <div class="text-right">
                         <div class="text-yellow-400 font-bold text-xl md:text-2xl drop-shadow-md">Rp {{ formatCurrency((currentQuestionIndex + 1) * 1000000) }}</div>
@@ -86,11 +86,19 @@
                  </div>
 
                  <!-- Question (Flex Grow to fill space but not overflow) -->
-                 <div class="question-container mb-6 md:mb-4 relative group md:flex-1 flex items-center justify-center w-full min-h-0">
+                 <div class="question-container mb-6 md:mb-4 relative group md:flex-1 flex items-center justify-center w-full min-h-0" data-tour="quiz">
                       <div class="w-full bg-gradient-to-b from-blue-900 to-blue-950 border-y-2 border-yellow-500/50 p-2 md:p-8 text-center md:h-full min-h-[40vh] md:min-h-0 max-h-[60vh] md:max-h-none flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(0,0,0,0.6)] rounded-lg overflow-y-auto">
-                          <h1 class="text-xl md:text-3xl font-semibold leading-relaxed tracking-wide text-white drop-shadow-md">
-                            <MathRenderer :content="currentQuestion.question_text" />
-                          </h1>
+                          <div class="space-y-4 w-full">
+                            <h1 class="text-xl md:text-3xl font-semibold leading-relaxed tracking-wide text-white drop-shadow-md">
+                              <MathRenderer :content="currentQuestion.question_text" />
+                            </h1>
+                            <img
+                              v-if="currentQuestion.image_url"
+                              :src="resolveStorageUrl(currentQuestion.image_url)"
+                              alt="Question illustration"
+                              class="mx-auto max-h-64 rounded border border-blue-800/40"
+                            />
+                          </div>
                       </div>
                  </div>
 
@@ -115,13 +123,13 @@
             <div class="hidden md:flex flex-col w-64 ml-8 justify-center shrink-0 pr-4">
                 <div class="bg-blue-950/90 p-1 rounded-lg border border-blue-800 shadow-2xl backdrop-blur">
                     <div class="text-xs text-center text-gray-500 mb-2 italic">*Uang ini hanya khayalan</div>
-                    <div v-for="(q, i) in questions" :key="q.id" 
+                    <div v-for="(q, i) in questions" :key="q.id"
                          class="flex justify-between items-center px-4 py-1.5 mb-1 text-sm font-bold rounded transition-all"
                          :class="{
                             'bg-yellow-500 text-black scale-105 shadow-lg border-2 border-white': (questions.length - 1 - i) === currentQuestionIndex,
                             'text-yellow-200': (questions.length - 1 - i) > currentQuestionIndex,
                             'text-gray-500': (questions.length - 1 - i) < currentQuestionIndex,
-                            'text-white': (questions.length - 1 - i) % 5 === 4 
+                            'text-white': (questions.length - 1 - i) % 5 === 4
                          }">
                         <span class="w-8 text-center">{{ questions.length - i }}</span>
                         <span class="flex-1 text-right tracking-wider">Rp {{ formatCurrency((questions.length - i) * 1000000) }}</span>
@@ -136,7 +144,7 @@
     <!-- Mode: Classic (Netflix Consistent Theme) -->
     <div v-else class="min-h-screen bg-[#141414] py-10 px-4 text-white font-sans">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
-            
+
             <!-- Result Card -->
             <div v-if="result" class="w-full bg-[#181818] rounded-md shadow-2xl border border-[#333] overflow-hidden text-center p-12">
                  <div class="w-24 h-24 bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -146,10 +154,10 @@
                  </div>
                  <h2 class="text-3xl font-bold text-white mb-2">Quiz Completed</h2>
                  <p class="text-[#B3B3B3] mb-8">You have finished this assignment.</p>
-                 
+
                  <div class="text-6xl font-extrabold text-[#E50914] mb-2">{{ result.score }}%</div>
                  <div class="text-sm text-gray-500 uppercase tracking-widest mb-8">Final Score</div>
-                 
+
                  <button @click="$router.push('/student')" class="bg-white text-black px-8 py-3 rounded hover:bg-gray-200 transition font-bold uppercase tracking-wide">
                     Back to Dashboard
                  </button>
@@ -162,8 +170,8 @@
                     <div class="bg-[#181818] rounded-md shadow-lg border border-[#333] p-6 sticky top-24">
                         <h3 class="font-bold text-[#B3B3B3] mb-4 text-sm uppercase tracking-wider">Navigator</h3>
                         <div class="grid grid-cols-5 gap-2">
-                             <button 
-                                v-for="(q, idx) in questions" 
+                             <button
+                                v-for="(q, idx) in questions"
                                 :key="idx"
                                 @click="jumpToQuestion(idx)"
                                 class="w-10 h-10 rounded-sm flex items-center justify-center text-sm font-bold transition border"
@@ -176,7 +184,7 @@
                                 {{ idx + 1 }}
                              </button>
                         </div>
-                        
+
                         <div class="mt-8 pt-6 border-t border-[#333]">
                              <button v-if="allAnswered" @click="submitClassic" class="mt-2 w-full bg-[#E50914] text-white py-3 rounded font-bold hover:bg-red-700 transition uppercase tracking-wide" :disabled="submitting">
                                 {{ submitting ? 'Submitting...' : 'Submit All' }}
@@ -200,14 +208,22 @@
 
                          <!-- Question Text -->
                          <div class="flex-1 mb-10">
-                             <div class="text-2xl text-gray-100 leading-relaxed font-light">
-                                <MathRenderer :content="currentClassicQuestion.question_text" />
+                             <div class="space-y-4">
+                                <div class="text-2xl text-gray-100 leading-relaxed font-light">
+                                  <MathRenderer :content="currentClassicQuestion.question_text" />
+                                </div>
+                                <img
+                                  v-if="currentClassicQuestion.image_url"
+                                  :src="resolveStorageUrl(currentClassicQuestion.image_url)"
+                                  alt="Question illustration"
+                                  class="max-h-64 rounded border border-[#333]"
+                                />
                              </div>
                          </div>
 
                          <!-- Options -->
                          <div class="space-y-3">
-                             <label v-for="(opt, i) in currentClassicQuestion.finalOptions" :key="i" 
+                             <label v-for="(opt, i) in currentClassicQuestion.finalOptions" :key="i"
                                     class="flex items-center gap-4 p-4 rounded border cursor-pointer transition group"
                                     :class="answers[currentClassicQuestion.id] === opt ? 'border-[#E50914] bg-[#E50914]/20' : 'border-[#333] hover:border-[#555] bg-[#2F2F2F] hover:bg-[#363636]'"
                              >
@@ -220,20 +236,20 @@
                                  <span class="text-gray-200 font-medium text-lg">{{ opt }}</span>
                              </label>
                          </div>
-                         
+
                          <!-- Navigation Buttons -->
                          <div class="flex justify-between mt-10 pt-6 border-t border-[#333]">
-                             <button 
-                                @click="classicIndex--" 
+                             <button
+                                @click="classicIndex--"
                                 :disabled="classicIndex === 0"
                                 class="px-6 py-2 rounded font-medium transition text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
                              >
                                 ← Previous
                              </button>
 
-                             <button 
+                             <button
                                 v-if="classicIndex < questions.length - 1"
-                                @click="classicIndex++" 
+                                @click="classicIndex++"
                                 class="px-8 py-2 rounded font-bold bg-white text-black hover:bg-gray-200 transition flex items-center gap-2"
                              >
                                 Next
@@ -265,6 +281,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import MathRenderer from '../components/MathRenderer.vue';
 import api from '../api';
+import { isDemoMode, getDemoQuizById } from '../utils/demo';
+import { resolveStorageUrl } from '../utils/storage';
 
 const route = useRoute();
 const quizId = route.params.id;
@@ -284,6 +302,8 @@ const quiz = ref<any>(null);
 const questions = ref<any[]>([]);
 const result = ref<any>(null);
 const submitting = ref(false);
+const quizStart = ref<number | null>(null);
+const demoMode = isDemoMode();
 
 // Classic State
 const classicIndex = ref(0);
@@ -294,7 +314,7 @@ const allAnswered = computed(() => {
 });
 
 // Millionaire State
-const gameState = ref('playing'); 
+const gameState = ref('playing');
 const currentQuestionIndex = ref(0);
 const userAnswers = ref<any[]>([]);
 const revealState = ref('waiting');
@@ -314,26 +334,63 @@ const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('id-ID').format(val);
 };
 
+const getStudentId = () => {
+    const saved = localStorage.getItem('student');
+    if (!saved) return null;
+    try {
+        const parsed = JSON.parse(saved);
+        return parsed?.id || null;
+    } catch {
+        return null;
+    }
+};
+
 // Init
 const fetchQuiz = async () => {
   try {
-    const { data } = await api.get(`/quizzes/${quizId}`);
+    if (demoMode) {
+        const demoQuiz = getDemoQuizById(String(quizId));
+        if (demoQuiz) {
+            quiz.value = demoQuiz;
+            let qList = demoQuiz.questions || [];
+            if (qList.length > 0) {
+                qList = shuffleArray([...qList]);
+                qList.forEach((q: any) => {
+                    let opts = q.options;
+                    if (typeof opts === 'string') opts = JSON.parse(opts);
+                    q.finalOptions = shuffleArray([...opts]);
+                });
+            }
+            questions.value = qList;
+            if (demoQuiz.style === 'millionaire' && questions.value.length > 0) {
+                prepareMillionaireQuestion(0);
+            }
+            quizStart.value = Date.now();
+        }
+        loading.value = false;
+        return;
+    }
+    const studentId = getStudentId();
+    const { data } = await api.get(`/quizzes/${quizId}`, {
+        headers: studentId ? { 'X-Student-ID': studentId } : undefined
+    });
     quiz.value = data;
-    
+    quizStart.value = Date.now();
+
     // Fetch Questions
     let qList = [];
     if (data.questions) {
       qList = data.questions;
     } else {
-       const qIds = await api.get(`/quizzes/${quizId}/questions`); 
+       const qIds = await api.get(`/quizzes/${quizId}/questions`);
        qList = qIds.data;
     }
-    
+
     // Process Randomization
     if (qList.length > 0) {
         // Shuffle questions
         qList = shuffleArray([...qList]);
-        
+
         // Shuffle options and store as 'finalOptions' property to persist order
         qList.forEach((q: any) => {
             let opts = q.options;
@@ -343,7 +400,7 @@ const fetchQuiz = async () => {
     }
 
     questions.value = qList;
-    
+
     if (data.style === 'millionaire' && qList.length > 0) {
         prepareMillionaireQuestion(0);
     }
@@ -365,20 +422,33 @@ const jumpToQuestion = (idx: number) => {
 const submitClassic = async () => {
     submitting.value = true;
     try {
-        const studRes = await api.get('/students');
-        const studentId = studRes.data[0]?.id; // Demo
-
         const formattedAnswers = Object.keys(answers.value).map(k => ({
             question_id: k,
             user_answer: answers.value[k]
         }));
+        if (demoMode) {
+            const correct = formattedAnswers.filter((ans) => {
+                const q = questions.value.find((q) => q.id === ans.question_id);
+                return q && q.correct_answer === ans.user_answer;
+            }).length;
+            const score = questions.value.length > 0 ? Math.round((correct / questions.value.length) * 100) : 0;
+            result.value = { score, total_questions: questions.value.length, correct_answers: correct };
+            return;
+        }
 
-        const { data } = await api.post('/submit-quiz', {
+        const studentId = getStudentId();
+        if (!studentId) {
+            alert('Silakan login ulang untuk mengirim jawaban.');
+            return;
+        }
+
+        const { data } = await api.post('/quizzes/submit-quiz', {
             student_id: studentId,
             quiz_id: quizId,
             answers: formattedAnswers
         });
         result.value = data;
+        await logQuizActivity(studentId);
     } catch (e) {
         alert("Gagal mengirim jawaban");
     } finally {
@@ -393,11 +463,11 @@ const prepareMillionaireQuestion = (idx: number) => {
 
     let opts = q.finalOptions || q.options; // Use shuffled
     if (typeof opts === 'string') opts = JSON.parse(opts);
-    
+
     tempOptions.value = opts.map((o: string) => ({ text: o, hidden: false }));
     revealState.value = 'waiting';
     selectedAnswer.value = null;
-    
+
     // Only reset lifelines on first question? No, init them once.
     if (idx === 0) {
         lifelines.value = { fiftyFifty: true, phone: true, audience: true };
@@ -408,13 +478,13 @@ const selectOption = (opt: any) => {
     if (revealState.value !== 'waiting') return;
     selectedAnswer.value = opt.text;
     revealState.value = 'locked';
-    
+
     // Immediate check
     const isCorrect = opt.text === currentQuestion.value.correct_answer;
 
     setTimeout(() => {
         revealState.value = 'revealed';
-        
+
         setTimeout(() => {
             if (isCorrect) {
                 // Correct: Save and Move Next
@@ -427,7 +497,7 @@ const selectOption = (opt: any) => {
                 // Wrong: Game Over
                 // We do NOT add the wrong answer to userAnswers if we want to follow strict "last obtained" logic?
                 // Actually, submitting the wrong answer is fine, backend counts correct ones.
-                // But generally "last obtained" implies we revert to previous state. 
+                // But generally "last obtained" implies we revert to previous state.
                 // However, the score is based on Correct Count. So adding a wrong answer doesn't increase score.
                 // We will add it for record.
                 userAnswers.value.push({
@@ -452,20 +522,53 @@ const nextQuestion = () => {
 const submitGame = async () => {
     loading.value = true;
     try {
-        const studRes = await api.get('/students');
-        const studentId = studRes.data[0]?.id;
-        const { data } = await api.post('/submit-quiz', {
+        if (demoMode) {
+            const correct = userAnswers.value.filter((ans: any) => {
+                const q = questions.value.find((q) => q.id === ans.question_id);
+                return q && q.correct_answer === ans.user_answer;
+            }).length;
+            const score = questions.value.length > 0 ? Math.round((correct / questions.value.length) * 100) : 0;
+            result.value = { score, total_questions: questions.value.length, correct_answers: correct };
+            gameState.value = 'result';
+            return;
+        }
+
+        const studentId = getStudentId();
+        if (!studentId) {
+            alert('Silakan login ulang untuk mengirim jawaban.');
+            return;
+        }
+        const { data } = await api.post('/quizzes/submit-quiz', {
             student_id: studentId,
             quiz_id: quizId,
             answers: userAnswers.value
         });
         result.value = data;
         gameState.value = 'result';
+        await logQuizActivity(studentId);
     } catch (e) {
         console.error(e);
         alert("Submission Error");
     } finally {
         loading.value = false;
+    }
+};
+
+const logQuizActivity = async (studentId: string) => {
+    if (!quiz.value?.material_id || !quizStart.value) return;
+    const endedAt = Date.now();
+    const durationSeconds = Math.round((endedAt - quizStart.value) / 1000);
+    if (durationSeconds < 5) return;
+    try {
+        await api.post('/activity', {
+            student_id: studentId,
+            material_id: quiz.value.material_id,
+            started_at: quizStart.value,
+            ended_at: endedAt,
+            duration_seconds: durationSeconds
+        });
+    } catch (e) {
+        console.error("Failed to log quiz activity", e);
     }
 };
 
@@ -476,9 +579,9 @@ const useLifeline = (type: string) => {
         const correct = currentQuestion.value.correct_answer;
         const wrongIndices: number[] = [];
         tempOptions.value.forEach((o, i) => { if (o.text !== correct) wrongIndices.push(i); });
-        
+
         wrongIndices.sort(() => Math.random() - 0.5);
-        
+
         // Helper to safely hide option
         const hideOption = (idx: number | undefined) => {
             if (idx !== undefined && tempOptions.value[idx]) {
@@ -493,24 +596,24 @@ const useLifeline = (type: string) => {
              hideOption(wrongIndices[0]);
         }
         lifelines.value.fiftyFifty = false;
-        
+
     } else if (type === 'phone' && lifelines.value.phone) {
         const correct = currentQuestion.value.correct_answer;
         lifelineTitle.value = "☎️ Phone A Friend";
         // 80% chance friend is right
         const friendSays = Math.random() < 0.8 ? correct : tempOptions.value.find(o => o.text !== correct)?.text;
-        
+
         lifelineMessage.value = `Temanmu berbisik: \n"Aku cukup yakin jawabannya adalah... ${friendSays}"`;
         lifelines.value.phone = false;
 
     } else if (type === 'audience' && lifelines.value.audience) {
         const correct = currentQuestion.value.correct_answer;
         const opts = tempOptions.value.filter(o => !o.hidden);
-        
+
         // Distribute 100%
         let remaining = 100;
         let stats = opts.map(o => ({ text: o.text, pct: 0 }));
-        
+
         // Correct gets majority
         const correctIdx = stats.findIndex(s => s.text === correct);
         if (correctIdx !== -1 && stats[correctIdx]) {
@@ -518,7 +621,7 @@ const useLifeline = (type: string) => {
              stats[correctIdx].pct = val;
              remaining -= val;
         }
-        
+
         // Randomize rest
         stats.forEach((s, i) => {
              if (i !== correctIdx) {
