@@ -123,7 +123,7 @@ const props = defineProps<{
   isOpen: boolean;
 }>();
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'logged-in']);
 
 const router = useRouter();
 const role = ref<'student' | 'admin'>('student');
@@ -159,6 +159,7 @@ const handleLogin = async () => {
           resetDemo();
         }
         localStorage.setItem('student', JSON.stringify(student));
+        emit('logged-in', student);
         emit('close');
         router.push('/student');
       } else {
@@ -178,6 +179,7 @@ const handleLogin = async () => {
           resetDemo();
         }
         localStorage.setItem('admin_user', JSON.stringify({ username: usernameValue, role: 'admin' }));
+        emit('logged-in', { username: usernameValue, role: 'admin' });
         emit('close');
         router.push('/admin/dashboard');
       } else {

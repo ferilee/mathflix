@@ -148,7 +148,7 @@
     </div>
 
      <!-- Login Modal -->
-     <LoginModal :is-open="showLoginModal" @close="showLoginModal = false" />
+     <LoginModal :is-open="showLoginModal" @close="showLoginModal = false" @logged-in="handleLoggedIn" />
 
      <!-- Developer Widget (Modal) -->
      <DeveloperWidget :is-open="showDevInfo" @close="showDevInfo = false" />
@@ -300,6 +300,17 @@ const resetDemoSession = () => {
     student.value = null;
     showMenu.value = false;
     router.push('/login');
+};
+
+const handleLoggedIn = (payload?: any) => {
+    if (payload?.role === 'admin') return;
+    student.value = payload || null;
+    showMenu.value = false;
+    if (!demoMode.value) {
+        checkNotifications();
+        checkAssignmentNotifications();
+        checkDiscussNotifications();
+    }
 };
 
 const initials = computed(() => {

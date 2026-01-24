@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+minio_data/.minio.sys/
 
 # Editor directories and files
 .vscode/*
