@@ -3,7 +3,7 @@ services:
     image: ghcr.io/ferilee/mathflix:latest
     container_name: mathflix-frontend
     ports:
-      - "9001:80"
+      - "9101:80"
     environment:
       - VITE_API_URL=http://api-mathflix:3001
     restart: unless-stopped
