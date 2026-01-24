@@ -5,5 +5,5 @@ services:
     ports:
       - "9001:80"
     environment:
-      - VITE_API_URL=http://api-mathflix:3000
+      - VITE_API_URL=http://api-mathflix:3001
     restart: unless-stopped
