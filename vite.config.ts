@@ -42,7 +42,7 @@ export default defineConfig({
     }),
   ],
   server: {
-    port: 9002,
+    port: 9101,
     strictPort: true,
     proxy: {
       "/students": { target: "http://localhost:3001", changeOrigin: true },
