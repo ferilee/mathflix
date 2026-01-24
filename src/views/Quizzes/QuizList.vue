@@ -173,8 +173,12 @@ const createQuiz = async () => {
       question_count: 10,
       difficulty_mix: { easy: 4, medium: 4, hard: 2 }
     };
-  } catch (e) {
-    alert("Gagal membuat kuis");
+  } catch (e: any) {
+    const status = e?.response?.status;
+    const serverMessage = e?.response?.data?.message || e?.response?.data?.error;
+    const requestUrl = `${e?.config?.baseURL || api.defaults.baseURL || ''}${e?.config?.url || ''}`;
+    alert(`Gagal membuat kuis${status ? ` (${status})` : ''}: ${serverMessage || e?.message || 'Terjadi kesalahan.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
+    console.error('Create quiz error:', e);
   }
 };
 

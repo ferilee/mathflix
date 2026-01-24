@@ -448,11 +448,12 @@ const saveMaterial = async () => {
         if (e.response) {
             const status = e.response.status;
             const serverMessage = e.response.data?.message || e.response.data?.error;
+            const requestUrl = `${e.config?.baseURL || api.defaults.baseURL || ''}${e.config?.url || ''}`;
 
             // More specific error messages based on status
             switch(status) {
                 case 500:
-                    alert(`Server error (500): ${serverMessage || 'Terjadi kesalahan internal server. Silakan hubungi administrator.'}`);
+                    alert(`Server error (500): ${serverMessage || 'Terjadi kesalahan internal server. Silakan hubungi administrator.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
                     break;
                 case 422:
                     alert(`Validasi error: ${serverMessage || 'Data yang dikirim tidak valid.'}`);
@@ -461,7 +462,7 @@ const saveMaterial = async () => {
                     alert(`Permintaan error (400): ${serverMessage || 'Permintaan tidak valid.'}`);
                     break;
                 default:
-                    alert(`${serverMessage || `Gagal menyimpan materi (${status})`}. Silakan coba lagi.`);
+                    alert(`${serverMessage || `Gagal menyimpan materi (${status})`}.${requestUrl ? `\nURL: ${requestUrl}` : ''} Silakan coba lagi.`);
             }
         } else if (e.request) {
             alert('Tidak dapat terhubung ke server. Silakan cek koneksi internet dan pastikan backend berjalan.');
