@@ -33,7 +33,8 @@
         v-model="localValue"
         @blur="validateImageUrl"
         @input="onInput"
-        type="url"
+        type="text"
+        inputmode="url"
         :placeholder="placeholder"
         class="w-full px-3 py-2 border dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
       />
@@ -113,7 +114,7 @@
     <div v-if="localValue" class="mt-4">
       <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">Preview Kartu:</p>
       <div class="w-64 aspect-video rounded-md overflow-hidden relative">
-        <img :src="localValue" alt="Preview" class="w-full h-full object-cover" @error="imageError = true">
+        <img :src="previewSrc" alt="Preview" class="w-full h-full object-cover" @error="imageError = true">
         <div v-if="imageError" class="absolute inset-0 bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 text-xs p-4 text-center">
           ❌ {{ errorText }}
         </div>
@@ -126,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted, computed } from 'vue';
 import api from '../api';
 import { resolveStorageUrl } from '../utils/storage';
 
@@ -164,6 +165,7 @@ const isDragging = ref(false);
 const storageImages = ref<{ key: string; url: string }[]>([]);
 const storageLoading = ref(false);
 const storageError = ref('');
+const previewSrc = computed(() => (localValue.value ? resolveStorageUrl(localValue.value) : ''));
 
 // Sample images for browsing tab
 const sampleImages = [
