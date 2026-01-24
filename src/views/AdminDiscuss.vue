@@ -140,7 +140,7 @@ const filterCategory = ref('Semua');
 const filterTag = ref('');
 
 const timer = ref<any>(null);
-const adminUserId = 'admin';
+const adminUserId = 'ferilee';
 const categories = ['Umum', 'Materi', 'Tugas', 'Kuis'];
 
 const filteredPosts = computed(() => {
@@ -206,7 +206,7 @@ const createPost = async () => {
     if (!newPostContent.value.trim()) return;
     const { data } = await api.post('/discussions', {
         content: newPostContent.value,
-        author_id: 'admin',
+        author_id: 'ferilee',
         author_name: 'Feri Dwi Hermawan',
         author_role: 'guru',
         category: newPostCategory.value,
@@ -244,7 +244,7 @@ const createComment = async (post: any) => {
     if (!post.newComment.trim()) return;
     const { data } = await api.post(`/discussions/${post.id}/comments`, {
         content: post.newComment,
-        author_id: 'admin',
+        author_id: 'ferilee',
         author_name: 'Feri Dwi Hermawan',
         author_role: 'guru'
     });

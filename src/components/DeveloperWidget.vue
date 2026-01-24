@@ -19,44 +19,14 @@
                     <img :src="resolveStorageUrl('/uploads/ferilee.jpg')" alt="Dev" class="w-full h-full rounded-full object-cover">
                  </div>
              </div>
-             
+
              <!-- Info -->
              <h3 class="font-bold text-gray-900 text-2xl mb-1">Feri Dwi Hermawan</h3>
              <p class="text-sm text-indigo-600 font-semibold mb-6 uppercase tracking-wider">Pengajar & Pengembang</p>
-             
+
              <p class="text-gray-500 text-sm mb-6 leading-relaxed">
                Mengembangkan teknologi pembelajaran adaptif untuk memajukan pendidikan vokasi di Indonesia.
              </p>
-
-             <!-- Admin Login Section -->
-             <div class="w-full mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-2 border-indigo-200">
-                <h4 class="font-bold text-gray-800 text-sm mb-3 flex items-center justify-center gap-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                   Akses Admin
-                </h4>
-                <form @submit.prevent="handleAdminLogin" class="space-y-3">
-                   <input 
-                      v-model="username" 
-                      type="text" 
-                      placeholder="Username"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   />
-                   <input 
-                      v-model="password" 
-                      type="password" 
-                      placeholder="Password"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   />
-                   <button 
-                      type="submit"
-                      :disabled="loading"
-                      class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-lg font-bold hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                   >
-                      {{ loading ? 'Memproses...' : 'Masuk sebagai Admin' }}
-                   </button>
-                   <p v-if="error" class="text-red-500 text-xs">{{ error }}</p>
-                </form>
-             </div>
 
              <!-- Contacts -->
              <div class="space-y-3 w-full">
@@ -78,8 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { resolveStorageUrl } from '../utils/storage';
 
 defineProps<{
@@ -88,39 +56,6 @@ defineProps<{
 
 const emit = defineEmits(['close']);
 
-const router = useRouter();
-const username = ref('ferilee');
-const password = ref('F3r!-lee');
-const loading = ref(false);
-const error = ref('');
-
-const handleAdminLogin = async () => {
-   loading.value = true;
-   error.value = '';
-   
-   // Simulate a small delay for better UX
-   await new Promise(resolve => setTimeout(resolve, 500));
-   
-   // Check hardcoded credentials
-   if (username.value === 'ferilee' && password.value === 'F3r!-lee') {
-      // Store admin session
-      localStorage.setItem('admin', JSON.stringify({
-         username: username.value,
-         role: 'admin',
-         loginTime: new Date().toISOString()
-      }));
-      
-      // Close modal
-      emit('close');
-      
-      // Navigate to admin dashboard
-      router.push('/admin/dashboard');
-   } else {
-      error.value = 'Username atau password salah!';
-   }
-   
-   loading.value = false;
-};
 </script>
 
 <style scoped>

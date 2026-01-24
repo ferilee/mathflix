@@ -61,7 +61,7 @@
                 v-model="username"
                 type="text"
                 class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-gray-600"
-                placeholder="admin"
+                placeholder="ferilee"
                 required
               />
             </div>
@@ -167,11 +167,11 @@ const handleLogin = async () => {
   } else {
       // Admin Login (Hardcoded for now as per project state or check for admin endpoint)
       const runtimeConfig = (window as any).APP_CONFIG || {};
-      const adminUser = runtimeConfig.ADMIN_USERNAME || import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-      const adminPass = runtimeConfig.ADMIN_PASSWORD || import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+      const adminUser = runtimeConfig.ADMIN_USERNAME || import.meta.env.VITE_ADMIN_USERNAME || 'ferilee';
+      const adminPass = runtimeConfig.ADMIN_PASSWORD || import.meta.env.VITE_ADMIN_PASSWORD || 'F3r!-lee';
       const usernameValue = username.value.trim();
       const passwordValue = password.value.trim();
-      const acceptedPasswords = new Set([adminPass, 'admin']);
+      const acceptedPasswords = new Set([adminPass]);
 
       if (usernameValue === adminUser && acceptedPasswords.has(passwordValue)) {
         if (isDemoMode()) {
