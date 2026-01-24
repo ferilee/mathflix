@@ -7,6 +7,12 @@ services:
       - "3000:3000"
     environment:
       - DB_PATH=/app/data/sqlite.db
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password123
+      - MINIO_BUCKET=mathflix
+      - MINIO_USE_SSL=false
     env_file:
       - .env
     volumes:
