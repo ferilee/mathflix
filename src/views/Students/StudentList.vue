@@ -3,7 +3,7 @@
     <div class="mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-gray-700">
       <div>
          <h2 class="text-lg font-bold text-gray-800 dark:text-white">Tambah Siswa</h2>
-         <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Kelas, Jurusan)</p>
+         <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Kelas, Jurusan, Sekolah)</p>
       </div>
       <div class="flex gap-4">
           <!-- CSV Import trigger -->
@@ -26,6 +26,7 @@
       <form @submit.prevent="saveStudent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FloatingInput v-model="form.nisn" label="ID (NISN)" id="s_nisn" required />
         <FloatingInput v-model="form.full_name" label="Nama Siswa" id="s_name" required />
+        <FloatingInput v-model="form.school" label="Sekolah" id="s_school" required />
 
         <div class="relative z-0 w-full mb-6 group">
             <select v-model="form.major" id="s_major" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
@@ -44,7 +45,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-4">
         <div class="md:col-span-2">
             <input
               v-model="searchQuery"
@@ -58,6 +59,14 @@
                 <option value="">Semua Jurusan</option>
                 <option v-for="major in MAJOR_OPTIONS" :key="major.value" :value="major.value">{{ major.label }}</option>
             </select>
+        </div>
+        <div>
+            <input
+              v-model="filterSchool"
+              type="text"
+              placeholder="Sekolah..."
+              class="w-full border p-2 rounded bg-gray-50 dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+            />
         </div>
         <div>
             <select v-model="filterGrade" class="w-full border p-2 rounded bg-gray-50 dark:bg-slate-700 dark:border-gray-600 dark:text-white">
@@ -86,6 +95,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID (NISN)</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama Siswa</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jurusan</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Sekolah</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kelas</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktivitas Terakhir</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
@@ -103,6 +113,7 @@
                     'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': student.major === 'Multimedia'
                 }">{{ student.major }}</span>
             </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ student.school || '-' }}</td>
             <td class="px-6 py-4 whitespace-nowrap">{{ student.grade_level }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
               <div v-if="activityByStudentId[student.id]">
@@ -125,7 +136,7 @@
             </td>
           </tr>
           <tr v-if="students.length === 0">
-            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data (Cek filter anda).</td>
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data (Cek filter anda).</td>
           </tr>
         </tbody>
       </table>
@@ -179,6 +190,7 @@ interface Student {
   full_name: string;
   major: string;
   grade_level: number;
+  school?: string;
 }
 
 const students = ref<Student[]>([]);
@@ -187,6 +199,7 @@ const showForm = ref(false);
 const form = ref({
   nisn: '',
   full_name: '',
+  school: '',
   major: '',
   grade_level: ''
 });
@@ -194,6 +207,7 @@ const form = ref({
 // Filters & Pagination
 const searchQuery = ref('');
 const filterMajor = ref('');
+const filterSchool = ref('');
 const filterGrade = ref('');
 const currentPage = ref(1);
 const totalStudents = ref(0);
@@ -208,6 +222,7 @@ const fetchStudents = async () => {
             limit: itemsPerPage.value,
             search: searchQuery.value,
             major: filterMajor.value,
+            school: filterSchool.value,
             grade: filterGrade.value
         }
     });
@@ -247,7 +262,7 @@ const formatDuration = (seconds?: number | null) => {
 };
 
 // Reset to page 1 on filter change
-watch([searchQuery, filterMajor, filterGrade], () => {
+watch([searchQuery, filterMajor, filterSchool, filterGrade], () => {
     currentPage.value = 1;
     fetchStudents();
 });
@@ -259,7 +274,7 @@ const saveStudent = async () => {
     await api.post('/students', form.value);
     await fetchStudents();
     showForm.value = false;
-    form.value = { nisn: '', full_name: '', major: '', grade_level: '' };
+    form.value = { nisn: '', full_name: '', school: '', major: '', grade_level: '' };
   } catch (e: any) {
     console.error("Gagal menyimpan siswa", e);
     const msg = e.response?.data?.message || e.message || "Gagal menyimpan siswa";
@@ -280,6 +295,7 @@ const deleteStudent = async (id: string) => {
 const handleBulkDelete = async () => {
     const filterText = [
         searchQuery.value ? `Nama/ID: "${searchQuery.value}"` : '',
+        filterSchool.value ? `Sekolah: ${filterSchool.value}` : '',
         filterGrade.value ? `Kelas: ${filterGrade.value}` : '',
         filterMajor.value ? `Jurusan: ${filterMajor.value}` : ''
     ].filter(Boolean).join(', ');
@@ -292,7 +308,8 @@ const handleBulkDelete = async () => {
         const { data } = await api.post('/students/bulk-delete', {
             full_name: searchQuery.value,
             grade_level: filterGrade.value,
-            major: filterMajor.value
+            major: filterMajor.value,
+            school: filterSchool.value
         });
         alert(data.message);
         await fetchStudents();
@@ -331,7 +348,7 @@ const processCSV = async (csvText: string) => {
 
     // Header Detection: Skip if first line contains any of these keywords
     let startIndex = 0;
-    const headerKeywords = ['id', 'nama', 'nisn', 'kelas', 'jurusan', 'grade', 'major'];
+    const headerKeywords = ['id', 'nama', 'nisn', 'kelas', 'jurusan', 'grade', 'major', 'sekolah', 'school'];
     if (headerKeywords.some(key => firstLine.toLowerCase().includes(key))) {
         startIndex = 1;
     }
@@ -349,6 +366,7 @@ const processCSV = async (csvText: string) => {
                     name: cols[1]?.trim() || '',
                     grade: Number(grade),
                     major: cols[3]?.trim() || '',
+                    school: cols[4]?.trim() || '',
                 });
             }
         }
@@ -361,7 +379,7 @@ const processCSV = async (csvText: string) => {
             fetchStudents();
         } catch (e: any) {
             const errorMsg = e.response?.data?.error || 'Gagal import CSV.';
-            alert(`${errorMsg}\nPastikan format: ID, Nama Siswa, Kelas, Jurusan`);
+            alert(`${errorMsg}\nPastikan format: ID, Nama Siswa, Kelas, Jurusan, Sekolah`);
             console.error(e);
         }
     } else {
