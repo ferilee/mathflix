@@ -5,12 +5,20 @@
          <h2 class="text-lg font-bold text-gray-800 dark:text-white">Tambah Siswa</h2>
          <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Kelas, Jurusan, Sekolah)</p>
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 items-center">
           <!-- CSV Import trigger -->
           <label class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold flex items-center gap-2 shadow transition">
              <span>📂 Import CSV</span>
              <input type="file" @change="handleFileUpload" accept=".csv" class="hidden">
           </label>
+          <a
+            href="https://docs.google.com/spreadsheets/d/1ra9EupqIgHOiRMfRL-OtsmrDrx2hwmcyryBvV1kWn1c/edit?usp=sharing"
+            target="_blank"
+            rel="noopener"
+            class="text-sm text-indigo-600 dark:text-indigo-300 font-semibold hover:underline"
+          >
+            Unduh Template CSV
+          </a>
           <button
             @click="showForm = !showForm"
             class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-bold shadow transition"
@@ -113,7 +121,7 @@
                     'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': student.major === 'Multimedia'
                 }">{{ student.major }}</span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ student.school || '-' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ student.school || 'Unknown' }}</td>
             <td class="px-6 py-4 whitespace-nowrap">{{ student.grade_level }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
               <div v-if="activityByStudentId[student.id]">
