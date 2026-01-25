@@ -90,45 +90,7 @@
                   Nomor Induk (NIP)
                 </label>
               </div>
-              <p class="text-[10px] text-gray-500 mt-2">Contoh: 1987xxxxxx. Harus sudah terdaftar admin.</p>
-            </div>
-            <div>
-              <div class="relative">
-                <input
-                  id="full_name"
-                  v-model="fullName"
-                  type="text"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Nama Lengkap"
-                  required
-                />
-                <label
-                  for="full_name"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Nama Lengkap
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Gunakan nama yang terdaftar di sistem.</p>
-            </div>
-            <div>
-              <div class="relative">
-                <input
-                  id="school"
-                  v-model="school"
-                  type="text"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Asal Sekolah"
-                  required
-                />
-                <label
-                  for="school"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Asal Sekolah
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Contoh: SMK Negeri 1.</p>
+              <p class="text-[10px] text-gray-500 mt-2">Masukkan NIP yang sudah terdaftar admin.</p>
             </div>
           </div>
 
@@ -204,7 +166,7 @@
             {{ role === 'student'
               ? 'Belum punya NISN? Hubungi Guru Admin.'
               : role === 'guru'
-                ? 'Akses guru menggunakan data profil.'
+                ? 'Akses guru menggunakan NIP terdaftar.'
                 : 'Akses khusus administrator.' }}
           </p>
         </div>
@@ -231,8 +193,6 @@ const router = useRouter();
 const role = ref<'student' | 'guru' | 'admin'>('student');
 const nisn = ref('');
 const nip = ref('');
-const fullName = ref('');
-const school = ref('');
 const username = ref('');
 const password = ref('');
 const loading = ref(false);
@@ -243,8 +203,6 @@ watch(role, () => {
   error.value = '';
   nisn.value = '';
   nip.value = '';
-  fullName.value = '';
-  school.value = '';
   username.value = '';
   password.value = '';
 });
@@ -275,24 +233,13 @@ const handleLogin = async () => {
       }
     } else if (role.value === 'guru') {
       const nipValue = nip.value.trim();
-      const nameValue = fullName.value.trim();
-      const schoolValue = school.value.trim();
 
-      if (!nipValue || !nameValue || !schoolValue) {
-        error.value = 'Lengkapi NIP, nama lengkap, dan asal sekolah.';
+      if (!nipValue) {
+        error.value = 'Lengkapi NIP.';
       } else {
         const teacherAccount = await findTeacherByNip(nipValue);
         if (!teacherAccount) {
           error.value = 'NIP belum terdaftar. Hubungi admin untuk pendaftaran guru.';
-          return;
-        }
-        const normalizedName = nameValue.toLowerCase();
-        const normalizedSchool = schoolValue.toLowerCase();
-        if (
-          teacherAccount.full_name.toLowerCase() !== normalizedName ||
-          teacherAccount.school.toLowerCase() !== normalizedSchool
-        ) {
-          error.value = 'Nama atau sekolah tidak sesuai data admin.';
           return;
         }
         if (isDemoMode()) {
