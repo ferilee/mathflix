@@ -67,6 +67,38 @@
           Audit Log
         </router-link>
       </nav>
+      <div v-if="isGuru" class="px-4 pt-4 text-xs text-slate-400">
+        <div class="border border-slate-700 rounded-lg p-3 bg-slate-900/40">
+          <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-3">Info Pengembang</div>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-700">
+              <img :src="resolveStorageUrl('/uploads/ferilee.jpg')" alt="Developer" class="w-full h-full object-cover" />
+            </div>
+            <div>
+              <div class="text-sm text-slate-200 font-semibold">Feri Dwi Hermawan</div>
+              <div class="text-[11px] text-slate-400">Pengajar & Pengembang Mathflix</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              href="https://t.me/ferilee"
+              target="_blank"
+              rel="noopener"
+              class="flex-1 text-center text-[11px] font-semibold py-1.5 rounded bg-blue-600 text-white hover:bg-blue-500 transition"
+            >
+              Telegram
+            </a>
+            <a
+              href="https://wa.me/6285174244128"
+              target="_blank"
+              rel="noopener"
+              class="flex-1 text-center text-[11px] font-semibold py-1.5 rounded bg-emerald-500 text-white hover:bg-emerald-400 transition"
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
       <div class="p-4 border-t border-slate-700 text-sm text-slate-400">
         V 1.0.0
       </div>
@@ -131,25 +163,37 @@
       </button>
     </div>
 
-        <!-- Bottom Navigation (Mobile Only) -->
+    <!-- Bottom Navigation (Mobile Only) -->
     <div class="md:hidden fixed bottom-0 w-full bg-slate-900 border-t border-slate-700 flex justify-between p-2 z-50 text-xs shadow-lg">
       <template v-if="isGuru">
-        <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+        <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
           <span>Info</span>
         </router-link>
-        <router-link to="/admin/assignments" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+        <router-link to="/admin/assignments" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
           <span>Tugas</span>
         </router-link>
-        <router-link to="/admin/materials" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+        <router-link to="/admin/materials" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
           <span>Materi</span>
         </router-link>
-        <router-link to="/admin/quizzes" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+        <router-link to="/admin/quizzes" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
           <span>Kuis</span>
         </router-link>
+        <button
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5"
+          @click="showDevInfo = true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 4h18v12H3z"></path>
+            <path d="M7 20h10"></path>
+            <path d="M9 16v4"></path>
+            <path d="M15 16v4"></path>
+          </svg>
+          <span>Dev</span>
+        </button>
       </template>
       <template v-else>
         <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
@@ -174,6 +218,9 @@
         </router-link>
       </template>
     </div>
+
+    <!-- Developer Widget (Modal) -->
+    <DeveloperWidget :is-open="showDevInfo" @close="showDevInfo = false" />
   </div>
 </template>
 
@@ -181,10 +228,13 @@
 import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getStaffDisplayName, getStaffUser } from '../utils/auth';
+import DeveloperWidget from '../components/DeveloperWidget.vue';
+import { resolveStorageUrl } from '../utils/storage';
 
 const route = useRoute();
 const routeName = computed(() => route.meta.title || 'Dashboard');
 const showMenu = ref(false);
+const showDevInfo = ref(false);
 const staffUser = ref(getStaffUser());
 const staffName = computed(() => getStaffDisplayName(staffUser.value));
 const isAdmin = computed(() => staffUser.value?.role === 'admin');
