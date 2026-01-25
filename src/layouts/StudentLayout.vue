@@ -303,7 +303,7 @@ const resetDemoSession = () => {
 };
 
 const handleLoggedIn = (payload?: any) => {
-    if (payload?.role === 'admin') return;
+    if (payload?.role === 'admin' || payload?.role === 'guru') return;
     student.value = payload || null;
     showMenu.value = false;
     if (!demoMode.value) {

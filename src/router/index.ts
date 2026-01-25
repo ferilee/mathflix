@@ -5,6 +5,7 @@ import {
 } from "vue-router";
 import AdminLayout from "../layouts/AdminLayout.vue";
 import Dashboard from "../views/Dashboard.vue";
+import { getStaffUser } from "../utils/auth";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -65,103 +66,121 @@ const routes: Array<RouteRecordRaw> = [
         path: "dashboard",
         name: "Dashboard",
         component: Dashboard,
-        meta: { title: "Dashboard" },
+        meta: { title: "Dashboard", roles: ["admin", "guru"] },
       },
       {
         path: "students",
         name: "Students",
         component: () => import("../views/Students/StudentList.vue"),
-        meta: { title: "Manajemen Siswa" },
+        meta: { title: "Manajemen Siswa", roles: ["admin"] },
       },
       {
         path: "activity",
         name: "AdminActivity",
         component: () => import("../views/AdminActivity.vue"),
-        meta: { title: "Aktivitas Siswa" },
+        meta: { title: "Aktivitas Siswa", roles: ["admin"] },
       },
       {
         path: "material-analytics",
         name: "MaterialAnalytics",
         component: () => import("../views/AdminMaterialAnalytics.vue"),
-        meta: { title: "Analitik Materi" },
+        meta: { title: "Analitik Materi", roles: ["admin"] },
       },
       {
         path: "question-bank",
         name: "QuestionBank",
         component: () => import("../views/QuestionBank.vue"),
-        meta: { title: "Bank Soal" },
+        meta: { title: "Bank Soal", roles: ["admin"] },
       },
       {
         path: "materials",
         name: "Materials",
         component: () => import("../views/Materials/MaterialList.vue"),
-        meta: { title: "Manajemen Materi" },
+        meta: { title: "Manajemen Materi", roles: ["admin", "guru"] },
       },
       {
         path: "materials/new",
         name: "CreateMaterial",
         component: () => import("../views/Materials/MaterialForm.vue"),
-        meta: { title: "Tambah Materi" },
+        meta: { title: "Tambah Materi", roles: ["admin", "guru"] },
       },
       {
         path: "materials/:id/edit",
         name: "EditMaterial",
         component: () => import("../views/Materials/MaterialForm.vue"),
-        meta: { title: "Edit Materi" },
+        meta: { title: "Edit Materi", roles: ["admin", "guru"] },
       },
       {
         path: "quizzes",
         name: "Quizzes",
         component: () => import("../views/Quizzes/QuizList.vue"),
-        meta: { title: "Manajemen Kuis" },
+        meta: { title: "Manajemen Kuis", roles: ["admin", "guru"] },
       },
       {
         path: "quizzes/:id",
         name: "QuizDetail",
         component: () => import("../views/Quizzes/QuizDetail.vue"),
-        meta: { title: "Detail Kuis" },
+        meta: { title: "Detail Kuis", roles: ["admin", "guru"] },
       },
       {
         path: "quizzes/:quizId/questions/new",
         name: "AddQuestion",
         component: () => import("../views/Quizzes/QuestionForm.vue"),
-        meta: { title: "Tambah Soal" },
+        meta: { title: "Tambah Soal", roles: ["admin", "guru"] },
       },
       {
         path: "announcements",
         name: "AdminAnnouncements",
         component: () => import("../views/AdminAnnouncements.vue"),
-        meta: { title: "Kelola Pengumuman" },
+        meta: { title: "Kelola Pengumuman", roles: ["admin", "guru"] },
       },
       {
         path: "discuss",
         name: "AdminDiscuss",
         component: () => import("../views/AdminDiscuss.vue"),
-        meta: { title: "Moderasi Diskusi" },
+        meta: { title: "Moderasi Diskusi", roles: ["admin"] },
       },
       {
         path: "assignments",
         name: "AdminAssignments",
         component: () => import("../views/AdminAssignments.vue"),
-        meta: { title: "Manajemen Tugas" },
+        meta: { title: "Manajemen Tugas", roles: ["admin", "guru"] },
       },
       {
         path: "assignments/:id",
         name: "AdminAssignmentDetail",
         component: () => import("../views/AdminAssignmentDetail.vue"),
-        meta: { title: "Detail Pengumpulan" },
+        meta: { title: "Detail Pengumpulan", roles: ["admin", "guru"] },
       },
       {
         path: "reflections",
         name: "AdminReflections",
         component: () => import("../views/AdminReflections.vue"),
-        meta: { title: "Jurnal Siswa" },
+        meta: { title: "Jurnal Siswa", roles: ["admin"] },
       },
       {
         path: "grading",
         name: "AdminGrading",
         component: () => import("../views/AdminGrading.vue"),
-        meta: { title: "Rekap Penilaian" },
+        meta: { title: "Rekap Penilaian", roles: ["admin"] },
+      },
+      {
+        path: "roles",
+        name: "AdminRoles",
+        component: () => import("../views/AdminRoles.vue"),
+        meta: { title: "Role & Permissions", roles: ["admin"] },
+      },
+      {
+        path: "teachers",
+        name: "AdminTeachers",
+        component: () => import("../views/AdminTeachers.vue"),
+        meta: { title: "Manajemen Guru", roles: ["admin"] },
+      },
+      {
+        path: "audit-log",
+        name: "AdminAuditLog",
+        component: () => import("../views/AdminAuditLog.vue"),
+        meta: { title: "Audit Log", roles: ["admin"] },
       },
     ],
   },
@@ -170,6 +189,19 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to) => {
+  if (!to.path.startsWith("/admin")) return true;
+  const staffUser = getStaffUser();
+  if (!staffUser) {
+    return { path: "/login", query: { redirect: to.fullPath } };
+  }
+  const allowedRoles = to.meta.roles as string[] | undefined;
+  if (allowedRoles && !allowedRoles.includes(staffUser.role)) {
+    return { path: "/admin/dashboard" };
+  }
+  return true;
 });
 
 export default router;

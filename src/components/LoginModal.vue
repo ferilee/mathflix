@@ -31,49 +31,145 @@
             Siswa
           </button>
           <button
+            @click="role = 'guru'"
+            :class="[
+              'flex-1 py-2 text-sm font-bold rounded-md transition-all',
+              role === 'guru' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
+            ]"
+          >
+            Guru
+          </button>
+          <button
             @click="role = 'admin'"
             :class="[
               'flex-1 py-2 text-sm font-bold rounded-md transition-all',
               role === 'admin' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
             ]"
           >
-            Guru / Admin
+            Admin
           </button>
         </div>
 
         <!-- Form -->
         <form @submit.prevent="handleLogin" class="px-8 pb-8 space-y-4">
           <div v-if="role === 'student'">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">NISN</label>
-            <input
-              v-model="nisn"
-              type="text"
-              class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-gray-600"
-              placeholder="Masukkan NISN Anda"
-              required
-            />
+            <div class="relative">
+              <input
+                id="nisn"
+                v-model="nisn"
+                type="text"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="NISN"
+                required
+              />
+              <label
+                for="nisn"
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                NISN
+              </label>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-2">Gunakan NISN resmi siswa untuk masuk.</p>
+          </div>
+
+          <div v-else-if="role === 'guru'" class="space-y-4">
+            <div>
+              <div class="relative">
+                <input
+                  id="nip"
+                  v-model="nip"
+                  type="text"
+                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                  placeholder="Nomor Induk (NIP)"
+                  required
+                />
+                <label
+                  for="nip"
+                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+                >
+                  Nomor Induk (NIP)
+                </label>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2">Contoh: 1987xxxxxx. Harus sudah terdaftar admin.</p>
+            </div>
+            <div>
+              <div class="relative">
+                <input
+                  id="full_name"
+                  v-model="fullName"
+                  type="text"
+                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                  placeholder="Nama Lengkap"
+                  required
+                />
+                <label
+                  for="full_name"
+                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+                >
+                  Nama Lengkap
+                </label>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2">Gunakan nama yang terdaftar di sistem.</p>
+            </div>
+            <div>
+              <div class="relative">
+                <input
+                  id="school"
+                  v-model="school"
+                  type="text"
+                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                  placeholder="Asal Sekolah"
+                  required
+                />
+                <label
+                  for="school"
+                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+                >
+                  Asal Sekolah
+                </label>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2">Contoh: SMK Negeri 1.</p>
+            </div>
           </div>
 
           <div v-else class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Username / Email</label>
-              <input
-                v-model="username"
-                type="text"
-                class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-gray-600"
-                placeholder="ferilee"
-                required
-              />
+              <div class="relative">
+                <input
+                  id="admin_username"
+                  v-model="username"
+                  type="text"
+                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                  placeholder="Username / Email"
+                  required
+                />
+                <label
+                  for="admin_username"
+                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+                >
+                  Username / Email
+                </label>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2">Akun admin hanya untuk pengelola sistem.</p>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Password</label>
-              <input
-                v-model="password"
-                type="password"
-                class="w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-gray-600"
-                placeholder="••••••••"
-                required
-              />
+              <div class="relative">
+                <input
+                  id="admin_password"
+                  v-model="password"
+                  type="password"
+                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                  placeholder="Password"
+                  required
+                />
+                <label
+                  for="admin_password"
+                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+                >
+                  Password
+                </label>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-2">Gunakan password admin yang sudah ditentukan.</p>
             </div>
           </div>
 
@@ -105,7 +201,11 @@
 
         <div class="px-8 pb-8 text-center">
           <p class="text-gray-500 text-xs">
-            {{ role === 'student' ? 'Belum punya NISN? Hubungi Guru Admin.' : 'Akses khusus staf dan administrator.' }}
+            {{ role === 'student'
+              ? 'Belum punya NISN? Hubungi Guru Admin.'
+              : role === 'guru'
+                ? 'Akses guru menggunakan data profil.'
+                : 'Akses khusus administrator.' }}
           </p>
         </div>
       </div>
@@ -118,6 +218,8 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
 import { enableDemo, isDemoMode, resetDemo } from '../utils/demo';
+import { setStaffUser } from '../utils/auth';
+import { findTeacherByNip } from '../utils/teachers';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -126,8 +228,11 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'logged-in']);
 
 const router = useRouter();
-const role = ref<'student' | 'admin'>('student');
+const role = ref<'student' | 'guru' | 'admin'>('student');
 const nisn = ref('');
+const nip = ref('');
+const fullName = ref('');
+const school = ref('');
 const username = ref('');
 const password = ref('');
 const loading = ref(false);
@@ -137,6 +242,9 @@ const error = ref('');
 watch(role, () => {
   error.value = '';
   nisn.value = '';
+  nip.value = '';
+  fullName.value = '';
+  school.value = '';
   username.value = '';
   password.value = '';
 });
@@ -165,7 +273,43 @@ const handleLogin = async () => {
       } else {
         error.value = 'NISN tidak ditemukan.';
       }
-  } else {
+    } else if (role.value === 'guru') {
+      const nipValue = nip.value.trim();
+      const nameValue = fullName.value.trim();
+      const schoolValue = school.value.trim();
+
+      if (!nipValue || !nameValue || !schoolValue) {
+        error.value = 'Lengkapi NIP, nama lengkap, dan asal sekolah.';
+      } else {
+        const teacherAccount = await findTeacherByNip(nipValue);
+        if (!teacherAccount) {
+          error.value = 'NIP belum terdaftar. Hubungi admin untuk pendaftaran guru.';
+          return;
+        }
+        const normalizedName = nameValue.toLowerCase();
+        const normalizedSchool = schoolValue.toLowerCase();
+        if (
+          teacherAccount.full_name.toLowerCase() !== normalizedName ||
+          teacherAccount.school.toLowerCase() !== normalizedSchool
+        ) {
+          error.value = 'Nama atau sekolah tidak sesuai data admin.';
+          return;
+        }
+        if (isDemoMode()) {
+          resetDemo();
+        }
+        const guruUser = {
+          role: 'guru' as const,
+          nip: teacherAccount.nip,
+          full_name: teacherAccount.full_name,
+          school: teacherAccount.school,
+        };
+        setStaffUser(guruUser);
+        emit('logged-in', guruUser);
+        emit('close');
+        router.push('/admin/dashboard');
+      }
+    } else {
       // Admin Login (Hardcoded for now as per project state or check for admin endpoint)
       const runtimeConfig = (window as any).APP_CONFIG || {};
       const adminUser = runtimeConfig.ADMIN_USERNAME || import.meta.env.VITE_ADMIN_USERNAME || 'ferilee';
@@ -178,8 +322,9 @@ const handleLogin = async () => {
         if (isDemoMode()) {
           resetDemo();
         }
-        localStorage.setItem('admin_user', JSON.stringify({ username: usernameValue, role: 'admin' }));
-        emit('logged-in', { username: usernameValue, role: 'admin' });
+        const adminUserData = { username: usernameValue, role: 'admin' as const };
+        setStaffUser(adminUserData);
+        emit('logged-in', adminUserData);
         emit('close');
         router.push('/admin/dashboard');
       } else {

@@ -167,6 +167,8 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import MathRenderer from '../components/MathRenderer.vue';
 import api from '../api';
 import { MAJOR_OPTIONS } from '../constants/majors';
+import { addAuditLog } from '../utils/auditLog';
+import { getStaffActorId, getStaffUser } from '../utils/auth';
 
 const students = ref<any[]>([]);
 const assignments = ref<any[]>([]);
@@ -174,6 +176,9 @@ const loading = ref(true);
 const error = ref('');
 const showForm = ref(false);
 const targetMode = ref('class'); // 'class' or 'individual'
+const staffUser = ref(getStaffUser());
+const actorId = ref(getStaffActorId(staffUser.value));
+const isGuru = ref(staffUser.value?.role === 'guru');
 
 const form = reactive({
     title: '',
@@ -219,7 +224,14 @@ const loadData = async () => {
              api.get('/assignments'),
              api.get('/students')
         ]);
-        assignments.value = Array.isArray(aRes.data) ? aRes.data : aRes.data?.data || [];
+        const assignmentRows = Array.isArray(aRes.data) ? aRes.data : aRes.data?.data || [];
+        if (isGuru.value) {
+            assignments.value = assignmentRows.filter(
+                (item: any) => String(item.created_by || '') === String(actorId.value)
+            );
+        } else {
+            assignments.value = assignmentRows;
+        }
         students.value = Array.isArray(sRes.data) ? sRes.data : sRes.data?.data || [];
     } catch (e: any) {
         console.error("Error loading data:", e);
@@ -233,7 +245,7 @@ const createAssignment = async () => {
     if (!form.title || !form.due_date) return alert('Judul dan Tanggal harus diisi!');
 
     // Prepare payload
-    const payload = { ...form, rubric: normalizeRubric() };
+    const payload = { ...form, rubric: normalizeRubric(), created_by: actorId.value };
 
     if (targetMode.value === 'individual') {
         if (form.target_students.length === 0) return alert('Pilih minimal satu siswa untuk tugas individu!');
@@ -243,7 +255,14 @@ const createAssignment = async () => {
     }
 
     try {
-        await api.post('/assignments', payload);
+        const response = await api.post('/assignments', payload);
+        const createdId = response?.data?.id || response?.data?.assignment_id || response?.data?.data?.id;
+        addAuditLog({
+            action: 'create',
+            entity: 'assignment',
+            entity_id: String(createdId || ''),
+            summary: `Tambah tugas: ${payload.title}`,
+        }).catch(() => undefined);
         alert('Tugas berhasil dibuat!');
 
         // Reset form
@@ -267,9 +286,23 @@ const createAssignment = async () => {
 
 const deleteAssignment = async (id: string) => {
     if (!confirm('Apakah anda yakin ingin menghapus tugas ini?')) return;
+    if (isGuru.value) {
+        const item = assignments.value.find((row: any) => String(row.id) === String(id));
+        const isOwned = item?.created_by && String(item.created_by) === String(actorId.value);
+        if (!isOwned) {
+            alert('Anda hanya dapat menghapus tugas milik Anda sendiri.');
+            return;
+        }
+    }
 
     try {
         await api.delete(`/assignments/${id}`);
+        addAuditLog({
+            action: 'delete',
+            entity: 'assignment',
+            entity_id: String(id),
+            summary: 'Hapus tugas',
+        }).catch(() => undefined);
         // Remove from local list to avoid full reload
         assignments.value = assignments.value.filter(a => a.id !== id);
     } catch (e: any) {

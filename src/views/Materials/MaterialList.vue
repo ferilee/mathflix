@@ -38,7 +38,7 @@
                      <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{{ material.teacher_name }}</span>
                  </div>
                  <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">{{ material.description || 'Tidak ada deskripsi singkat.' }}</p>
-                 
+
                  <div class="mt-auto flex justify-end gap-2 pt-4 border-t dark:border-gray-700">
                      <button @click="$router.push(`/admin/materials/`+material.id+`/edit`)" class="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded text-sm font-bold transition">Edit</button>
                      <button @click="deleteMaterial(material.id)" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1.5 rounded text-sm font-bold transition">Hapus</button>
@@ -58,17 +58,26 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '../../api';
 import { MAJOR_OPTIONS } from '../../constants/majors';
+import { addAuditLog } from '../../utils/auditLog';
+import { getStaffActorId, getStaffUser } from '../../utils/auth';
 
 const materials = ref<any[]>([]);
 const search = ref('');
 const filterMajor = ref('');
 const loading = ref(true);
+const staffUser = ref(getStaffUser());
+const actorId = computed(() => getStaffActorId(staffUser.value));
+const isGuru = computed(() => staffUser.value?.role === 'guru');
 
 const filteredMaterials = computed(() => {
     return materials.value.filter(m => {
         const matchTitle = m.title.toLowerCase().includes(search.value.toLowerCase());
         const matchMajor = filterMajor.value ? m.major_target === filterMajor.value : true;
-        return matchTitle && matchMajor;
+        if (!isGuru.value) return matchTitle && matchMajor;
+        const isOwned =
+            String(m.created_by || '') === actorId.value ||
+            (staffUser.value?.full_name && m.teacher_name === staffUser.value.full_name);
+        return matchTitle && matchMajor && isOwned;
     });
 });
 
@@ -85,8 +94,24 @@ const loadMaterials = async () => {
 
 const deleteMaterial = async (id: string) => {
     if (!confirm('Hapus materi ini?')) return;
+    if (isGuru.value) {
+        const item = materials.value.find(m => String(m.id) === String(id));
+        const isOwned =
+            String(item?.created_by || '') === actorId.value ||
+            (staffUser.value?.full_name && item?.teacher_name === staffUser.value.full_name);
+        if (!isOwned) {
+            alert('Anda hanya dapat menghapus materi milik Anda sendiri.');
+            return;
+        }
+    }
     try {
         await api.delete(`/materials/${id}`);
+        addAuditLog({
+            action: 'delete',
+            entity: 'material',
+            entity_id: String(id),
+            summary: 'Hapus materi',
+        }).catch(() => undefined);
         await loadMaterials();
     } catch (e) {
         alert('Gagal menghapus');

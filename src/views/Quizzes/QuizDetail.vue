@@ -146,6 +146,7 @@ import { useRoute } from 'vue-router';
 import MathRenderer from '../../components/MathRenderer.vue';
 import ImageUploader from '../../components/ImageUploader.vue';
 import api from '../../api';
+import { addAuditLog } from '../../utils/auditLog';
 
 import { resolveStorageUrl } from '../../utils/storage';
 
@@ -201,6 +202,12 @@ const fetchData = async () => {
 const saveQuizInfo = async () => {
   try {
     await api.put(`/quizzes/${quizId}`, editForm.value);
+    addAuditLog({
+      action: 'update',
+      entity: 'quiz',
+      entity_id: String(quizId),
+      summary: `Update kuis: ${editForm.value.title}`,
+    }).catch(() => undefined);
     editMode.value = false;
     await fetchData();
   } catch (e) {

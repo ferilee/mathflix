@@ -10,11 +10,11 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           Dashboard
         </router-link>
-        <router-link to="/admin/students" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/students" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           Siswa
         </router-link>
-        <router-link to="/admin/activity" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/activity" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
           Aktivitas
         </router-link>
@@ -26,11 +26,11 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
            Kuis
         </router-link>
-        <router-link to="/admin/question-bank" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/question-bank" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M8 6h8"></path><path d="M8 10h8"></path></svg>
           Bank Soal
         </router-link>
-        <router-link to="/admin/material-analytics" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/material-analytics" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
           Analitik Materi
         </router-link>
@@ -38,7 +38,7 @@
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
            Pengumuman
         </router-link>
-        <router-link to="/admin/discuss" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/discuss" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
            Diskusi
         </router-link>
@@ -46,13 +46,25 @@
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
            Tugas
         </router-link>
-        <router-link to="/admin/reflections" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/reflections" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
            Jurnal Siswa
         </router-link>
-        <router-link to="/admin/grading" class="nav-item">
+        <router-link v-if="isAdmin" to="/admin/grading" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
            Penilaian
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/teachers" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"></circle><path d="M5.5 21a6.5 6.5 0 0 1 13 0"></path></svg>
+          Guru
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/roles" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"></path><path d="M4 20v-1a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v1"></path></svg>
+          Role & Permissions
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/audit-log" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M7 12h8"></path><path d="M7 8h10"></path><path d="M7 16h5"></path></svg>
+          Audit Log
         </router-link>
       </nav>
       <div class="p-4 border-t border-slate-700 text-sm text-slate-400">
@@ -77,7 +89,9 @@
                 <span v-if="isDark" class="text-yellow-400 text-xl">☀</span>
                 <span v-else class="text-gray-500 text-xl">🌙</span>
              </button>
-             <div class="text-sm text-gray-500 dark:text-gray-300">Guru / Pengajar</div>
+             <div class="text-sm text-gray-500 dark:text-gray-300">
+               {{ staffRoleLabel }}{{ staffName ? `: ${staffName}` : '' }}
+             </div>
         </div>
       </header>
       <div class="p-6">
@@ -89,7 +103,7 @@
     <div class="md:hidden fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
       <transition name="fade">
         <div v-if="showMenu" class="flex flex-col gap-2 mb-2">
-          <router-link to="/admin/students" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+          <router-link v-if="isAdmin" to="/admin/students" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span class="text-sm font-bold pr-2">Siswa</span>
           </router-link>
@@ -100,6 +114,14 @@
           <router-link to="/admin/quizzes" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
             <span class="text-sm font-bold pr-2">Kuis</span>
+          </router-link>
+          <router-link v-if="isAdmin" to="/admin/audit-log" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M7 12h8"></path><path d="M7 8h10"></path><path d="M7 16h5"></path></svg>
+            <span class="text-sm font-bold pr-2">Audit</span>
+          </router-link>
+          <router-link v-if="isAdmin" to="/admin/teachers" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"></circle><path d="M5.5 21a6.5 6.5 0 0 1 13 0"></path></svg>
+            <span class="text-sm font-bold pr-2">Guru</span>
           </router-link>
         </div>
       </transition>
@@ -115,7 +137,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span>Info</span>
       </router-link>
-      <router-link to="/admin/discuss" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+      <router-link v-if="isAdmin" to="/admin/discuss" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         <span>Diskusi</span>
       </router-link>
@@ -123,11 +145,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
         <span>Tugas</span>
       </router-link>
-      <router-link to="/admin/reflections" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+      <router-link v-if="isAdmin" to="/admin/reflections" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
         <span>Jurnal</span>
       </router-link>
-      <router-link to="/admin/grading" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+      <router-link v-if="isAdmin" to="/admin/grading" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
         <span>Nilai</span>
       </router-link>
@@ -138,10 +160,19 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { getStaffDisplayName, getStaffUser } from '../utils/auth';
 
 const route = useRoute();
 const routeName = computed(() => route.meta.title || 'Dashboard');
 const showMenu = ref(false);
+const staffUser = ref(getStaffUser());
+const staffName = computed(() => getStaffDisplayName(staffUser.value));
+const isAdmin = computed(() => staffUser.value?.role === 'admin');
+const staffRoleLabel = computed(() => {
+  if (staffUser.value?.role === 'admin') return 'Admin';
+  if (staffUser.value?.role === 'guru') return 'Guru';
+  return 'Pengguna';
+});
 
 const isDark = ref(false);
 

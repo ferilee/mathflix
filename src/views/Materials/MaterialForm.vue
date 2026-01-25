@@ -221,10 +221,14 @@ import FloatingInput from '../../components/FloatingInput.vue';
 import ImageUploader from '../../components/ImageUploader.vue';
 import api from '../../api';
 import { MAJOR_OPTIONS } from '../../constants/majors';
+import { addAuditLog } from '../../utils/auditLog';
+import { getStaffActorId, getStaffUser } from '../../utils/auth';
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = computed(() => !!route.params.id);
+const staffUser = getStaffUser();
+const staffActorId = getStaffActorId(staffUser);
 
 interface MaterialForm {
     title: string;
@@ -319,6 +323,9 @@ const currentStageToolUrl = computed({
 });
 
 onMounted(async () => {
+  if (!isEdit.value && staffUser?.role === 'guru' && staffUser.full_name) {
+    form.value.teacher_name = staffUser.full_name;
+  }
   if (isEdit.value) {
     try {
       const { data } = await api.get(`/materials/${route.params.id}`);
@@ -346,6 +353,15 @@ onMounted(async () => {
 
       // Parse content back to DELTA sections
       parseContent(data.content);
+
+      if (
+        staffUser?.role === 'guru' &&
+        String(data.created_by || '') !== staffActorId &&
+        (!staffUser.full_name || data.teacher_name !== staffUser.full_name)
+      ) {
+        alert('Anda hanya dapat mengedit materi milik Anda sendiri.');
+        router.push('/admin/materials');
+      }
     } catch (e) {
       console.error("Failed to load material", e);
     }
@@ -389,6 +405,7 @@ const saveMaterial = async () => {
 
     // Sanitize the image URL before sending to prevent backend issues
     const sanitizedImageUrl = form.value.image_url ? form.value.image_url.trim() : '';
+    const createdByValue = staffUser ? getStaffActorId(staffUser) : '';
 
     const payload = {
         ...form.value,
@@ -397,6 +414,10 @@ const saveMaterial = async () => {
     };
 
     try {
+        const enforcedTeacherName =
+            staffUser?.role === 'guru' && staffUser.full_name
+                ? staffUser.full_name
+                : payload.teacher_name || 'Guru';
         // Prepare payload ensuring compatibility with backend expectations
         const validatedPayload: any = {
             // Only send the fields that are expected by the backend
@@ -405,7 +426,8 @@ const saveMaterial = async () => {
             content: payload.content || '<p>Content not specified</p>',
             major_target: payload.major_target || 'Semua',
             target_grade: payload.target_grade ?? null,
-            teacher_name: payload.teacher_name || 'Guru',
+            teacher_name: enforcedTeacherName,
+            created_by: createdByValue || undefined,
             is_featured: Boolean(payload.is_featured),
             embedded_tool_url: payload.embedded_tool_url || '',  // Legacy
             tool_type: payload.tool_type || '',  // Legacy
@@ -429,9 +451,22 @@ const saveMaterial = async () => {
         if (isEdit.value) {
             const response = await api.put(`/materials/${route.params.id}`, validatedPayload);
             console.log('Update response:', response.data);
+            addAuditLog({
+                action: 'update',
+                entity: 'material',
+                entity_id: String(route.params.id || ''),
+                summary: `Update materi: ${validatedPayload.title}`,
+            }).catch(() => undefined);
         } else {
             const response = await api.post('/materials', validatedPayload);
+            const createdId = response?.data?.id || response?.data?.material_id || response?.data?.data?.id;
             console.log('Create response:', response.data);
+            addAuditLog({
+                action: 'create',
+                entity: 'material',
+                entity_id: String(createdId || ''),
+                summary: `Tambah materi: ${validatedPayload.title}`,
+            }).catch(() => undefined);
         }
 
         router.push('/admin/materials');

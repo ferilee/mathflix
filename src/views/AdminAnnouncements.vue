@@ -186,6 +186,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../api';
+import { addAuditLog } from '../utils/auditLog';
+import { getStaffActorId, getStaffUser } from '../utils/auth';
 
 const announcements = ref<any[]>([]);
 const form = ref({
@@ -207,11 +209,19 @@ const linkUrl = ref('');
 const activeReadersId = ref<string | null>(null);
 const readers = ref<any[]>([]);
 const readersLoading = ref(false);
+const staffUser = ref(getStaffUser());
+const actorId = ref(getStaffActorId(staffUser.value));
+const isGuru = ref(staffUser.value?.role === 'guru');
 
 const loadData = async () => {
    try {
      const { data } = await api.get('/announcements');
-     announcements.value = data;
+     const rows = Array.isArray(data) ? data : data?.data || [];
+     if (isGuru.value) {
+       announcements.value = rows.filter((item: any) => String(item.created_by || '') === String(actorId.value));
+     } else {
+       announcements.value = rows;
+     }
    } catch (e) {
      console.error("Failed to load announcements", e);
    }
@@ -219,7 +229,15 @@ const loadData = async () => {
 
 const createAnnouncement = async () => {
     try {
-        await api.post('/announcements', form.value);
+        const payload = { ...form.value, created_by: actorId.value };
+        const response = await api.post('/announcements', payload);
+        const createdId = response?.data?.id || response?.data?.announcement_id || response?.data?.data?.id;
+        addAuditLog({
+          action: 'create',
+          entity: 'announcement',
+          entity_id: String(createdId || ''),
+          summary: `Tambah pengumuman: ${payload.title}`,
+        }).catch(() => undefined);
         form.value = {
           title: '',
           content: '',
@@ -242,8 +260,22 @@ const createAnnouncement = async () => {
 
 const deleteAnnouncement = async (id: string) => {
     if (!confirm('Hapus pengumuman ini?')) return;
+    if (isGuru.value) {
+      const item = announcements.value.find((row: any) => String(row.id) === String(id));
+      const isOwned = item?.created_by && String(item.created_by) === String(actorId.value);
+      if (!isOwned) {
+        alert('Anda hanya dapat menghapus pengumuman milik Anda sendiri.');
+        return;
+      }
+    }
     try {
         await api.delete(`/announcements/${id}`);
+        addAuditLog({
+          action: 'delete',
+          entity: 'announcement',
+          entity_id: String(id),
+          summary: 'Hapus pengumuman',
+        }).catch(() => undefined);
         await loadData();
     } catch (e) {
         alert('Gagal menghapus');

@@ -101,6 +101,8 @@
 import { ref, onMounted } from 'vue';
 import api from '../../api';
 import ImageUploader from '../../components/ImageUploader.vue';
+import { addAuditLog } from '../../utils/auditLog';
+import { getStaffActorId, getStaffUser } from '../../utils/auth';
 
 interface Quiz {
   id: string;
@@ -120,6 +122,9 @@ interface Material {
 const quizzes = ref<Quiz[]>([]);
 const materials = ref<Material[]>([]);
 const showForm = ref(false);
+const staffUser = ref(getStaffUser());
+const actorId = ref(getStaffActorId(staffUser.value));
+const isGuru = ref(staffUser.value?.role === 'guru');
 const form = ref({
   title: '',
   material_id: '',
@@ -141,8 +146,18 @@ const fetchData = async () => {
       api.get('/quizzes').catch(() => ({ data: [] })),
       api.get('/materials').catch(() => ({ data: [] }))
     ]);
-    quizzes.value = quizzesRes.data;
-    materials.value = materialsRes.data;
+    const quizData = Array.isArray(quizzesRes.data) ? quizzesRes.data : [];
+    const materialData = Array.isArray(materialsRes.data) ? materialsRes.data : [];
+    if (isGuru.value) {
+      quizzes.value = quizData.filter((q: any) => String(q.created_by || '') === actorId.value);
+      materials.value = materialData.filter((m: any) => {
+        if (String(m.created_by || '') === actorId.value) return true;
+        return staffUser.value?.full_name && m.teacher_name === staffUser.value.full_name;
+      });
+    } else {
+      quizzes.value = quizData;
+      materials.value = materialData;
+    }
   } catch (e) {
     console.error("Gagal mengambil data", e);
   }
@@ -158,9 +173,17 @@ const createQuiz = async () => {
     const payload = {
       ...form.value,
       difficulty_mix: form.value.use_bank ? form.value.difficulty_mix : undefined,
-      question_count: form.value.use_bank ? form.value.question_count : undefined
+      question_count: form.value.use_bank ? form.value.question_count : undefined,
+      created_by: actorId.value
     };
-    await api.post('/quizzes', payload);
+    const response = await api.post('/quizzes', payload);
+    const createdId = response?.data?.id || response?.data?.quiz_id || response?.data?.data?.id;
+    addAuditLog({
+      action: 'create',
+      entity: 'quiz',
+      entity_id: String(createdId || ''),
+      summary: `Tambah kuis: ${payload.title}`,
+    }).catch(() => undefined);
     await fetchData();
     showForm.value = false;
     form.value = {
@@ -184,8 +207,20 @@ const createQuiz = async () => {
 
 const deleteQuiz = async (id: string) => {
   if (!confirm('Yakin ingin menghapus kuis ini?')) return;
+  if (isGuru.value) {
+    if (!quizzes.value.find((q: any) => String(q.id) === String(id))) {
+      alert('Anda hanya dapat menghapus kuis milik Anda sendiri.');
+      return;
+    }
+  }
   try {
     await api.delete(`/quizzes/${id}`);
+    addAuditLog({
+      action: 'delete',
+      entity: 'quiz',
+      entity_id: String(id),
+      summary: 'Hapus kuis',
+    }).catch(() => undefined);
     await fetchData();
   } catch (e) {
     alert("Gagal menghapus kuis");
