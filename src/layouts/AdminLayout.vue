@@ -100,18 +100,18 @@
     </main>
 
     <!-- Expandable Menu (FAB) -->
-    <div class="md:hidden fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
+    <div v-if="!isGuru" class="md:hidden fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
       <transition name="fade">
         <div v-if="showMenu" class="flex flex-col gap-2 mb-2">
           <router-link v-if="isAdmin" to="/admin/students" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span class="text-sm font-bold pr-2">Siswa</span>
           </router-link>
-          <router-link to="/admin/materials" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+          <router-link v-if="!isGuru" to="/admin/materials" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
             <span class="text-sm font-bold pr-2">Materi</span>
           </router-link>
-          <router-link to="/admin/quizzes" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
+          <router-link v-if="!isGuru" to="/admin/quizzes" class="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2" @click="showMenu = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
             <span class="text-sm font-bold pr-2">Kuis</span>
           </router-link>
@@ -131,28 +131,48 @@
       </button>
     </div>
 
-    <!-- Bottom Navigation (Mobile Only) -->
+        <!-- Bottom Navigation (Mobile Only) -->
     <div class="md:hidden fixed bottom-0 w-full bg-slate-900 border-t border-slate-700 flex justify-between p-2 z-50 text-xs shadow-lg">
-      <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        <span>Info</span>
-      </router-link>
-      <router-link v-if="isAdmin" to="/admin/discuss" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span>Diskusi</span>
-      </router-link>
-      <router-link to="/admin/assignments" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-        <span>Tugas</span>
-      </router-link>
-      <router-link v-if="isAdmin" to="/admin/reflections" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-        <span>Jurnal</span>
-      </router-link>
-      <router-link v-if="isAdmin" to="/admin/grading" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-        <span>Nilai</span>
-      </router-link>
+      <template v-if="isGuru">
+        <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Info</span>
+        </router-link>
+        <router-link to="/admin/assignments" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Tugas</span>
+        </router-link>
+        <router-link to="/admin/materials" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Materi</span>
+        </router-link>
+        <router-link to="/admin/quizzes" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/4" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
+          <span>Kuis</span>
+        </router-link>
+      </template>
+      <template v-else>
+        <router-link to="/admin/announcements" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Info</span>
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/discuss" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>Diskusi</span>
+        </router-link>
+        <router-link to="/admin/assignments" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Tugas</span>
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/reflections" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span>Jurnal</span>
+        </router-link>
+        <router-link v-if="isAdmin" to="/admin/grading" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white w-1/5" active-class="text-indigo-400 font-bold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>Nilai</span>
+        </router-link>
+      </template>
     </div>
   </div>
 </template>
@@ -168,6 +188,7 @@ const showMenu = ref(false);
 const staffUser = ref(getStaffUser());
 const staffName = computed(() => getStaffDisplayName(staffUser.value));
 const isAdmin = computed(() => staffUser.value?.role === 'admin');
+const isGuru = computed(() => staffUser.value?.role === 'guru');
 const staffRoleLabel = computed(() => {
   if (staffUser.value?.role === 'admin') return 'Admin';
   if (staffUser.value?.role === 'guru') return 'Guru';
