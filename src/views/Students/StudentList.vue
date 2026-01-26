@@ -1,13 +1,13 @@
 <template>
   <div class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
-    <div class="mb-6 flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-gray-700">
+    <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-gray-700">
       <div>
          <h2 class="text-lg font-bold text-gray-800 dark:text-white">Tambah Siswa</h2>
          <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Kelas, Jurusan, Sekolah)</p>
       </div>
-      <div class="flex gap-4 items-center">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center w-full lg:w-auto">
           <!-- CSV Import trigger -->
-          <label class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold flex items-center gap-2 shadow transition">
+          <label class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold flex items-center justify-center gap-2 shadow transition w-full sm:w-auto">
              <span>📂 Import CSV</span>
              <input type="file" @change="handleFileUpload" accept=".csv" class="hidden">
           </label>
@@ -15,13 +15,13 @@
             href="https://docs.google.com/spreadsheets/d/1ra9EupqIgHOiRMfRL-OtsmrDrx2hwmcyryBvV1kWn1c/edit?usp=sharing"
             target="_blank"
             rel="noopener"
-            class="text-sm text-indigo-600 dark:text-indigo-300 font-semibold hover:underline"
+            class="text-sm text-indigo-600 dark:text-indigo-300 font-semibold hover:underline w-full sm:w-auto text-center sm:text-left"
           >
             Unduh Template CSV
           </a>
           <button
             @click="showForm = !showForm"
-            class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-bold shadow transition"
+            class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 font-bold shadow transition w-full sm:w-auto"
           >
             {{ showForm ? 'Batal' : 'Manual Input' }}
           </button>

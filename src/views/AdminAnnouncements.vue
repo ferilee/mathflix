@@ -103,8 +103,8 @@
     </div>
 
     <!-- List -->
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 transition-colors overflow-hidden">
-       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 transition-colors overflow-x-auto">
+       <table class="min-w-[720px] divide-y divide-gray-200 dark:divide-gray-700">
          <thead class="bg-gray-50 dark:bg-slate-700">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Judul</th>

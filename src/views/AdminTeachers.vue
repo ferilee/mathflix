@@ -86,12 +86,12 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 rounded shadow overflow-hidden transition-colors">
+    <div class="bg-white dark:bg-slate-800 rounded shadow overflow-x-auto transition-colors">
       <div class="p-6 flex items-center justify-between">
         <h2 class="text-lg font-bold text-gray-800 dark:text-white">Daftar Guru</h2>
         <button @click="refresh" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Muat Ulang</button>
       </div>
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+      <table class="min-w-[900px] divide-y divide-gray-200 dark:divide-gray-700 text-sm">
         <thead class="bg-gray-50 dark:bg-slate-700">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider">NIP</th>
