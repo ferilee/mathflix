@@ -130,6 +130,7 @@
 import { ref, watch, nextTick, onMounted, computed } from 'vue';
 import api from '../api';
 import { resolveStorageUrl } from '../utils/storage';
+import { useDialog } from '../utils/dialog';
 
 // Props
 interface Props {
@@ -166,6 +167,7 @@ const storageImages = ref<{ key: string; url: string }[]>([]);
 const storageLoading = ref(false);
 const storageError = ref('');
 const previewSrc = computed(() => (localValue.value ? resolveStorageUrl(localValue.value) : ''));
+const dialog = useDialog();
 
 // Sample images for browsing tab
 const sampleImages = [
@@ -238,7 +240,7 @@ const isValidImageUrl = (url: string): boolean => {
 const validateImageUrl = () => {
   if (localValue.value && localValue.value.trim() !== '' && !isValidImageUrl(localValue.value)) {
     nextTick(() => {
-      alert('Format URL gambar tidak valid. Pastikan URL diakhiri dengan ekstensi gambar yang valid (jpg, png, gif, dll.)');
+      void dialog.alert('Format URL gambar tidak valid. Pastikan URL diakhiri dengan ekstensi gambar yang valid (jpg, png, gif, dll.)');
       imageError.value = true;
     });
   } else {
@@ -282,13 +284,13 @@ const processFile = async (file: File) => {
   // Validate file size (5MB max)
   const maxSize = 5 * 1024 * 1024;
   if (file.size > maxSize) {
-    alert('File terlalu besar. Maksimal 5MB.');
+    await dialog.alert('File terlalu besar. Maksimal 5MB.');
     return;
   }
 
   // Validate file type
   if (!file.type.startsWith('image/')) {
-    alert('File harus berupa gambar (JPEG, PNG, GIF, etc.).');
+    await dialog.alert('File harus berupa gambar (JPEG, PNG, GIF, etc.).');
     return;
   }
 
@@ -314,7 +316,7 @@ const processFile = async (file: File) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         localValue.value = e.target?.result as string;
-        alert('Gambar disisipkan langsung (fallback). Server upload gagal.');
+        void dialog.alert('Gambar disisipkan langsung (fallback). Server upload gagal.');
         imageError.value = false;
         activeTab.value = 'url';
       };
@@ -327,7 +329,7 @@ const processFile = async (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       localValue.value = e.target?.result as string;
-      alert('Menggunakan gambar tertanam sebagai fallback karena server upload gagal.');
+      void dialog.alert('Menggunakan gambar tertanam sebagai fallback karena server upload gagal.');
       imageError.value = false;
       activeTab.value = 'url';
     };

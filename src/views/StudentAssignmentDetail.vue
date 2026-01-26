@@ -95,6 +95,7 @@ import { useRoute } from 'vue-router';
 import api from '../api';
 import MathRenderer from '../components/MathRenderer.vue';
 import { isDemoMode, getDemoAssignmentById, getDemoAssignmentSubmission, saveDemoAssignmentSubmission } from '../utils/demo';
+import { useDialog } from '../utils/dialog';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -107,6 +108,7 @@ const isEditingSubmission = ref(false);
 let pollingInterval: any = null;
 const taskRubric = ref<any[]>([]);
 const demoMode = isDemoMode();
+const dialog = useDialog();
 
 const form = reactive({
     url: '',
@@ -188,12 +190,12 @@ const submitTask = async () => {
             headers: { 'X-Student-ID': student.id }
         });
 
-        alert('Tugas berhasil dikirim!');
+        await dialog.alert('Tugas berhasil dikirim!');
         isEditingSubmission.value = false;
         // Reload to show submission state
         loadData();
     } catch (e) {
-        alert('Gagal mengirim tugas. Cek koneksi.');
+        await dialog.alert('Gagal mengirim tugas. Cek koneksi.');
         console.error(e);
     } finally {
         submitting.value = false;

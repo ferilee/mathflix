@@ -92,6 +92,16 @@
               </div>
               <p class="text-[10px] text-gray-500 mt-2">Masukkan NIP yang sudah terdaftar admin.</p>
             </div>
+            <div class="flex items-center justify-between text-xs text-gray-400">
+              <span>Belum punya akun?</span>
+              <button
+                type="button"
+                class="text-red-400 hover:text-red-300 font-semibold"
+                @click="openRegister"
+              >
+                Daftar
+              </button>
+            </div>
           </div>
 
           <div v-else class="space-y-4">
@@ -173,6 +183,85 @@
       </div>
     </div>
   </Transition>
+
+  <Transition name="modal">
+    <div v-if="showRegister" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-gray-900 border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-rose-500"></div>
+        <button
+          @click="closeRegister"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="p-8">
+          <p class="text-xs uppercase tracking-[0.2em] text-red-400">Pendaftaran Guru</p>
+          <h2 class="text-2xl font-bold text-white mt-2">Daftarkan Akun Guru</h2>
+          <p class="text-sm text-gray-400 mt-2">Akun akan aktif setelah dikonfirmasi admin.</p>
+
+          <form @submit.prevent="submitRegister" class="mt-6 space-y-4">
+            <div class="relative">
+              <input
+                v-model="registerForm.nip"
+                type="text"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Nomor Induk (NIP)"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Nomor Induk (NIP)
+              </label>
+            </div>
+            <div class="relative">
+              <input
+                v-model="registerForm.full_name"
+                type="text"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Nama Lengkap"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Nama Lengkap
+              </label>
+            </div>
+            <div class="relative">
+              <input
+                v-model="registerForm.school"
+                type="text"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Asal Sekolah"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Asal Sekolah
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="registerLoading"
+              class="w-full bg-red-600 text-white font-black py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+            >
+              {{ registerLoading ? 'MENGIRIM...' : 'KIRIM PERMINTAAN' }}
+            </button>
+
+            <div v-if="registerError" class="bg-red-900/40 border border-red-500/50 text-red-200 p-3 rounded-xl text-xs text-center">
+              {{ registerError }}
+            </div>
+            <div v-if="registerSuccess" class="bg-emerald-900/40 border border-emerald-500/50 text-emerald-200 p-3 rounded-xl text-xs text-center">
+              {{ registerSuccess }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -182,6 +271,7 @@ import api from '../api';
 import { enableDemo, isDemoMode, resetDemo } from '../utils/demo';
 import { setStaffUser } from '../utils/auth';
 import { findTeacherByNip } from '../utils/teachers';
+import { createTeacherRequest } from '../utils/teacherRequests';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -197,6 +287,15 @@ const username = ref('');
 const password = ref('');
 const loading = ref(false);
 const error = ref('');
+const showRegister = ref(false);
+const registerForm = ref({
+  nip: '',
+  full_name: '',
+  school: '',
+});
+const registerLoading = ref(false);
+const registerError = ref('');
+const registerSuccess = ref('');
 
 // Reset fields when role changes
 watch(role, () => {
@@ -206,6 +305,56 @@ watch(role, () => {
   username.value = '';
   password.value = '';
 });
+
+const openRegister = () => {
+  registerError.value = '';
+  registerSuccess.value = '';
+  registerForm.value = { nip: nip.value.trim(), full_name: '', school: '' };
+  showRegister.value = true;
+};
+
+const closeRegister = () => {
+  showRegister.value = false;
+};
+
+const submitRegister = async () => {
+  registerLoading.value = true;
+  registerError.value = '';
+  registerSuccess.value = '';
+  try {
+    const nipValue = registerForm.value.nip.trim();
+    const fullNameValue = registerForm.value.full_name.trim();
+    const schoolValue = registerForm.value.school.trim();
+
+    if (!nipValue || !fullNameValue || !schoolValue) {
+      registerError.value = 'Semua field wajib diisi.';
+      return;
+    }
+
+    const existing = await findTeacherByNip(nipValue, { status: 'any' });
+    if (existing?.status === 'approved') {
+      registerError.value = 'NIP sudah terdaftar. Silakan login.';
+      return;
+    }
+    if (existing?.status === 'pending') {
+      registerError.value = 'Permintaan dengan NIP ini sudah dikirim.';
+      return;
+    }
+
+    await createTeacherRequest({
+      nip: nipValue,
+      full_name: fullNameValue,
+      school: schoolValue,
+    });
+
+    registerSuccess.value = 'Permintaan terkirim. Tunggu konfirmasi admin.';
+    registerForm.value = { nip: '', full_name: '', school: '' };
+  } catch (e: any) {
+    registerError.value = e?.response?.data?.error || e?.message || 'Gagal mengirim permintaan.';
+  } finally {
+    registerLoading.value = false;
+  }
+};
 
 const handleLogin = async () => {
   loading.value = true;
@@ -237,9 +386,17 @@ const handleLogin = async () => {
       if (!nipValue) {
         error.value = 'Lengkapi NIP.';
       } else {
-        const teacherAccount = await findTeacherByNip(nipValue);
+        const teacherAccount = await findTeacherByNip(nipValue, { status: 'any' });
         if (!teacherAccount) {
           error.value = 'NIP belum terdaftar. Hubungi admin untuk pendaftaran guru.';
+          return;
+        }
+        if (teacherAccount.status === 'pending') {
+          error.value = 'Akun guru masih menunggu konfirmasi admin.';
+          return;
+        }
+        if (teacherAccount.status === 'rejected') {
+          error.value = 'Permintaan guru ditolak. Hubungi admin untuk bantuan.';
           return;
         }
         if (isDemoMode()) {

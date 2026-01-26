@@ -188,6 +188,7 @@ import { ref, onMounted } from 'vue';
 import api from '../api';
 import { addAuditLog } from '../utils/auditLog';
 import { getStaffActorId, getStaffUser } from '../utils/auth';
+import { useDialog } from '../utils/dialog';
 
 const announcements = ref<any[]>([]);
 const form = ref({
@@ -208,6 +209,7 @@ const linkLabel = ref('');
 const linkUrl = ref('');
 const activeReadersId = ref<string | null>(null);
 const readers = ref<any[]>([]);
+const dialog = useDialog();
 const readersLoading = ref(false);
 const staffUser = ref(getStaffUser());
 const actorId = ref(getStaffActorId(staffUser.value));
@@ -252,19 +254,20 @@ const createAnnouncement = async () => {
         linkLabel.value = '';
         linkUrl.value = '';
         await loadData();
-        alert('Pengumuman berhasil dibuat');
+        await dialog.alert('Pengumuman berhasil dibuat');
     } catch (e) {
-        alert('Gagal membuat pengumuman');
+        await dialog.alert('Gagal membuat pengumuman');
     }
 };
 
 const deleteAnnouncement = async (id: string) => {
-    if (!confirm('Hapus pengumuman ini?')) return;
+    const ok = await dialog.confirm('Hapus pengumuman ini?', 'Hapus Pengumuman');
+    if (!ok) return;
     if (isGuru.value) {
       const item = announcements.value.find((row: any) => String(row.id) === String(id));
       const isOwned = item?.created_by && String(item.created_by) === String(actorId.value);
       if (!isOwned) {
-        alert('Anda hanya dapat menghapus pengumuman milik Anda sendiri.');
+        await dialog.alert('Anda hanya dapat menghapus pengumuman milik Anda sendiri.');
         return;
       }
     }
@@ -278,7 +281,7 @@ const deleteAnnouncement = async (id: string) => {
         }).catch(() => undefined);
         await loadData();
     } catch (e) {
-        alert('Gagal menghapus');
+        await dialog.alert('Gagal menghapus');
     }
 };
 
@@ -330,7 +333,7 @@ const handleFileUpload = async (event: Event) => {
         size: file.size,
       });
     } catch (e) {
-      alert(`Gagal upload ${file.name}`);
+      await dialog.alert(`Gagal upload ${file.name}`);
     }
   }
   input.value = '';

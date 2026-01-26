@@ -3,7 +3,7 @@
     <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Tambah Soal Baru</h2>
 
     <form @submit.prevent="saveQuestion" class="space-y-6">
-      
+
       <!-- Question Type -->
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Soal</label>
@@ -20,10 +20,10 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pertanyaan (Teks & LaTeX)</label>
         <div class="h-48 mb-12 bg-white dark:bg-gray-700 rounded text-black dark:text-white">
-           <QuillEditor 
-            v-model:content="form.question_text" 
-            content-type="html" 
-            theme="snow" 
+           <QuillEditor
+            v-model:content="form.question_text"
+            content-type="html"
+            theme="snow"
             toolbar="minimal"
           />
         </div>
@@ -47,16 +47,16 @@
         <div v-if="form.question_type === 'multiple_choice'">
           <div v-for="(_, index) in form.options" :key="index" class="flex items-center space-x-2 mb-2">
             <span class="font-bold w-6">{{ String.fromCharCode(65 + index) }}.</span>
-            <input 
-              v-model="form.options[index]" 
-              type="text" 
+            <input
+              v-model="form.options[index]"
+              type="text"
               required
               class="flex-1 rounded border p-2"
               :placeholder="`Pilihan ${String.fromCharCode(65 + index)}`"
             />
-            <input 
-              type="radio" 
-              :value="form.options[index]" 
+            <input
+              type="radio"
+              :value="form.options[index]"
               v-model="form.correct_answer"
               name="correct_answer_mc"
               required
@@ -69,16 +69,16 @@
         <div v-if="form.question_type === 'multiple_answer'">
           <div v-for="(_, index) in form.options" :key="index" class="flex items-center space-x-2 mb-2">
             <span class="font-bold w-6">{{ String.fromCharCode(65 + index) }}.</span>
-            <input 
-              v-model="form.options[index]" 
-              type="text" 
+            <input
+              v-model="form.options[index]"
+              type="text"
               required
               class="flex-1 rounded border p-2"
               :placeholder="`Pilihan ${String.fromCharCode(65 + index)}`"
             />
-            <input 
-              type="checkbox" 
-              :value="form.options[index]" 
+            <input
+              type="checkbox"
+              :value="form.options[index]"
               v-model="form.correct_answers"
               name="correct_answer_ma"
             />
@@ -105,17 +105,17 @@
          <div v-if="form.question_type === 'matching'">
           <div v-for="(pair, index) in form.matching_pairs" :key="index" class="flex items-center space-x-2 mb-2">
             <span class="font-bold w-6 text-center">{{ index + 1 }}</span>
-            <input 
-              v-model="pair.left" 
-              type="text" 
+            <input
+              v-model="pair.left"
+              type="text"
               required
               class="flex-1 rounded border p-2"
               placeholder="Pertanyaan / Sisi Kiri"
             />
             <span class="text-gray-500 font-bold"> - </span>
-             <input 
-              v-model="pair.right" 
-              type="text" 
+             <input
+              v-model="pair.right"
+              type="text"
               required
               class="flex-1 rounded border p-2"
               placeholder="Jawaban / Sisi Kanan"
@@ -129,9 +129,9 @@
       <!-- Short Answer -->
       <div v-if="form.question_type === 'short_answer'">
         <label class="block text-sm font-medium text-gray-700 mb-1">Kunci Jawaban</label>
-        <input 
-          v-model="form.correct_answer" 
-          type="text" 
+        <input
+          v-model="form.correct_answer"
+          type="text"
           required
           class="w-full rounded border p-2"
           placeholder="Tuliskan jawaban singkat yang benar"
@@ -141,15 +141,15 @@
 
       <!-- Actions -->
       <div class="flex justify-end space-x-4 mt-6">
-        <button 
-          type="button" 
+        <button
+          type="button"
           @click="$router.back()"
           class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
         >
           Batal
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
         >
           Simpan Soal
@@ -165,10 +165,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import MathRenderer from '../../components/MathRenderer.vue';
 import api from '../../api';
+import { useDialog } from '../../utils/dialog';
 
 const route = useRoute();
 const router = useRouter();
 const quizId = route.params.quizId;
+const dialog = useDialog();
 
 interface MatchingPair {
   left: string;
@@ -186,7 +188,7 @@ const form = ref({
 
 
 const resetOptions = () => {
-    // Reset specific fields when type changes if needed, 
+    // Reset specific fields when type changes if needed,
     // but often users might want to keep text.
     form.value.correct_answer = '';
     form.value.correct_answers = [];
@@ -219,7 +221,7 @@ const saveQuestion = async () => {
 
     if (form.value.question_type === 'multiple_choice') {
         if (!form.value.options.includes(form.value.correct_answer)) {
-            alert("Pilih satu jawaban yang benar!");
+            await dialog.alert("Pilih satu jawaban yang benar!");
             return;
         }
         payload.options = form.value.options;
@@ -227,15 +229,15 @@ const saveQuestion = async () => {
 
     } else if (form.value.question_type === 'multiple_answer') {
         if (form.value.correct_answers.length === 0) {
-             alert("Pilih setidaknya satu jawaban yang benar!");
+             await dialog.alert("Pilih setidaknya satu jawaban yang benar!");
              return;
         }
         // Ensure options include correct answers (they should as they are bound)
         payload.options = form.value.options;
         // Use correct_answer field to store JSON string or use a new field if backend supports.
-        // Assuming backend stores `correct_answer` as a string, we might need to JSON stringify 
+        // Assuming backend stores `correct_answer` as a string, we might need to JSON stringify
         // OR the backend might support `correct_answers` array.
-        // Let's assume we store it as a JSON string for simplicity if backend schema is rigid, 
+        // Let's assume we store it as a JSON string for simplicity if backend schema is rigid,
         // OR assume the backend is flexible (NoSQL/JSON column).
         // Based on previous conversations, Drizzle+SQLite JSON support was mentioned.
         // So we can send an array if the API expects it.
@@ -244,10 +246,10 @@ const saveQuestion = async () => {
         // Let's send a specific field if possible, or overload `correct_answer`.
         payload.correct_answer = JSON.stringify(form.value.correct_answers);
         payload.options = form.value.options;
-        
+
     } else if (form.value.question_type === 'true_false') {
         if (!form.value.correct_answer) {
-             alert("Pilih Benar atau Salah!");
+             await dialog.alert("Pilih Benar atau Salah!");
              return;
         }
         payload.options = ['True', 'False'];
@@ -255,7 +257,7 @@ const saveQuestion = async () => {
 
     } else if (form.value.question_type === 'short_answer') {
          if (!form.value.correct_answer) {
-             alert("Isi kunci jawaban!");
+             await dialog.alert("Isi kunci jawaban!");
              return;
         }
         payload.correct_answer = form.value.correct_answer;
@@ -264,7 +266,7 @@ const saveQuestion = async () => {
     } else if (form.value.question_type === 'matching') {
         // Validate pairs
         if (form.value.matching_pairs.some(p => !p.left || !p.right)) {
-            alert("Lengkapi semua pasangan!");
+            await dialog.alert("Lengkapi semua pasangan!");
             return;
         }
         // Store as JSON in options or correct_answer?
@@ -281,7 +283,7 @@ const saveQuestion = async () => {
   } catch (e: any) {
     console.error("Gagal menyimpan soal", e);
     const msg = e.response?.data?.message || e.message || "Gagal menyimpan soal";
-    alert(`Error: ${msg}`);
+    await dialog.alert(`Error: ${msg}`);
   }
 };
 </script>

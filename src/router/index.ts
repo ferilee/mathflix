@@ -72,7 +72,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "students",
         name: "Students",
         component: () => import("../views/Students/StudentList.vue"),
-        meta: { title: "Manajemen Siswa", roles: ["admin"] },
+        meta: { title: "Manajemen Siswa", roles: ["admin", "guru"] },
       },
       {
         path: "activity",
@@ -175,6 +175,12 @@ const routes: Array<RouteRecordRaw> = [
         name: "AdminTeachers",
         component: () => import("../views/AdminTeachers.vue"),
         meta: { title: "Manajemen Guru", roles: ["admin"] },
+      },
+      {
+        path: "settings",
+        name: "AdminSettings",
+        component: () => import("../views/AdminSettings.vue"),
+        meta: { title: "Pengaturan", roles: ["admin"] },
       },
       {
         path: "audit-log",

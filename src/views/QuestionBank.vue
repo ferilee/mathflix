@@ -141,6 +141,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../api';
+import { useDialog } from '../utils/dialog';
 
 interface Material {
   id: string;
@@ -154,6 +155,7 @@ const importMode = ref<'json' | 'csv'>('json');
 const importText = ref('');
 const importError = ref('');
 const importSuccess = ref('');
+const dialog = useDialog();
 const form = ref({
   question_text: '',
   material_id: '',
@@ -210,17 +212,18 @@ const createQuestion = async () => {
         image_url: ''
       };
   } catch (e) {
-    alert('Gagal menyimpan soal.');
+    await dialog.alert('Gagal menyimpan soal.');
   }
 };
 
 const deleteQuestion = async (id: string) => {
-  if (!confirm('Hapus soal ini?')) return;
+  const ok = await dialog.confirm('Hapus soal ini?', 'Hapus Soal');
+  if (!ok) return;
   try {
     await api.delete(`/question-bank/${id}`);
     await fetchData();
   } catch (e) {
-    alert('Gagal menghapus soal.');
+    await dialog.alert('Gagal menghapus soal.');
   }
 };
 

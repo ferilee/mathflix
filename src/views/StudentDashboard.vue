@@ -162,6 +162,7 @@ import api from '../api';
 import { useRouter } from 'vue-router';
 import { resolveStorageUrl } from '../utils/storage';
 import { isDemoMode, getDemoMaterials, getDemoQuizzes, getDemoStudent, getDemoRecommendations } from '../utils/demo';
+import { useDialog } from '../utils/dialog';
 
 const router = useRouter();
 const materials = ref<any[]>([]);
@@ -170,6 +171,7 @@ const featuredMaterial = ref<any>(null);
 const student = ref<any>(null);
 const recommendations = ref<any[]>([]);
 const demoMode = isDemoMode();
+const dialog = useDialog();
 
 
 
@@ -247,9 +249,10 @@ const fetchRecommendations = async () => {
 const addToMyList = (material: any) => {
   const studentData = localStorage.getItem('student');
   if (!studentData) {
-      if (confirm('Anda harus login untuk menyimpan materi. Login sekarang?')) {
-          router.push('/login');
-      }
+      dialog.confirm('Anda harus login untuk menyimpan materi. Login sekarang?', 'Login Diperlukan')
+        .then((ok) => {
+          if (ok) router.push('/login');
+        });
       return;
   }
 
@@ -261,16 +264,16 @@ const addToMyList = (material: any) => {
   const materialId = material.id || material.material_id;
 
   if (!materialId) {
-    alert('Materi tidak valid untuk disimpan.');
+    void dialog.alert('Materi tidak valid untuk disimpan.');
     return;
   }
 
   if (!list.find((m: any) => m.id === materialId)) {
     list.push({ ...material, id: materialId });
     localStorage.setItem(key, JSON.stringify(list));
-    alert('Berhasil ditambahkan ke Daftar Saya!');
+    void dialog.alert('Berhasil ditambahkan ke Daftar Saya!');
   } else {
-    alert('Materi ini sudah ada di Daftar Saya.');
+    void dialog.alert('Materi ini sudah ada di Daftar Saya.');
   }
 };
 

@@ -1,4 +1,4 @@
-import api from '../api';
+import api from "../api";
 
 export interface TeacherAccount {
   id: string;
@@ -9,12 +9,17 @@ export interface TeacherAccount {
 }
 
 export const getTeacherAccounts = async (): Promise<TeacherAccount[]> => {
-  const { data } = await api.get('/teachers');
+  const { data } = await api.get("/teachers");
   return Array.isArray(data) ? data : data?.data || [];
 };
 
-export const findTeacherByNip = async (nip: string): Promise<TeacherAccount | null> => {
-  const { data } = await api.get('/teachers', { params: { nip } });
+export const findTeacherByNip = async (
+  nip: string,
+  options?: { status?: "approved" | "pending" | "rejected" | "any" },
+): Promise<(TeacherAccount & { status?: string }) | null> => {
+  const { data } = await api.get("/teachers", {
+    params: { nip, status: options?.status },
+  });
   const list = Array.isArray(data) ? data : data?.data || [];
   return list[0] || null;
 };
@@ -24,7 +29,7 @@ export const addTeacherAccount = async (input: {
   full_name: string;
   school: string;
 }): Promise<TeacherAccount> => {
-  const { data } = await api.post('/teachers', input);
+  const { data } = await api.post("/teachers", input);
   return data;
 };
 

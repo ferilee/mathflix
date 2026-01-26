@@ -169,6 +169,7 @@ import api from '../api';
 import { MAJOR_OPTIONS } from '../constants/majors';
 import { addAuditLog } from '../utils/auditLog';
 import { getStaffActorId, getStaffUser } from '../utils/auth';
+import { useDialog } from '../utils/dialog';
 
 const students = ref<any[]>([]);
 const assignments = ref<any[]>([]);
@@ -178,6 +179,7 @@ const showForm = ref(false);
 const targetMode = ref('class'); // 'class' or 'individual'
 const staffUser = ref(getStaffUser());
 const actorId = ref(getStaffActorId(staffUser.value));
+const dialog = useDialog();
 const isGuru = ref(staffUser.value?.role === 'guru');
 
 const form = reactive({
@@ -242,13 +244,19 @@ const loadData = async () => {
 };
 
 const createAssignment = async () => {
-    if (!form.title || !form.due_date) return alert('Judul dan Tanggal harus diisi!');
+    if (!form.title || !form.due_date) {
+        await dialog.alert('Judul dan Tanggal harus diisi!');
+        return;
+    }
 
     // Prepare payload
     const payload = { ...form, rubric: normalizeRubric(), created_by: actorId.value };
 
     if (targetMode.value === 'individual') {
-        if (form.target_students.length === 0) return alert('Pilih minimal satu siswa untuk tugas individu!');
+        if (form.target_students.length === 0) {
+            await dialog.alert('Pilih minimal satu siswa untuk tugas individu!');
+            return;
+        }
         // Set Class Filters to Non-Matching to ensure privacy
         payload.target_grade = -1;
         payload.target_major = 'NONE';
@@ -263,7 +271,7 @@ const createAssignment = async () => {
             entity_id: String(createdId || ''),
             summary: `Tambah tugas: ${payload.title}`,
         }).catch(() => undefined);
-        alert('Tugas berhasil dibuat!');
+        await dialog.alert('Tugas berhasil dibuat!');
 
         // Reset form
         form.title = '';
@@ -280,17 +288,18 @@ const createAssignment = async () => {
         console.error(e);
         let msg = e.response?.data?.error || e.message || 'Gagal membuat tugas';
         if (typeof msg === 'object') msg = JSON.stringify(msg);
-        alert('Gagal membuat tugas: ' + msg);
+        await dialog.alert('Gagal membuat tugas: ' + msg);
     }
 };
 
 const deleteAssignment = async (id: string) => {
-    if (!confirm('Apakah anda yakin ingin menghapus tugas ini?')) return;
+    const ok = await dialog.confirm('Apakah anda yakin ingin menghapus tugas ini?', 'Hapus Tugas');
+    if (!ok) return;
     if (isGuru.value) {
         const item = assignments.value.find((row: any) => String(row.id) === String(id));
         const isOwned = item?.created_by && String(item.created_by) === String(actorId.value);
         if (!isOwned) {
-            alert('Anda hanya dapat menghapus tugas milik Anda sendiri.');
+            await dialog.alert('Anda hanya dapat menghapus tugas milik Anda sendiri.');
             return;
         }
     }
@@ -306,7 +315,7 @@ const deleteAssignment = async (id: string) => {
         // Remove from local list to avoid full reload
         assignments.value = assignments.value.filter(a => a.id !== id);
     } catch (e: any) {
-        alert('Gagal menghapus tugas: ' + (e.message || String(e)));
+        await dialog.alert('Gagal menghapus tugas: ' + (e.message || String(e)));
     }
 };
 

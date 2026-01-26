@@ -141,6 +141,7 @@ import { ref, onMounted, onUnmounted, computed, reactive, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../api';
 import MathRenderer from '../components/MathRenderer.vue';
+import { useDialog } from '../utils/dialog';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -152,6 +153,7 @@ let pollingInterval: any = null;
 
 const showModal = ref(false);
 const selectedItem = ref<any>(null);
+const dialog = useDialog();
 const gradeForm = reactive({
     grade: 0,
     feedback: '',
@@ -247,7 +249,7 @@ const saveGrade = async () => {
         await loadData();
 
     } catch (e: any) {
-        alert('Gagal menyimpan nilai');
+        await dialog.alert('Gagal menyimpan nilai');
         console.error(e);
     }
 };

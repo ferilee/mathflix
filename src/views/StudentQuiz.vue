@@ -283,9 +283,11 @@ import MathRenderer from '../components/MathRenderer.vue';
 import api from '../api';
 import { isDemoMode, getDemoQuizById } from '../utils/demo';
 import { resolveStorageUrl } from '../utils/storage';
+import { useDialog } from '../utils/dialog';
 
 const route = useRoute();
 const quizId = route.params.id;
+const dialog = useDialog();
 
 // Helper: Shuffle
 const shuffleArray = (array: any[]) => {
@@ -438,7 +440,7 @@ const submitClassic = async () => {
 
         const studentId = getStudentId();
         if (!studentId) {
-            alert('Silakan login ulang untuk mengirim jawaban.');
+            await dialog.alert('Silakan login ulang untuk mengirim jawaban.');
             return;
         }
 
@@ -450,7 +452,7 @@ const submitClassic = async () => {
         result.value = data;
         await logQuizActivity(studentId);
     } catch (e) {
-        alert("Gagal mengirim jawaban");
+        await dialog.alert("Gagal mengirim jawaban");
     } finally {
         submitting.value = false;
     }
@@ -535,7 +537,7 @@ const submitGame = async () => {
 
         const studentId = getStudentId();
         if (!studentId) {
-            alert('Silakan login ulang untuk mengirim jawaban.');
+            await dialog.alert('Silakan login ulang untuk mengirim jawaban.');
             return;
         }
         const { data } = await api.post('/quizzes/submit-quiz', {
@@ -548,7 +550,7 @@ const submitGame = async () => {
         await logQuizActivity(studentId);
     } catch (e) {
         console.error(e);
-        alert("Submission Error");
+        await dialog.alert("Submission Error");
     } finally {
         loading.value = false;
     }

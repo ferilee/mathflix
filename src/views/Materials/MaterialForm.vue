@@ -223,12 +223,14 @@ import api from '../../api';
 import { MAJOR_OPTIONS } from '../../constants/majors';
 import { addAuditLog } from '../../utils/auditLog';
 import { getStaffActorId, getStaffUser } from '../../utils/auth';
+import { useDialog } from '../../utils/dialog';
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = computed(() => !!route.params.id);
 const staffUser = getStaffUser();
 const staffActorId = getStaffActorId(staffUser);
+const dialog = useDialog();
 
 interface MaterialForm {
     title: string;
@@ -359,7 +361,7 @@ onMounted(async () => {
         String(data.created_by || '') !== staffActorId &&
         (!staffUser.full_name || data.teacher_name !== staffUser.full_name)
       ) {
-        alert('Anda hanya dapat mengedit materi milik Anda sendiri.');
+        await dialog.alert('Anda hanya dapat mengedit materi milik Anda sendiri.');
         router.push('/admin/materials');
       }
     } catch (e) {
@@ -488,21 +490,21 @@ const saveMaterial = async () => {
             // More specific error messages based on status
             switch(status) {
                 case 500:
-                    alert(`Server error (500): ${serverMessage || 'Terjadi kesalahan internal server. Silakan hubungi administrator.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
+                    await dialog.alert(`Server error (500): ${serverMessage || 'Terjadi kesalahan internal server. Silakan hubungi administrator.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
                     break;
                 case 422:
-                    alert(`Validasi error: ${serverMessage || 'Data yang dikirim tidak valid.'}`);
+                    await dialog.alert(`Validasi error: ${serverMessage || 'Data yang dikirim tidak valid.'}`);
                     break;
                 case 400:
-                    alert(`Permintaan error (400): ${serverMessage || 'Permintaan tidak valid.'}`);
+                    await dialog.alert(`Permintaan error (400): ${serverMessage || 'Permintaan tidak valid.'}`);
                     break;
                 default:
-                    alert(`${serverMessage || `Gagal menyimpan materi (${status})`}.${requestUrl ? `\nURL: ${requestUrl}` : ''} Silakan coba lagi.`);
+                    await dialog.alert(`${serverMessage || `Gagal menyimpan materi (${status})`}.${requestUrl ? `\nURL: ${requestUrl}` : ''} Silakan coba lagi.`);
             }
         } else if (e.request) {
-            alert('Tidak dapat terhubung ke server. Silakan cek koneksi internet dan pastikan backend berjalan.');
+            await dialog.alert('Tidak dapat terhubung ke server. Silakan cek koneksi internet dan pastikan backend berjalan.');
         } else {
-            alert('Terjadi kesalahan saat menyimpan materi: ' + e.message);
+            await dialog.alert('Terjadi kesalahan saat menyimpan materi: ' + e.message);
         }
     }
 };

@@ -176,6 +176,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue';
 import FloatingInput from '../components/FloatingInput.vue';
 import FloatingTextarea from '../components/FloatingTextarea.vue';
 import api from '../api';
+import { useDialog } from '../utils/dialog';
 
 const posts = ref<any[]>([]);
 const newPostContent = ref('');
@@ -185,6 +186,7 @@ const filterCategory = ref('Semua');
 const filterTag = ref('');
 const loading = ref(true);
 const student = ref<any>(null);
+const dialog = useDialog();
 
 const timer = ref<any>(null);
 
@@ -293,7 +295,7 @@ const createPost = async () => {
         showEmbedInput.value = false;
 
     } catch (e) {
-        alert('Gagal membuat postingan');
+        await dialog.alert('Gagal membuat postingan');
     }
 };
 
@@ -346,9 +348,9 @@ const createComment = async (post: any) => {
 
     } catch (e: any) {
         if (e.response && e.response.status === 403) {
-             alert('Postingan ini terkunci.');
+             await dialog.alert('Postingan ini terkunci.');
         } else {
-             alert('Gagal mengirim komentar');
+             await dialog.alert('Gagal mengirim komentar');
         }
     }
 };

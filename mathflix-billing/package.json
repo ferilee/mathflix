@@ -1,0 +1,20 @@
+{
+  "name": "mathflix-billing",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "db:push": "bun x drizzle-kit push"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.30.10",
+    "hono": "^4.5.2"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^12.6.2",
+    "drizzle-kit": "^0.21.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -41,10 +41,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDialog } from '../utils/dialog';
 
 const myList = ref<any[]>([]);
 const router = useRouter();
 const student = ref<any>(null);
+const dialog = useDialog();
 
 const getStorageKey = () => {
     const studentData = localStorage.getItem('student');
@@ -84,10 +86,10 @@ const removeFromList = (id: string) => {
     localStorage.setItem(key, JSON.stringify(myList.value));
 };
 
-onMounted(() => {
+onMounted(async () => {
     const key = getStorageKey();
     if (!key) {
-        alert("Silakan login untuk melihat daftar saya.");
+        await dialog.alert("Silakan login untuk melihat daftar saya.");
         router.push('/login');
     } else {
         const savedStudent = localStorage.getItem('student');

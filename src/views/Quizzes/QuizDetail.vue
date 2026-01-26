@@ -147,6 +147,7 @@ import MathRenderer from '../../components/MathRenderer.vue';
 import ImageUploader from '../../components/ImageUploader.vue';
 import api from '../../api';
 import { addAuditLog } from '../../utils/auditLog';
+import { useDialog } from '../../utils/dialog';
 
 import { resolveStorageUrl } from '../../utils/storage';
 
@@ -161,6 +162,7 @@ const editForm = ref({
   passing_score: 0,
   image_url: ''
 });
+const dialog = useDialog();
 
 
 const fetchData = async () => {
@@ -211,20 +213,21 @@ const saveQuizInfo = async () => {
     editMode.value = false;
     await fetchData();
   } catch (e) {
-    alert('Gagal menyimpan perubahan');
+    await dialog.alert('Gagal menyimpan perubahan');
     console.error(e);
   }
 };
 
 const deleteQuestion = async (id: string) => {
-   if (!confirm('Hapus soal ini?')) return;
+   const ok = await dialog.confirm('Hapus soal ini?', 'Hapus Soal');
+   if (!ok) return;
    try {
      // Assumption: DELETE /questions/:id or /quizzes/:quizId/questions/:id
      // Usually REST is DELETE /questions/:id
      await api.delete(`/questions/${id}`);
      await fetchData();
    } catch (e) {
-     alert("Gagal menghapus soal (Mungkin API belum support delete question)");
+     await dialog.alert("Gagal menghapus soal (Mungkin API belum support delete question)");
    }
 };
 

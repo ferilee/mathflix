@@ -65,11 +65,13 @@
 import { ref, reactive, onMounted } from 'vue';
 import api from '../api';
 import { isDemoMode, getDemoReflections, saveDemoReflections } from '../utils/demo';
+import { useDialog } from '../utils/dialog';
 
 const reflections = ref<any[]>([]);
 const loading = ref(true);
 const loadingSubmit = ref(false);
 const demoMode = isDemoMode();
+const dialog = useDialog();
 
 const form = reactive({
     content: '',
@@ -111,7 +113,10 @@ const loadReflections = async () => {
 };
 
 const submitReflection = async () => {
-    if (!form.content.trim()) return alert("Isi jurnal tidak boleh kosong!");
+    if (!form.content.trim()) {
+        await dialog.alert("Isi jurnal tidak boleh kosong!");
+        return;
+    }
 
     if (demoMode) {
         const newItem = {
@@ -147,7 +152,7 @@ const submitReflection = async () => {
 
         if (badgeData.new_badges && badgeData.new_badges.length > 0) {
             const names = badgeData.new_badges.map((b: any) => b.icon + ' ' + b.name).join(', ');
-            alert(`🎉 Selamat! Kamu mendapatkan lencana baru: ${names}`);
+            await dialog.alert(`🎉 Selamat! Kamu mendapatkan lencana baru: ${names}`);
         }
 
         // Reset and Reload
@@ -156,7 +161,7 @@ const submitReflection = async () => {
         form.topic = '';
         await loadReflections();
     } catch (e: any) {
-        alert("Gagal menyimpan jurnal: " + (e.response?.data?.error || e.message));
+        await dialog.alert("Gagal menyimpan jurnal: " + (e.response?.data?.error || e.message));
     } finally {
         loadingSubmit.value = false;
     }

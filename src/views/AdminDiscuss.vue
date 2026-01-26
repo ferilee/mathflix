@@ -131,6 +131,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import api from '../api';
+import { useDialog } from '../utils/dialog';
 
 const posts = ref<any[]>([]);
 const newPostContent = ref('');
@@ -142,6 +143,7 @@ const filterTag = ref('');
 const timer = ref<any>(null);
 const adminUserId = 'ferilee';
 const categories = ['Umum', 'Materi', 'Tugas', 'Kuis'];
+const dialog = useDialog();
 
 const filteredPosts = computed(() => {
     const tagFilter = filterTag.value.trim().toLowerCase();
@@ -264,14 +266,16 @@ const toggleLock = async (post: any) => {
 };
 
 const deletePost = async (id: string) => {
-    if(!confirm('Hapus diskusi ini?')) return;
+    const ok = await dialog.confirm('Hapus diskusi ini?', 'Hapus Diskusi');
+    if (!ok) return;
     // Optimistic
     posts.value = posts.value.filter(p => p.id !== id);
     await api.delete(`/discussions/${id}`);
 };
 
 const deleteComment = async (id: string) => {
-    if(!confirm('Hapus komentar?')) return;
+    const ok = await dialog.confirm('Hapus komentar?', 'Hapus Komentar');
+    if (!ok) return;
     // Hard to do optimistic without parent post ID or deep search, so just reload for delete
     // OR we could scan
     await api.delete(`/discussions/comments/${id}`);

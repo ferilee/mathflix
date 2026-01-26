@@ -46,10 +46,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../api';
+import { useDialog } from '../utils/dialog';
 
 const reflections = ref<any[]>([]);
 const loading = ref(true);
 const error = ref('');
+const dialog = useDialog();
 
 const getMoodEmoji = (mood: string) => {
     switch(mood) {
@@ -71,7 +73,8 @@ const getStudentMeta = (ref: any) => {
 };
 
 const deleteReflection = async (reflectionId: string) => {
-    if (!confirm('Hapus jurnal refleksi ini?')) return;
+    const ok = await dialog.confirm('Hapus jurnal refleksi ini?', 'Hapus Jurnal');
+    if (!ok) return;
     try {
         await api.delete(`/reflections/${reflectionId}`);
         reflections.value = reflections.value.filter((ref) => ref.id !== reflectionId);

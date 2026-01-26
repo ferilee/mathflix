@@ -103,6 +103,7 @@ import api from '../../api';
 import ImageUploader from '../../components/ImageUploader.vue';
 import { addAuditLog } from '../../utils/auditLog';
 import { getStaffActorId, getStaffUser } from '../../utils/auth';
+import { useDialog } from '../../utils/dialog';
 
 interface Quiz {
   id: string;
@@ -125,6 +126,7 @@ const showForm = ref(false);
 const staffUser = ref(getStaffUser());
 const actorId = ref(getStaffActorId(staffUser.value));
 const isGuru = ref(staffUser.value?.role === 'guru');
+const dialog = useDialog();
 const form = ref({
   title: '',
   material_id: '',
@@ -200,16 +202,17 @@ const createQuiz = async () => {
     const status = e?.response?.status;
     const serverMessage = e?.response?.data?.message || e?.response?.data?.error;
     const requestUrl = `${e?.config?.baseURL || api.defaults.baseURL || ''}${e?.config?.url || ''}`;
-    alert(`Gagal membuat kuis${status ? ` (${status})` : ''}: ${serverMessage || e?.message || 'Terjadi kesalahan.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
+    await dialog.alert(`Gagal membuat kuis${status ? ` (${status})` : ''}: ${serverMessage || e?.message || 'Terjadi kesalahan.'}${requestUrl ? `\nURL: ${requestUrl}` : ''}`);
     console.error('Create quiz error:', e);
   }
 };
 
 const deleteQuiz = async (id: string) => {
-  if (!confirm('Yakin ingin menghapus kuis ini?')) return;
+  const ok = await dialog.confirm('Yakin ingin menghapus kuis ini?', 'Hapus Kuis');
+  if (!ok) return;
   if (isGuru.value) {
     if (!quizzes.value.find((q: any) => String(q.id) === String(id))) {
-      alert('Anda hanya dapat menghapus kuis milik Anda sendiri.');
+      await dialog.alert('Anda hanya dapat menghapus kuis milik Anda sendiri.');
       return;
     }
   }
@@ -223,7 +226,7 @@ const deleteQuiz = async (id: string) => {
     }).catch(() => undefined);
     await fetchData();
   } catch (e) {
-    alert("Gagal menghapus kuis");
+    await dialog.alert("Gagal menghapus kuis");
   }
 };
 

@@ -60,6 +60,7 @@ import api from '../../api';
 import { MAJOR_OPTIONS } from '../../constants/majors';
 import { addAuditLog } from '../../utils/auditLog';
 import { getStaffActorId, getStaffUser } from '../../utils/auth';
+import { useDialog } from '../../utils/dialog';
 
 const materials = ref<any[]>([]);
 const search = ref('');
@@ -68,6 +69,7 @@ const loading = ref(true);
 const staffUser = ref(getStaffUser());
 const actorId = computed(() => getStaffActorId(staffUser.value));
 const isGuru = computed(() => staffUser.value?.role === 'guru');
+const dialog = useDialog();
 
 const filteredMaterials = computed(() => {
     return materials.value.filter(m => {
@@ -93,14 +95,15 @@ const loadMaterials = async () => {
 };
 
 const deleteMaterial = async (id: string) => {
-    if (!confirm('Hapus materi ini?')) return;
+    const ok = await dialog.confirm('Hapus materi ini?', 'Hapus Materi');
+    if (!ok) return;
     if (isGuru.value) {
         const item = materials.value.find(m => String(m.id) === String(id));
         const isOwned =
             String(item?.created_by || '') === actorId.value ||
             (staffUser.value?.full_name && item?.teacher_name === staffUser.value.full_name);
         if (!isOwned) {
-            alert('Anda hanya dapat menghapus materi milik Anda sendiri.');
+            await dialog.alert('Anda hanya dapat menghapus materi milik Anda sendiri.');
             return;
         }
     }
@@ -114,7 +117,7 @@ const deleteMaterial = async (id: string) => {
         }).catch(() => undefined);
         await loadMaterials();
     } catch (e) {
-        alert('Gagal menghapus');
+        await dialog.alert('Gagal menghapus');
     }
 };
 
