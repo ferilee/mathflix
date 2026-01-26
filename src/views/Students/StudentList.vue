@@ -428,7 +428,6 @@ import api from '../../api';
 import {
   fetchBillingSummary,
   fetchBillingStatuses,
-  payBilling,
   syncBillingStudents,
   fetchTeacherExemptions,
   fetchBillingSettings
@@ -447,6 +446,8 @@ interface Student {
   created_at?: string;
   teacher_id?: string;
   teacher_name?: string;
+  teacherId?: string;
+  teacherName?: string;
 }
 
 const students = ref<Student[]>([]);
@@ -706,14 +707,16 @@ const fetchTeacherExemptionsForAdmin = async () => {
   try {
     const rows = await fetchTeacherExemptions();
     exemptTeacherIds.value = new Set(rows.map((row: any) => row.teacherId || row.teacher_id).filter(Boolean));
+    const isNonEmptyString = (value: unknown): value is string =>
+      typeof value === 'string' && value.trim().length > 0;
     const explicitNames = rows
       .map((row: any) => row.teacherName || row.teacher_name)
-      .filter(Boolean)
-      .map((name: string) => name.toLowerCase());
+      .filter(isNonEmptyString)
+      .map((name) => name.toLowerCase());
     const derivedNames = rows
       .map((row: any) => teacherNameByNip.value[row.teacherId || row.teacher_id])
-      .filter(Boolean)
-      .map((name: string) => name.toLowerCase());
+      .filter(isNonEmptyString)
+      .map((name) => name.toLowerCase());
     exemptTeacherNames.value = new Set([...explicitNames, ...derivedNames]);
     buildAdminAccessMap();
   } catch (e) {

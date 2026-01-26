@@ -218,7 +218,7 @@
                 <div class="font-semibold text-white">{{ req.full_name }}</div>
                 <div class="text-xs text-slate-400">NIP {{ req.nip }} • {{ req.school }}</div>
                 <div class="text-[10px] text-slate-500 mt-1">
-                  {{ new Date(req.requested_at || req.created_at).toLocaleString() }}
+                  {{ formatRequestTime(req) }}
                 </div>
               </div>
               <div class="flex items-center gap-2">
@@ -258,12 +258,8 @@ import { fetchBillingSummary, fetchTeacherExemptions, fetchBillingPayments } fro
 import { getTeacherAccounts } from '../utils/teachers';
 import { clearStaffUser, getStaffActorId, getStaffUser } from '../utils/auth';
 import { useDialog } from '../utils/dialog';
-import {
-    approveTeacherRequest,
-    fetchPendingTeacherRequests,
-    rejectTeacherRequest,
-    TeacherRequest
-} from '../utils/teacherRequests';
+import { approveTeacherRequest, fetchPendingTeacherRequests, rejectTeacherRequest } from '../utils/teacherRequests';
+import type { TeacherRequest } from '../utils/teacherRequests';
 
 const stats = ref<any>({});
 const loading = ref(true);
@@ -288,6 +284,11 @@ const dialog = useDialog();
 const pendingTeacherRequests = ref<TeacherRequest[]>([]);
 const showPendingRequests = ref(false);
 const guruStudentTotal = ref<number | null>(null);
+const formatRequestTime = (req: TeacherRequest) => {
+    const timestamp = req.requested_at || req.created_at;
+    if (!timestamp) return '-';
+    return new Date(timestamp).toLocaleString();
+};
 
 const totalStudentsForBilling = computed(() => {
     if (isGuru.value) {

@@ -318,13 +318,13 @@ const parseCsvLine = (line: string, delimiter: string) => {
   return result;
 };
 
-const parseCsv = (text: string) => {
+const parseCsv = (text: string): { rows: string[][]; delimiter: string } => {
   const lines = text
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
   if (lines.length === 0) return { rows: [], delimiter: ',' };
-  const delimiter = detectDelimiter(lines[0]);
+  const delimiter = detectDelimiter(lines[0] ?? '');
   const rows = lines.map((line) => parseCsvLine(line, delimiter));
   return { rows, delimiter };
 };
@@ -358,18 +358,18 @@ const handleImportCsv = async () => {
     }
 
     const headerMap: Record<number, 'nip' | 'full_name' | 'school'> = {};
-    const headerRow = rows[0].map((cell) => normalizeCsvHeader(cell));
+    const headerRow = (rows[0] ?? []).map((cell) => normalizeCsvHeader(cell ?? ''));
     headerRow.forEach((value, index) => {
       if (value === 'nip' || value === 'nomorindukpegawai') headerMap[index] = 'nip';
       if (value === 'fullname' || value === 'namalengkap' || value === 'nama') headerMap[index] = 'full_name';
       if (value === 'school' || value === 'sekolah' || value === 'asalsekolah') headerMap[index] = 'school';
     });
     const headerIndexes = {
-      nip: Object.keys(headerMap).find((key) => headerMap[Number(key)] === 'nip'),
-      full_name: Object.keys(headerMap).find((key) => headerMap[Number(key)] === 'full_name'),
-      school: Object.keys(headerMap).find((key) => headerMap[Number(key)] === 'school'),
+      nip: Object.keys(headerMap).map(Number).find((key) => headerMap[key] === 'nip') ?? null,
+      full_name: Object.keys(headerMap).map(Number).find((key) => headerMap[key] === 'full_name') ?? null,
+      school: Object.keys(headerMap).map(Number).find((key) => headerMap[key] === 'school') ?? null,
     };
-    const hasHeader = Boolean(headerIndexes.nip && headerIndexes.full_name && headerIndexes.school);
+    const hasHeader = headerIndexes.nip !== null && headerIndexes.full_name !== null && headerIndexes.school !== null;
 
     const dataRows = hasHeader ? rows.slice(1) : rows;
     if (!dataRows.length) {
@@ -384,9 +384,9 @@ const handleImportCsv = async () => {
 
     dataRows.forEach((row) => {
       const getValue = (index: number) => String(row[index] ?? '').trim();
-      const nip = hasHeader ? getValue(Number(headerIndexes.nip)) : getValue(0);
-      const full_name = hasHeader ? getValue(Number(headerIndexes.full_name)) : getValue(1);
-      const school = hasHeader ? getValue(Number(headerIndexes.school)) : getValue(2);
+      const nip = hasHeader ? getValue(headerIndexes.nip as number) : getValue(0);
+      const full_name = hasHeader ? getValue(headerIndexes.full_name as number) : getValue(1);
+      const school = hasHeader ? getValue(headerIndexes.school as number) : getValue(2);
 
       if (!nip || !full_name || !school) {
         skipped += 1;
