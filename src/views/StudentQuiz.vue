@@ -1,5 +1,44 @@
 <template>
   <div>
+    <!-- Badge Achievement Modal -->
+    <div v-if="showBadgeModal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="confetti-layer">
+          <span
+            v-for="piece in confettiPieces"
+            :key="piece.id"
+            class="confetti-piece"
+            :style="{
+              left: piece.left,
+              width: piece.size,
+              height: piece.size,
+              backgroundColor: piece.color,
+              animationDelay: piece.delay,
+              animationDuration: piece.duration,
+              '--rotate-angle': piece.rotate
+            }"
+          ></span>
+        </div>
+      </div>
+      <div class="relative w-full max-w-md bg-[#141414] border border-yellow-500/60 rounded-2xl p-6 text-center shadow-2xl">
+        <div class="text-5xl mb-3">{{ activeBadge?.icon || '🏅' }}</div>
+        <h3 class="text-2xl font-bold text-yellow-400 mb-2">Pencapaian Baru!</h3>
+        <div class="text-lg font-semibold text-white mb-2">
+          {{ activeBadge?.name || 'Badge Baru' }}
+        </div>
+        <p class="text-sm text-gray-300 mb-6">
+          {{ activeBadge?.description || 'Terus tingkatkan pencapaianmu.' }}
+        </p>
+        <button
+          type="button"
+          class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-full hover:bg-yellow-400 transition"
+          @click="closeBadgeModal"
+        >
+          Lanjut
+        </button>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="loading" class="text-center py-20 text-white">Loading Quiz...</div>
 
@@ -326,6 +365,10 @@ const tempOptions = ref<any[]>([]);
 const lifelineMessage = ref<string | null>(null);
 const lifelineTitle = ref('');
 const showMobileLadder = ref(false);
+const showBadgeModal = ref(false);
+const activeBadge = ref<any | null>(null);
+const pendingBadges = ref<any[]>([]);
+const confettiPieces = ref<Array<{ id: number; left: string; delay: string; duration: string; size: string; color: string; rotate: string }>>([]);
 
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value] || {});
 const currentOptions = computed(() => tempOptions.value);
@@ -344,6 +387,91 @@ const getStudentId = () => {
         return parsed?.id || null;
     } catch {
         return null;
+    }
+};
+
+const buildConfetti = () => {
+    const colors = ['#facc15', '#f97316', '#22c55e', '#38bdf8', '#a855f7', '#ef4444'];
+    confettiPieces.value = Array.from({ length: 36 }, (_, idx) => {
+        const size = 6 + Math.floor(Math.random() * 6);
+        const left = Math.floor(Math.random() * 100);
+        const delay = Math.random() * 0.4;
+        const duration = 1.8 + Math.random() * 1.2;
+        const rotate = `${Math.floor(Math.random() * 360)}deg`;
+        const color = colors[idx % colors.length] || '#facc15';
+        return {
+            id: idx,
+            left: `${left}%`,
+            delay: `${delay}s`,
+            duration: `${duration}s`,
+            size: `${size}px`,
+            color,
+            rotate
+        };
+    });
+};
+
+const playApplause = () => {
+    try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const burst = (time: number, gain: number) => {
+            const bufferSize = ctx.sampleRate * 0.2;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+            }
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(gain, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+            source.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            source.start(time);
+        };
+
+        const now = ctx.currentTime;
+        const pattern = [0, 0.08, 0.16, 0.32, 0.45, 0.6, 0.72];
+        pattern.forEach((offset, i) => burst(now + offset, 0.3 - i * 0.03));
+        setTimeout(() => ctx.close(), 1200);
+    } catch (e) {
+        console.error('Failed to play applause', e);
+    }
+};
+
+const showNextBadge = () => {
+    if (pendingBadges.value.length === 0) return;
+    activeBadge.value = pendingBadges.value.shift() || null;
+    buildConfetti();
+    showBadgeModal.value = true;
+    playApplause();
+};
+
+const closeBadgeModal = () => {
+    showBadgeModal.value = false;
+    activeBadge.value = null;
+    if (pendingBadges.value.length > 0) {
+        setTimeout(showNextBadge, 150);
+    }
+};
+
+const checkNewBadges = async (studentId: string) => {
+    try {
+        const { data } = await api.post('/badges/check', {}, {
+            headers: { 'X-Student-ID': studentId }
+        });
+        const newBadges = Array.isArray(data?.new_badges) ? data.new_badges : [];
+        if (newBadges.length > 0) {
+            pendingBadges.value = [...pendingBadges.value, ...newBadges];
+            if (!showBadgeModal.value) {
+                showNextBadge();
+            }
+        }
+    } catch (e) {
+        console.error('Failed to check badges', e);
     }
 };
 
@@ -451,6 +579,7 @@ const submitClassic = async () => {
         });
         result.value = data;
         await logQuizActivity(studentId);
+        await checkNewBadges(studentId);
     } catch (e) {
         await dialog.alert("Gagal mengirim jawaban");
     } finally {
@@ -548,6 +677,7 @@ const submitGame = async () => {
         result.value = data;
         gameState.value = 'result';
         await logQuizActivity(studentId);
+        await checkNewBadges(studentId);
     } catch (e) {
         console.error(e);
         await dialog.alert("Submission Error");
@@ -667,5 +797,35 @@ const getBoxClass = (opt: any) => {
 <style scoped>
 .millionaire-app {
     /* Scoped styles mainly for Millionaire mode */
+}
+
+.confetti-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -12px;
+    border-radius: 2px;
+    opacity: 0.9;
+    animation-name: confetti-fall;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 1;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-10px) rotate(var(--rotate-angle));
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) rotate(calc(var(--rotate-angle) + 360deg));
+        opacity: 0;
+    }
 }
 </style>

@@ -248,7 +248,7 @@ import { useRouter } from 'vue-router';
 import api from '../api';
 import { fetchBillingSummary, fetchTeacherExemptions, fetchBillingPayments } from '../utils/billing';
 import { getTeacherAccounts } from '../utils/teachers';
-import { clearStaffUser, getStaffActorId, getStaffUser } from '../utils/auth';
+import { getStaffActorId, getStaffUser } from '../utils/auth';
 import { useDialog } from '../utils/dialog';
 import { approveTeacherRequest, fetchPendingTeacherRequests, rejectTeacherRequest } from '../utils/teacherRequests';
 import type { TeacherRequest } from '../utils/teacherRequests';
@@ -634,11 +634,6 @@ const rejectRequest = async (req: TeacherRequest) => {
     await dialog.alert('Permintaan dihapus.', 'Info', 'info');
 };
 
-
-const handleLogout = () => {
-    clearStaffUser();
-    router.push('/login');
-};
 
 onMounted(loadAnalytics);
 onMounted(() => {

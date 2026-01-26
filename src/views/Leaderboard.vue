@@ -40,7 +40,7 @@
        </div>
 
        <div v-if="leaderboard.length === 0" class="p-8 text-center text-gray-500">
-          No records yet. Be the first!
+          Belum ada siswa yang mendapatkan poin.
        </div>
     </div>
   </div>
@@ -48,7 +48,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api from '../api';
 
 const leaderboard = ref<any[]>([]);
 const loading = ref(true);
@@ -62,20 +61,10 @@ const getInitial = (name: string | null | undefined) => {
   return display.charAt(0).toUpperCase();
 };
 
-const fetchLeaderboard = async () => {
-  try {
-    // Try fetching from specific endpoint
-    // If 404, we might need a backup strategy or I'll implement the endpoint.
-    const { data } = await api.get('/leaderboard');
-    leaderboard.value = Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.error("Failed to fetch leaderboard", e);
-    // Fallback: Fetch all results and aggregate manually if API missing (not ideal but safe fallback)
-    // Or just alert. I'll prefer ensuring the endpoint exists in next step.
-  } finally {
-    loading.value = false;
-  }
+const resetLeaderboard = () => {
+  leaderboard.value = [];
+  loading.value = false;
 };
 
-onMounted(fetchLeaderboard);
+onMounted(resetLeaderboard);
 </script>
