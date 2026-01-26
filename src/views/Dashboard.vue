@@ -7,14 +7,6 @@
       </div>
       <div class="flex items-center gap-3">
         <button @click="loadAnalytics" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-bold">Aggregated Real-time</button>
-        <button
-          v-if="isGuru"
-          type="button"
-          class="text-xs font-semibold px-3 py-2 rounded bg-red-500 text-black hover:bg-red-400"
-          @click="handleLogout"
-        >
-          Keluar
-        </button>
       </div>
     </div>
 
