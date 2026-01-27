@@ -1,6 +1,6 @@
 # Mathflix Billing API
 
-Backend billing service (Bun + Hono + Drizzle + SQLite) untuk kuota gratis 5 siswa dan Rp 1.000 per siswa.
+Backend billing service (Bun + Hono + Drizzle + SQLite) untuk skema gratis 1 kelas (maks 30 siswa) dan Rp 49.000 per kelas berikutnya.
 
 ## Setup
 
@@ -23,10 +23,13 @@ Server berjalan di `http://localhost:3000`.
 
 ## Env
 
+- Salin `.env.example` ke `.env` bila perlu.
+
 - `PORT` (default 3000)
 - `DB_URL` (default `./data/billing.db`)
-- `FREE_STUDENT_QUOTA` (default 5)
-- `PRICE_PER_STUDENT` (default 1000)
+- `FREE_CLASS_QUOTA` (default 1)
+- `STUDENTS_PER_CLASS` (default 30)
+- `PRICE_PER_CLASS` (default 49000)
 - `GRACE_DAYS` (default 7)
 - `BILLING_PERIOD_DAYS` (default 30)
 

@@ -123,7 +123,7 @@ The database is auto-managed using Drizzle Kit.
 
 ---
 
-## 4. Billing (Kuota Gratis + Berbayar)
+## 4. Billing (Kuota Kelas + Berbayar)
 
 ### Status Akses Siswa
 Status akses yang digunakan di frontend:
@@ -142,10 +142,12 @@ Contoh response:
 ```json
 {
   "total_students": 18,
-  "free_quota": 5,
+  "free_quota": 30,
+  "free_classes": 1,
   "paid_students": 13,
-  "price_per_student": 1000,
-  "amount_due": 13000,
+  "students_per_class": 30,
+  "price_per_class": 49000,
+  "amount_due": 49000,
   "grace_days": 7,
   "overdue_students": 4,
   "grace_students": 3
@@ -194,13 +196,13 @@ curl -X POST http://localhost:3000/billing/students/sync \
 ```
 
 ### Pay Billing
-Mencatat pembayaran dan mengaktifkan siswa berbayar.
+Mencatat pembayaran dan mengaktifkan siswa berbayar (tagihan per kelas, 30 siswa).
 ```bash
 curl -X POST http://localhost:3000/billing/pay \
   -H "Content-Type: application/json" \
   -d '{
     "teacher_id": "TEACHER_ID",
-    "amount": 13000,
+    "amount": 49000,
     "student_count": 13,
     "student_ids": ["STUDENT_ID_2", "STUDENT_ID_3"]
   }'

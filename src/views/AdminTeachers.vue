@@ -158,6 +158,12 @@
               {{ new Date(teacher.created_at).toLocaleDateString() }}
             </td>
             <td class="px-4 py-3 text-right">
+              <button
+                @click="resetPassword(teacher)"
+                class="text-emerald-600 hover:text-emerald-700"
+              >
+                Reset Password
+              </button>
               <button @click="remove(teacher.id)" class="text-red-600 hover:text-red-700">Hapus</button>
               <button @click="openPayments(teacher)" class="ml-3 text-indigo-600 hover:text-indigo-700">Riwayat</button>
             </td>
@@ -432,6 +438,31 @@ const remove = async (id: string) => {
     await refresh();
   } catch (err: any) {
     await dialog.alert(err?.response?.data?.error || err?.message || 'Gagal menghapus guru.', 'Hapus Guru');
+  }
+};
+
+const resetPassword = async (teacher: any) => {
+  const ok = await dialog.confirm(
+    `Reset password guru ${teacher.full_name}? Sistem akan membuat password sementara.`,
+    'Konfirmasi Reset Password',
+  );
+  if (!ok) return;
+  try {
+    const { data } = await api.post('/auth/guru/reset-password', {
+      nip: teacher.nip,
+    });
+    const tempPassword = data?.temp_password;
+    await dialog.alert(
+      tempPassword
+        ? `Password sementara: ${tempPassword}\\nSimpan sekarang, hanya ditampilkan sekali.`
+        : 'Password guru berhasil direset.',
+      'Reset Password Guru',
+    );
+  } catch (err: any) {
+    await dialog.alert(
+      err?.response?.data?.error || err?.message || 'Gagal reset password guru.',
+      'Reset Password Guru',
+    );
   }
 };
 

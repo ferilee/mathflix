@@ -53,10 +53,10 @@
             <div class="text-xs text-gray-400 mt-1">Siswa aktif merefleksi</div>
         </div>
         <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 border-l-4 border-amber-500 transition-colors backdrop-blur">
-            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Tagihan Siswa Berbayar</h3>
+            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Tagihan Kelas Berbayar</h3>
             <div class="text-3xl font-bold text-gray-800 dark:text-white mt-2">{{ formatRupiah(billingAmount) }}</div>
             <div class="text-xs text-gray-400 mt-1">
-              Gratis {{ freeQuotaDisplay }} siswa, {{ paidStudentCount }} berbayar
+              Gratis {{ freeQuotaDisplay }} siswa ({{ freeClassDisplay }} kelas), {{ paidClassCount }} kelas berbayar
               <span v-if="overdueStudents">• {{ overdueStudents }} tertunda</span>
             </div>
             <button
@@ -74,7 +74,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="font-bold text-lg text-gray-800 dark:text-white">Guru Belum Bayar</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Lebih dari {{ FREE_STUDENT_QUOTA }} siswa terdaftar.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Lebih dari 1 kelas ({{ STUDENTS_PER_CLASS }} siswa) terdaftar.</p>
         </div>
         <router-link to="/admin/students" class="text-indigo-600 dark:text-indigo-400 text-sm hover:underline">Lihat Manajemen Siswa</router-link>
       </div>
@@ -85,7 +85,7 @@
             <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.total }} siswa</div>
           </div>
           <div class="text-sm font-bold text-amber-700 dark:text-amber-300">
-            {{ item.unpaid }} belum bayar
+            {{ item.unpaid }} kelas belum bayar
           </div>
         </div>
       </div>
@@ -259,8 +259,9 @@ const recentActivity = ref<any[]>([]);
 const activityLoading = ref(true);
 const billingSummary = ref<any>(null);
 const billingLoading = ref(false);
-const FREE_STUDENT_QUOTA = 5;
-const PRICE_PER_STUDENT = 1000;
+const FREE_CLASS_QUOTA = 1;
+const STUDENTS_PER_CLASS = 30;
+const PRICE_PER_CLASS = 49000;
 const staffUser = getStaffUser();
 const teacherId = staffUser?.nip || staffUser?.full_name || getStaffActorId(staffUser);
 const teacherName = staffUser?.full_name || staffUser?.nip || '';
@@ -293,12 +294,18 @@ const totalStudentsForBilling = computed(() => {
 });
 
 const freeQuota = computed(() => {
-    return Number(billingSummary.value?.free_quota ?? FREE_STUDENT_QUOTA);
+    return Number(billingSummary.value?.free_quota ?? (FREE_CLASS_QUOTA * STUDENTS_PER_CLASS));
 });
 
 const freeQuotaDisplay = computed(() => {
     if (totalStudentsForBilling.value === 0) return 0;
     return freeQuota.value;
+});
+
+const freeClassDisplay = computed(() => {
+    const override = billingSummary.value?.free_classes;
+    if (override != null) return Number(override);
+    return FREE_CLASS_QUOTA;
 });
 
 const totalStudentsDisplay = computed(() => {
@@ -309,13 +316,14 @@ const totalStudentsDisplay = computed(() => {
     return Number(stats.value?.total_students ?? 0);
 });
 
-const pricePerStudent = computed(() => {
-    return Number(billingSummary.value?.price_per_student ?? PRICE_PER_STUDENT);
+const pricePerClass = computed(() => {
+    return Number(billingSummary.value?.price_per_class ?? PRICE_PER_CLASS);
 });
 
-const paidStudentCount = computed(() => {
+const paidClassCount = computed(() => {
     const total = totalStudentsForBilling.value;
-    return Math.max(0, total - freeQuota.value);
+    const paidStudents = Math.max(0, total - freeQuota.value);
+    return Math.ceil(paidStudents / STUDENTS_PER_CLASS);
 });
 
 const averageScoreDisplay = computed(() => {
@@ -347,7 +355,7 @@ const billingAmount = computed(() => {
     if (!isGuru.value && billingSummary.value?.amount_due != null) {
         return Number(billingSummary.value.amount_due);
     }
-    return paidStudentCount.value * pricePerStudent.value;
+    return paidClassCount.value * pricePerClass.value;
 });
 const overdueStudents = computed(() => (
     totalStudentsForBilling.value === 0 ? 0 : Number(billingSummary.value?.overdue_students ?? 0)
@@ -571,7 +579,7 @@ const loadTeacherBillingSnapshot = async () => {
                 key,
                 name: value.name,
                 total: value.total,
-                unpaid: Math.max(0, value.total - FREE_STUDENT_QUOTA)
+                unpaid: Math.ceil(Math.max(0, value.total - (FREE_CLASS_QUOTA * STUDENTS_PER_CLASS)) / STUDENTS_PER_CLASS)
             }))
             .filter((item) => item.unpaid > 0)
             .sort((a, b) => b.unpaid - a.unpaid || b.total - a.total);

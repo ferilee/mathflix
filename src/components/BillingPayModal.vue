@@ -22,13 +22,17 @@
           <div class="text-lg font-bold text-slate-800 dark:text-white">{{ selectedIds.length }}</div>
         </div>
         <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700">
-          <div class="text-slate-500 dark:text-slate-400">Harga per siswa</div>
-          <div class="text-lg font-bold text-slate-800 dark:text-white">{{ formatRupiah(pricePerStudent) }}</div>
+          <div class="text-slate-500 dark:text-slate-400">Harga per kelas</div>
+          <div class="text-lg font-bold text-slate-800 dark:text-white">{{ formatRupiah(pricePerClass) }}</div>
         </div>
         <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700">
           <div class="text-slate-500 dark:text-slate-400">Total tagihan</div>
           <div class="text-lg font-bold text-slate-800 dark:text-white">{{ formatRupiah(totalAmount) }}</div>
         </div>
+      </div>
+
+      <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+        1 kelas = {{ studentsPerClass }} siswa. Total kelas ditagihkan dihitung otomatis.
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-3 text-xs">
@@ -116,7 +120,8 @@ const props = defineProps<{
   isOpen: boolean;
   students: BillingStudentItem[];
   selectedIds: string[];
-  pricePerStudent: number;
+  pricePerClass: number;
+  studentsPerClass: number;
   isLoading?: boolean;
 }>();
 
@@ -126,7 +131,10 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const totalAmount = computed(() => props.selectedIds.length * props.pricePerStudent);
+const totalAmount = computed(() => {
+  const classCount = Math.ceil(props.selectedIds.length / props.studentsPerClass);
+  return classCount * props.pricePerClass;
+});
 
 const formatRupiah = (value: number) => {
   return new Intl.NumberFormat('id-ID', {

@@ -22,8 +22,9 @@ app.use(
   }),
 );
 
-const FREE_QUOTA = Number(process.env.FREE_STUDENT_QUOTA || 5);
-const PRICE_PER_STUDENT = Number(process.env.PRICE_PER_STUDENT || 1000);
+const FREE_CLASS_QUOTA = Number(process.env.FREE_CLASS_QUOTA || 1);
+const STUDENTS_PER_CLASS = Number(process.env.STUDENTS_PER_CLASS || 30);
+const PRICE_PER_CLASS = Number(process.env.PRICE_PER_CLASS || 49000);
 const GRACE_DAYS = Number(process.env.GRACE_DAYS || 7);
 const BILLING_PERIOD_DAYS = Number(process.env.BILLING_PERIOD_DAYS || 30);
 
@@ -98,7 +99,8 @@ const resolveStudentStatus = (params: {
 }) => {
   const { index, student, billing, now, graceDays } = params;
 
-  if (index < FREE_QUOTA) {
+  const freeStudentQuota = FREE_CLASS_QUOTA * STUDENTS_PER_CLASS;
+  if (index < freeStudentQuota) {
     return {
       status: "free",
       graceUntil: null,
@@ -223,13 +225,18 @@ app.get("/billing/summary", async (c) => {
   ).length;
 
   const dueCount = graceStudents + blockedStudents;
+  const dueClassCount = Math.ceil(dueCount / STUDENTS_PER_CLASS);
 
   return c.json({
     total_students: total,
-    free_quota: exempt ? total : FREE_QUOTA,
+    free_quota: exempt ? total : FREE_CLASS_QUOTA * STUDENTS_PER_CLASS,
+    free_classes: exempt
+      ? Math.ceil(total / STUDENTS_PER_CLASS)
+      : FREE_CLASS_QUOTA,
     paid_students: paidStudents,
-    price_per_student: PRICE_PER_STUDENT,
-    amount_due: exempt ? 0 : dueCount * PRICE_PER_STUDENT,
+    price_per_class: PRICE_PER_CLASS,
+    students_per_class: STUDENTS_PER_CLASS,
+    amount_due: exempt ? 0 : dueClassCount * PRICE_PER_CLASS,
     grace_days: graceDays,
     overdue_students: exempt ? 0 : blockedStudents,
     grace_students: exempt ? 0 : graceStudents,
@@ -379,7 +386,8 @@ app.post("/billing/teachers/:teacherId/confirm-payment", async (c) => {
 
   const allStudents = await getStudentsForTeacher(teacherId);
   const ordered = allStudents.map((row) => row.id);
-  const payableIds = ordered.slice(FREE_QUOTA);
+  const freeStudentQuota = FREE_CLASS_QUOTA * STUDENTS_PER_CLASS;
+  const payableIds = ordered.slice(freeStudentQuota);
   const targetIds =
     Array.isArray(body?.student_ids) && body.student_ids.length > 0
       ? body.student_ids
@@ -395,6 +403,7 @@ app.post("/billing/teachers/:teacherId/confirm-payment", async (c) => {
 
   const now = new Date();
   const paidUntil = withDays(now, periodDays);
+  const classCount = Math.ceil(targetIds.length / STUDENTS_PER_CLASS);
 
   for (const id of targetIds) {
     await db
@@ -418,7 +427,7 @@ app.post("/billing/teachers/:teacherId/confirm-payment", async (c) => {
   await db.insert(billingPayments).values({
     id: crypto.randomUUID(),
     teacherId,
-    amount: targetIds.length * PRICE_PER_STUDENT,
+    amount: classCount * PRICE_PER_CLASS,
     studentCount: targetIds.length,
     studentIds: JSON.stringify(targetIds),
     paidUntil: paidUntil.toISOString(),
@@ -517,19 +526,20 @@ app.post("/billing/pay", async (c) => {
     return c.json({ error: "teacher_id required" }, 400);
   }
 
-  if (!amount || amount <= 0) {
-    return c.json({ error: "amount must be greater than 0" }, 400);
-  }
-
   const allStudents = await getStudentsForTeacher(teacherId);
   const ordered = allStudents.map((row) => row.id);
-  const defaultPayIds = ordered.slice(FREE_QUOTA);
+  const freeStudentQuota = FREE_CLASS_QUOTA * STUDENTS_PER_CLASS;
+  const defaultPayIds = ordered.slice(freeStudentQuota);
   const targetIds =
     studentIds && studentIds.length > 0 ? studentIds : defaultPayIds;
 
   if (targetIds.length === 0) {
     return c.json({ error: "no payable students found" }, 400);
   }
+
+  const classCount = Math.ceil(targetIds.length / STUDENTS_PER_CLASS);
+  const resolvedAmount =
+    amount && amount > 0 ? amount : classCount * PRICE_PER_CLASS;
 
   const now = new Date();
   const paidUntil = withDays(now, BILLING_PERIOD_DAYS);
@@ -556,7 +566,7 @@ app.post("/billing/pay", async (c) => {
   await db.insert(billingPayments).values({
     id: crypto.randomUUID(),
     teacherId,
-    amount,
+    amount: resolvedAmount,
     studentCount: studentCount || targetIds.length,
     studentIds: JSON.stringify(targetIds),
     paidUntil: paidUntil.toISOString(),

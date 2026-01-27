@@ -14,6 +14,8 @@ services:
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=mathflix
       - MINIO_USE_SSL=false
+      - ADMIN_USERNAME=ferilee
+      - ADMIN_PASSWORD=F3r!-lee
     env_file:
       - .env
     volumes:

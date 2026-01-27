@@ -51,7 +51,7 @@
         <div>
           <h3 class="text-sm font-bold text-indigo-800 dark:text-indigo-200 uppercase tracking-wide">Skema Akses Guru</h3>
           <p class="text-sm text-indigo-700 dark:text-indigo-300">
-            Gratis hingga {{ FREE_STUDENT_QUOTA }} siswa. Siswa ke-{{ FREE_STUDENT_QUOTA + 1 }} dan seterusnya Rp 1.000 / siswa.
+            Gratis 1 kelas ({{ STUDENTS_PER_CLASS }} siswa). Kelas berikutnya {{ formatRupiah(CLASS_PRICE) }} / kelas.
           </p>
         </div>
         <div class="flex flex-wrap gap-3 text-xs">
@@ -60,12 +60,12 @@
             <div class="font-bold text-gray-800 dark:text-white">{{ displayStudentTotal }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 px-3 py-2 rounded border border-indigo-100 dark:border-slate-600">
-            <div class="text-gray-500 dark:text-gray-400">Sisa kuota gratis</div>
-            <div class="font-bold text-emerald-600 dark:text-emerald-300">{{ remainingFree }}</div>
+            <div class="text-gray-500 dark:text-gray-400">Sisa kuota gratis (siswa)</div>
+            <div class="font-bold text-emerald-600 dark:text-emerald-300">{{ remainingFreeStudents }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 px-3 py-2 rounded border border-indigo-100 dark:border-slate-600">
-            <div class="text-gray-500 dark:text-gray-400">Siswa berbayar</div>
-            <div class="font-bold text-amber-600 dark:text-amber-300">{{ paidStudentCount }}</div>
+            <div class="text-gray-500 dark:text-gray-400">Kelas berbayar</div>
+            <div class="font-bold text-amber-600 dark:text-amber-300">{{ paidClassCount }}</div>
           </div>
           <div class="bg-white dark:bg-slate-800 px-3 py-2 rounded border border-indigo-100 dark:border-slate-600">
             <div class="text-gray-500 dark:text-gray-400">Tagihan saat ini</div>
@@ -355,6 +355,13 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <button
+                v-if="isAdmin"
+                @click="resetStudentPassword(student)"
+                class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200 font-bold"
+              >
+                Reset Password
+              </button>
+              <button
                 @click="deleteStudent(student.id)"
                 class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ml-4 font-bold"
               >
@@ -410,7 +417,8 @@
       :is-open="showPayModal"
       :students="billingStudents"
       :selected-ids="selectedPayIds"
-      :price-per-student="pricePerStudent"
+      :price-per-class="pricePerClass"
+      :students-per-class="STUDENTS_PER_CLASS"
       :is-loading="billingLoading"
       @update:selected-ids="updateSelectedPayIds"
       @close="closePayModal"
@@ -476,8 +484,9 @@ const currentPage = ref(1);
 const totalStudents = ref(0);
 const totalPages = ref(0);
 const itemsPerPage = ref(10);
-const FREE_STUDENT_QUOTA = 5;
-const PRICE_PER_STUDENT = 1000;
+const FREE_CLASS_QUOTA = 1;
+const STUDENTS_PER_CLASS = 30;
+const CLASS_PRICE = 49000;
 const GRACE_DAYS = 7;
 const billingSummary = ref<any>(null);
 const billingStatusByStudentId = ref<Record<string, any>>({});
@@ -517,21 +526,17 @@ const displayStudentTotal = computed(() => {
   return isGuru ? totalStudents.value : totalStudentsForBilling.value;
 });
 
-const paidStudentCount = computed(() => {
-  if (isGuru) {
-    return Math.max(0, Number(totalStudents.value || 0) - FREE_STUDENT_QUOTA);
-  }
-  if (billingSummary.value?.paid_students != null) {
-    return Number(billingSummary.value.paid_students);
-  }
-  return Math.max(0, totalStudentsForBilling.value - FREE_STUDENT_QUOTA);
+const freeStudentQuota = FREE_CLASS_QUOTA * STUDENTS_PER_CLASS;
+
+const paidClassCount = computed(() => {
+  const total = isGuru ? Number(totalStudents.value || 0) : totalStudentsForBilling.value;
+  const paidStudents = Math.max(0, total - freeStudentQuota);
+  return Math.ceil(paidStudents / STUDENTS_PER_CLASS);
 });
 
-const remainingFree = computed(() => {
-  if (isGuru) {
-    return Math.max(0, FREE_STUDENT_QUOTA - Number(totalStudents.value || 0));
-  }
-  return Math.max(0, FREE_STUDENT_QUOTA - totalStudentsForBilling.value);
+const remainingFreeStudents = computed(() => {
+  const total = isGuru ? Number(totalStudents.value || 0) : totalStudentsForBilling.value;
+  return Math.max(0, freeStudentQuota - total);
 });
 
 const filteredCohortStudents = computed(() => {
@@ -540,15 +545,15 @@ const filteredCohortStudents = computed(() => {
   return cohortStudents.value.filter((s: any) => String(s.full_name || '').toLowerCase().includes(keyword));
 });
 
-const pricePerStudent = computed(() => {
-  return Number(billingSummary.value?.price_per_student ?? PRICE_PER_STUDENT);
+const pricePerClass = computed(() => {
+  return Number(billingSummary.value?.price_per_class ?? CLASS_PRICE);
 });
 
 const billingAmount = computed(() => {
   if (!isGuru && billingSummary.value?.amount_due != null) {
     return Number(billingSummary.value.amount_due);
   }
-  return paidStudentCount.value * pricePerStudent.value;
+  return paidClassCount.value * pricePerClass.value;
 });
 
 const overdueCount = computed(() => {
@@ -867,7 +872,7 @@ const buildAdminAccessMap = () => {
       (teacherName && exemptTeacherNames.value.has(teacherName));
 
     sorted.forEach((student, index) => {
-      if (isExempt || index < FREE_STUDENT_QUOTA) {
+      if (isExempt || index < freeStudentQuota) {
         map[student.id] = {
           label: 'Gratis',
           helper: isExempt ? 'Bebas bayar' : '',
@@ -937,7 +942,7 @@ const getStudentAccessInfo = (student: any, index: number, globalIndexOverride?:
 
   const globalIndex =
     globalIndexOverride ?? (currentPage.value - 1) * itemsPerPage.value + index;
-  if (globalIndex < FREE_STUDENT_QUOTA) {
+  if (globalIndex < freeStudentQuota) {
     return {
       label: 'Gratis',
       helper: '',
@@ -1043,7 +1048,8 @@ const refreshBilling = async () => {
 
 const confirmPayBilling = async () => {
   if (selectedPayIds.value.length === 0) return;
-  const amount = selectedPayIds.value.length * pricePerStudent.value;
+  const classCount = Math.ceil(selectedPayIds.value.length / STUDENTS_PER_CLASS);
+  const amount = classCount * pricePerClass.value;
   try {
     const ok = await dialog.confirm(`Bayar tagihan ${formatRupiah(amount)} sekarang?`, 'Konfirmasi Pembayaran');
     if (!ok) return;
@@ -1081,14 +1087,18 @@ const saveStudent = async () => {
     const { data } = await api.post('/students', payload);
     const createdStudent = data?.data || data;
     if (createdStudent?.id) {
-      await syncBillingStudents({
-        id: createdStudent.id,
-        nisn: createdStudent.nisn,
-        full_name: createdStudent.full_name || createdStudent.fullName,
-        teacher_id: payload.teacher_id,
-        teacher_name: payload.teacher_name,
-        created_at: createdStudent.created_at || createdStudent.createdAt
-      });
+      try {
+        await syncBillingStudents({
+          id: createdStudent.id,
+          nisn: createdStudent.nisn,
+          full_name: createdStudent.full_name || createdStudent.fullName,
+          teacher_id: payload.teacher_id,
+          teacher_name: payload.teacher_name,
+          created_at: createdStudent.created_at || createdStudent.createdAt
+        });
+      } catch (e) {
+        console.warn('Billing sync gagal, lanjutkan tanpa blokir.', e);
+      }
     }
     await fetchStudents();
     showForm.value = false;
@@ -1108,6 +1118,31 @@ const deleteStudent = async (id: string) => {
     await fetchStudents();
   } catch (e) {
     await dialog.alert("Gagal menghapus siswa");
+  }
+};
+
+const resetStudentPassword = async (student: Student) => {
+  const ok = await dialog.confirm(
+    `Reset password siswa ${student.full_name}? Sistem akan membuat password sementara.`,
+    'Konfirmasi Reset Password',
+  );
+  if (!ok) return;
+  try {
+    const { data } = await api.post('/auth/student/reset-password', {
+      nisn: student.nisn,
+    });
+    const tempPassword = data?.temp_password;
+    await dialog.alert(
+      tempPassword
+        ? `Password sementara: ${tempPassword}\\nSimpan sekarang, hanya ditampilkan sekali.`
+        : 'Password siswa berhasil direset.',
+      'Reset Password Siswa',
+    );
+  } catch (err: any) {
+    await dialog.alert(
+      err?.response?.data?.error || err?.message || 'Gagal reset password siswa.',
+      'Reset Password Siswa',
+    );
   }
 };
 
@@ -1204,16 +1239,20 @@ const processCSV = async (csvText: string) => {
             const { data } = await api.post('/students/bulk', studentsToImport);
             const createdRows = data?.data || data?.students || [];
             if (Array.isArray(createdRows) && createdRows.length > 0) {
-              await syncBillingStudents(
-                createdRows.map((row: any) => ({
-                  id: row.id,
-                  nisn: row.nisn,
-                  full_name: row.full_name || row.fullName,
-                  teacher_id: row.teacher_id || teacherId,
-                  teacher_name: row.teacher_name || teacherName,
-                  created_at: row.created_at || row.createdAt
-                }))
-              );
+              try {
+                await syncBillingStudents(
+                  createdRows.map((row: any) => ({
+                    id: row.id,
+                    nisn: row.nisn,
+                    full_name: row.full_name || row.fullName,
+                    teacher_id: row.teacher_id || teacherId,
+                    teacher_name: row.teacher_name || teacherName,
+                    created_at: row.created_at || row.createdAt
+                  }))
+                );
+              } catch (e) {
+                console.warn('Billing sync gagal saat import, lanjutkan.', e);
+              }
             }
             await dialog.alert(data.message);
             fetchStudents();
