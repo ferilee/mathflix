@@ -82,7 +82,7 @@
            >
                <span class="hidden sm:block">{{ student.full_name }}</span>
                <div v-if="student.photo_profile" class="w-8 h-8 rounded bg-gray-700 overflow-hidden">
-                   <img :src="student.photo_profile" alt="Profile" class="w-full h-full object-cover">
+                   <img :src="resolveStorageUrl(student.photo_profile)" alt="Profile" class="w-full h-full object-cover">
                </div>
                <div v-else class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center font-bold">
                    {{ initials }}
@@ -107,6 +107,15 @@
                      <div class="text-sm font-bold text-white">{{ student?.nisn }}</div>
                  </div>
 
+                 <router-link
+                   to="/student/profile"
+                   class="text-left px-4 py-3 hover:bg-gray-800/50 text-emerald-400 flex items-center gap-3 transition"
+                   @click="showMenu = false"
+                 >
+                    <span class="text-lg">👤</span>
+                    <span class="text-sm font-semibold">Profil Saya</span>
+                 </router-link>
+
                  <button @click="showDevInfo = true; showMenu = false" class="text-left px-4 py-3 hover:bg-gray-800/50 text-indigo-400 flex items-center gap-3 transition">
                     <span class="text-lg">ℹ️</span>
                     <span class="text-sm font-semibold">Tentang Aplikasi</span>
@@ -115,6 +124,11 @@
                  <button v-if="demoMode" @click="resetDemoSession" class="text-left px-4 py-3 hover:bg-gray-800/50 text-yellow-400 flex items-center gap-3 transition">
                     <span class="text-lg">🧹</span>
                     <span class="text-sm font-semibold">Reset Demo</span>
+                 </button>
+
+                 <button v-if="student && !demoMode" @click="openPhotoModal" class="text-left px-4 py-3 hover:bg-gray-800/50 text-sky-400 flex items-center gap-3 transition">
+                    <span class="text-lg">🖼️</span>
+                    <span class="text-sm font-semibold">Ubah Foto Profil</span>
                  </button>
 
                  <button @click="logout" class="text-left px-4 py-3 hover:bg-red-900/10 text-red-500 flex items-center gap-3 transition border-t border-gray-800">
@@ -272,6 +286,78 @@
       </router-link>
     </div>
 
+     <!-- Foto Profil Modal -->
+     <transition name="fade">
+       <div v-if="showPhotoModal" class="fixed inset-0 z-[130] flex items-center justify-center p-4">
+         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closePhotoModal"></div>
+         <div class="relative w-full max-w-md rounded-2xl bg-slate-900 text-white shadow-2xl border border-white/10">
+           <div class="p-6 border-b border-white/10 flex items-center justify-between">
+             <div>
+               <h3 class="text-lg font-bold">Ubah Foto Profil</h3>
+               <p class="text-xs text-gray-400">Unggah foto profil untuk akun siswa.</p>
+             </div>
+             <button class="text-slate-400 hover:text-white" @click="closePhotoModal">✕</button>
+           </div>
+           <div class="p-6 space-y-4">
+             <div class="flex items-center gap-4">
+               <div class="w-20 h-20 rounded-xl bg-slate-800 overflow-hidden flex items-center justify-center">
+                 <img v-if="photoPreview" :src="photoPreview" alt="Preview" class="w-full h-full object-cover">
+                 <span v-else class="text-xs text-slate-500">Preview</span>
+               </div>
+               <div class="flex-1">
+                 <input type="file" accept="image/*" @change="handlePhotoSelected" class="block w-full text-sm text-slate-300">
+                 <p class="text-[11px] text-slate-500 mt-1">Maks 5MB (JPG/PNG/WEBP/GIF).</p>
+               </div>
+             </div>
+             <div v-if="photoPreview" class="space-y-3">
+               <div class="flex flex-wrap gap-2 text-xs">
+                 <button
+                   type="button"
+                   class="px-3 py-1 rounded-full border"
+                   :class="photoRatio === '1:1' ? 'bg-sky-500/20 border-sky-400 text-sky-200' : 'border-white/10 text-slate-300'"
+                   @click="setPhotoRatio('1:1')"
+                 >
+                   1:1
+                 </button>
+                 <button
+                   type="button"
+                   class="px-3 py-1 rounded-full border"
+                   :class="photoRatio === '4:3' ? 'bg-sky-500/20 border-sky-400 text-sky-200' : 'border-white/10 text-slate-300'"
+                   @click="setPhotoRatio('4:3')"
+                 >
+                   4:3
+                 </button>
+               </div>
+               <div>
+                 <label class="text-[11px] text-slate-400">Zoom</label>
+                 <input
+                   type="range"
+                   min="1"
+                   max="3"
+                   step="0.05"
+                   v-model.number="photoZoom"
+                   @input="refreshCropPreview"
+                   class="w-full"
+                 >
+               </div>
+               <p class="text-[10px] text-slate-500">Hasil akan otomatis dipotong sesuai rasio dan dikompres.</p>
+             </div>
+             <div v-if="photoError" class="text-xs text-rose-400">{{ photoError }}</div>
+           </div>
+           <div class="p-6 border-t border-white/10 flex items-center justify-end gap-3">
+             <button class="px-4 py-2 rounded-full text-sm font-semibold bg-slate-800 hover:bg-slate-700" @click="closePhotoModal">Batal</button>
+             <button
+               class="px-5 py-2 rounded-full text-sm font-semibold bg-sky-500 hover:bg-sky-400 text-black disabled:opacity-60"
+               :disabled="photoUploading || !photoFile"
+               @click="uploadPhoto"
+             >
+               {{ photoUploading ? 'Mengunggah...' : 'Simpan Foto' }}
+             </button>
+           </div>
+         </div>
+       </div>
+     </transition>
+
      <!-- Login Modal -->
      <LoginModal :is-open="showLoginModal" @close="showLoginModal = false" @logged-in="handleLoggedIn" />
 
@@ -288,6 +374,8 @@ import LoginModal from '../components/LoginModal.vue';
 import api from '../api';
 import billingApi from '../api/billing';
 import { isDemoMode, enableDemo, resetDemo, getDemoStudent } from '../utils/demo';
+import { setAuthToken } from '../utils/auth';
+import { resolveStorageUrl } from '../utils/storage';
 
 const router = useRouter();
 const route = useRoute();
@@ -296,6 +384,15 @@ const student = ref<any>(null);
 const showMenu = ref(false);
 const showDevInfo = ref(false);
 const showLoginModal = ref(false);
+const showPhotoModal = ref(false);
+const photoFile = ref<File | null>(null);
+const photoPreview = ref<string>('');
+const photoImage = ref<HTMLImageElement | null>(null);
+const photoBlob = ref<Blob | null>(null);
+const photoRatio = ref<'1:1' | '4:3'>('1:1');
+const photoZoom = ref(1);
+const photoUploading = ref(false);
+const photoError = ref('');
 const hasNotification = ref(false);
 const hasAssignmentNotification = ref(false);
 const hasDiscussNotification = ref(false);
@@ -304,6 +401,137 @@ const accessGraceUntil = ref<string | null>(null);
 let pollingInterval: any = null;
 const ACCESS_POLL_INTERVAL = 2000;
 const demoMode = ref(isDemoMode());
+const STUDENT_UPDATED_EVENT = 'student-updated';
+
+const openPhotoModal = () => {
+  showMenu.value = false;
+  photoError.value = '';
+  photoFile.value = null;
+  photoImage.value = null;
+  photoBlob.value = null;
+  photoRatio.value = '1:1';
+  photoZoom.value = 1;
+  if (photoPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(photoPreview.value);
+  }
+  photoPreview.value = student.value?.photo_profile
+    ? resolveStorageUrl(student.value.photo_profile)
+    : '';
+  showPhotoModal.value = true;
+};
+
+const closePhotoModal = () => {
+  showPhotoModal.value = false;
+  photoError.value = '';
+  photoFile.value = null;
+  photoImage.value = null;
+  photoBlob.value = null;
+  if (photoPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(photoPreview.value);
+  }
+  photoPreview.value = '';
+};
+
+const setPhotoRatio = (ratio: '1:1' | '4:3') => {
+  photoRatio.value = ratio;
+  refreshCropPreview();
+};
+
+const refreshCropPreview = async () => {
+  if (!photoImage.value) return;
+  const ratio = photoRatio.value === '4:3' ? 4 / 3 : 1;
+  const outputWidth = ratio === 1 ? 512 : 640;
+  const outputHeight = ratio === 1 ? 512 : 480;
+  const img = photoImage.value;
+
+  const imageRatio = img.width / img.height;
+  let baseCropWidth = img.width;
+  let baseCropHeight = img.height;
+  if (imageRatio > ratio) {
+    baseCropHeight = img.height;
+    baseCropWidth = img.height * ratio;
+  } else {
+    baseCropWidth = img.width;
+    baseCropHeight = img.width / ratio;
+  }
+  const zoom = Math.max(1, Math.min(3, photoZoom.value || 1));
+  const cropWidth = baseCropWidth / zoom;
+  const cropHeight = baseCropHeight / zoom;
+  const cropX = (img.width - cropWidth) / 2;
+  const cropY = (img.height - cropHeight) / 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, outputWidth, outputHeight);
+  photoPreview.value = canvas.toDataURL('image/jpeg', 0.85);
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/jpeg', 0.8)
+  );
+  photoBlob.value = blob;
+};
+
+const handlePhotoSelected = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+  const file = input.files[0];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    photoError.value = 'Format file harus JPG/PNG/WEBP/GIF.';
+    return;
+  }
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+    photoError.value = 'Ukuran file maksimal 5MB.';
+    return;
+  }
+  photoFile.value = file;
+  photoError.value = '';
+  if (photoPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(photoPreview.value);
+  }
+  const objectUrl = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    photoImage.value = img;
+    refreshCropPreview();
+  };
+  img.src = objectUrl;
+};
+
+const uploadPhoto = async () => {
+  if (!student.value?.id || !photoFile.value) return;
+  photoUploading.value = true;
+  photoError.value = '';
+  try {
+    let fileToUpload: File = photoFile.value;
+    if (photoBlob.value) {
+      fileToUpload = new File([photoBlob.value], `profile-${student.value.id}.jpg`, {
+        type: 'image/jpeg',
+      });
+    }
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    const { data } = await api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const photoUrl = data?.url;
+    if (!photoUrl) throw new Error('URL upload tidak ditemukan.');
+    const { data: updated } = await api.put(`/students/${student.value.id}`, {
+      photo_profile: photoUrl,
+    });
+    const nextStudent = updated?.data || updated || {};
+    student.value = { ...student.value, ...nextStudent, photo_profile: photoUrl };
+    localStorage.setItem('student', JSON.stringify(student.value));
+    closePhotoModal();
+  } catch (e: any) {
+    photoError.value = e?.response?.data?.error || e?.message || 'Gagal mengunggah foto.';
+  } finally {
+    photoUploading.value = false;
+  }
+};
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
@@ -317,6 +545,10 @@ const loadStudent = () => {
         enableDemo();
         student.value = getDemoStudent();
     }
+};
+
+const handleStudentUpdated = () => {
+    loadStudent();
 };
 
 const formatAccessDate = (dateInput?: string | null) => {
@@ -453,6 +685,7 @@ const logout = () => {
         resetDemo();
         demoMode.value = false;
     }
+    setAuthToken(null);
     localStorage.removeItem('student');
     router.push('/login');
 };
@@ -460,6 +693,7 @@ const logout = () => {
 const resetDemoSession = () => {
     resetDemo();
     demoMode.value = false;
+    setAuthToken(null);
     student.value = null;
     showMenu.value = false;
     router.push('/login');
@@ -508,6 +742,7 @@ const isMenuDisabled = (path: string) => {
 onMounted(() => {
     document.documentElement.classList.add('dark');
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener(STUDENT_UPDATED_EVENT, handleStudentUpdated);
     loadStudent();
     if (!demoMode.value) {
         checkNotifications();
@@ -546,6 +781,7 @@ watch(() => route.path, (path) => {
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener(STUDENT_UPDATED_EVENT, handleStudentUpdated);
     if (pollingInterval) clearInterval(pollingInterval);
 });
 </script>

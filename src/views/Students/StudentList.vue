@@ -3,7 +3,7 @@
     <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center bg-white dark:bg-slate-800 p-4 rounded shadow border dark:border-gray-700">
       <div>
          <h2 class="text-lg font-bold text-gray-800 dark:text-white">Tambah Siswa</h2>
-         <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Kelas, Jurusan, Sekolah)</p>
+         <p class="text-sm text-gray-500 dark:text-gray-400">Input manual atau Import CSV (ID, Nama Siswa, Grade, Kelas, Jurusan, Sekolah)</p>
       </div>
       <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center w-full lg:w-auto">
           <!-- CSV Import trigger -->
@@ -30,18 +30,27 @@
 
     <!-- Create/Edit Form -->
     <div v-if="showForm" class="mb-8 bg-gray-50 dark:bg-slate-700 p-6 rounded border dark:border-gray-600 shadow-inner">
-      <h3 class="font-bold mb-6 text-gray-800 dark:text-white">Tambah Siswa Baru</h3>
+      <h3 class="font-bold mb-6 text-gray-800 dark:text-white">{{ isEditing ? 'Edit Siswa' : 'Tambah Siswa Baru' }}</h3>
       <form @submit.prevent="saveStudent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FloatingInput v-model="form.nisn" label="ID (NISN)" id="s_nisn" required />
         <FloatingInput v-model="form.full_name" label="Nama Siswa" id="s_name" required />
+        <FloatingInput v-model="form.grade_level" type="number" min="1" max="12" step="1" label="Grade (1-12)" id="s_grade" required />
+        <FloatingInput v-model="form.class_name" label="Kelas (A/B/1/2)" id="s_class" required />
+        <FloatingInput v-model="form.major" label="Jurusan/Departemen" id="s_major" required />
         <FloatingInput v-model="form.school" label="Sekolah" id="s_school" required />
 
-        <FloatingInput v-model="form.major" label="Jurusan" id="s_major" required />
-
-        <FloatingInput v-model="form.grade_level" type="number" label="Kelas" id="s_grade" required />
-
-        <div class="md:col-span-2 flex justify-end">
-          <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 font-bold shadow">Simpan Data</button>
+        <div class="md:col-span-2 flex justify-end gap-3">
+          <button
+            v-if="isEditing"
+            type="button"
+            class="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 font-bold shadow"
+            @click="cancelEdit"
+          >
+            Batal
+          </button>
+          <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 font-bold shadow">
+            {{ isEditing ? 'Simpan Perubahan' : 'Simpan Data' }}
+          </button>
         </div>
       </form>
     </div>
@@ -233,7 +242,7 @@
         </div>
         <div class="flex items-end">
             <button
-                v-if="searchQuery || filterMajor || filterGrade || filterTeacherName"
+                v-if="isAdmin && (searchQuery || filterMajor || filterGrade || filterTeacherName)"
                 @click="handleBulkDelete"
                 class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2"
             >
@@ -297,80 +306,69 @@
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-white">
         <thead class="bg-gray-50 dark:bg-slate-700">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID (NISN)</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama Siswa</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jurusan</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Sekolah</th>
-            <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Guru</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kelas</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Akses</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Waktu Dibuat</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktivitas Terakhir</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama Siswa</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tingkat (Grade)</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jurusan (Department)</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Class</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
           <tr v-for="(student, index) in students" :key="student.id" class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300 font-mono">{{ student.nisn }}</td>
-            <td class="px-6 py-4 whitespace-nowrap font-medium">{{ student.full_name }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  class="px-2 py-0.5 rounded text-xs font-bold"
-                  :class="getMajorBadgeClass(student.major)"
-                >
-                  {{ student.major }}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">{{ student.school || 'Unknown' }}</td>
-            <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
-              {{ resolveTeacherDisplay(student) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">{{ student.grade_level }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-xs">
-              <div class="flex flex-col gap-1">
-                <span
-                  class="px-2 py-0.5 rounded font-bold w-fit"
-                  :class="getStudentAccessInfo(student, index).badgeClass"
-                >
-                  {{ getStudentAccessInfo(student, index).label }}
-                </span>
-                <span v-if="getStudentAccessInfo(student, index).helper" class="text-[11px] text-gray-500 dark:text-gray-400">
-                  {{ getStudentAccessInfo(student, index).helper }}
-                </span>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
-              {{ formatDateTime(student.created_at) || '—' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
-              <div v-if="activityByStudentId[student.id]">
-                <div class="font-semibold text-gray-800 dark:text-gray-100">
-                  {{ activityByStudentId[student.id].material_title || 'Materi tidak diketahui' }}
-                </div>
-                <div class="text-[11px] text-gray-500 dark:text-gray-400">
-                  {{ formatDuration(activityByStudentId[student.id].duration_seconds) }}
-                </div>
-              </div>
-              <span v-else class="text-gray-400">Belum ada aktivitas</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button
-                v-if="isAdmin"
-                @click="resetStudentPassword(student)"
-                class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200 font-bold"
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300 font-mono text-center">{{ student.nisn }}</td>
+            <td class="px-6 py-4 whitespace-nowrap font-medium text-center">{{ student.full_name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.grade_level }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-center">
+              <span
+                class="px-2 py-0.5 rounded text-xs font-bold"
+                :class="getMajorBadgeClass(student.major)"
               >
-                Reset Password
-              </button>
-              <button
-                @click="deleteStudent(student.id)"
-                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ml-4 font-bold"
-              >
-                Hapus
-              </button>
+                {{ student.major }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300 text-center">
+              {{ student.class_name || '—' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+              <div class="flex items-center justify-center gap-3">
+                <button
+                  @click="viewStudent(student)"
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200"
+                  title="View"
+                  aria-label="View"
+                >
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5C7 5 3 9.5 2 12c1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+                  </svg>
+                </button>
+                <button
+                  v-if="isAdmin"
+                  @click="editStudent(student)"
+                  class="text-amber-600 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
+                  title="Edit"
+                  aria-label="Edit"
+                >
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="m16.86 3.1 4.04 4.04-12 12H4.86V15.1l12-12Zm4.45-1.03c.39-.39 1.02-.39 1.41 0l1.45 1.45c.39.39.39 1.02 0 1.41l-1.11 1.11-4.04-4.04 1.29-1.93Z"/>
+                  </svg>
+                </button>
+                <button
+                  v-if="isAdmin"
+                  @click="deleteStudent(student.id)"
+                  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                  title="Hapus"
+                  aria-label="Hapus"
+                >
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 7h12l-1 14H7L6 7Zm3-3h6l1 2H8l1-2Z"/>
+                  </svg>
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="students.length === 0">
-            <td :colspan="isAdmin ? 10 : 9" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data (Cek filter anda).</td>
+            <td :colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data (Cek filter anda).</td>
           </tr>
         </tbody>
       </table>
@@ -449,6 +447,7 @@ interface Student {
   nisn: string;
   full_name: string;
   major: string;
+  class_name?: string;
   grade_level: number;
   school?: string;
   created_at?: string;
@@ -466,11 +465,13 @@ const route = useRoute();
 const dialog = useDialog();
 const activityByStudentId = ref<Record<string, any>>({});
 const showForm = ref(false);
+const editingStudentId = ref<string | null>(null);
 const form = ref({
   nisn: '',
   full_name: '',
   school: '',
   major: '',
+  class_name: '',
   grade_level: ''
 });
 
@@ -497,6 +498,7 @@ const teacherId = staffUser?.nip || staffUser?.full_name || getStaffActorId(staf
 const teacherName = staffUser?.full_name || staffUser?.nip || '';
 const isAdmin = staffUser?.role === 'admin';
 const isGuru = staffUser?.role === 'guru';
+const isEditing = computed(() => editingStudentId.value !== null);
 const cohorts = ref<any[]>([]);
 const cohortForm = ref({ name: '', description: '' });
 const cohortError = ref('');
@@ -828,6 +830,7 @@ const getMajorBadgeClass = (major?: string | null) => {
 
 const normalizeStudentRow = (row: any) => ({
   ...row,
+  class_name: row?.class_name || row?.className || row?.class || '',
   created_at: row?.created_at || row?.createdAt || null
 });
 
@@ -1084,17 +1087,23 @@ const saveStudent = async () => {
       teacher_id: staffUser?.role === 'guru' ? teacherId : undefined,
       teacher_name: staffUser?.role === 'guru' ? teacherName : undefined
     };
-    const { data } = await api.post('/students', payload);
-    const createdStudent = data?.data || data;
-    if (createdStudent?.id) {
+    let savedStudent: any = null;
+    if (editingStudentId.value) {
+      const { data } = await api.put(`/students/${editingStudentId.value}`, payload);
+      savedStudent = data?.data || data;
+    } else {
+      const { data } = await api.post('/students', payload);
+      savedStudent = data?.data || data;
+    }
+    if (savedStudent?.id && !editingStudentId.value) {
       try {
         await syncBillingStudents({
-          id: createdStudent.id,
-          nisn: createdStudent.nisn,
-          full_name: createdStudent.full_name || createdStudent.fullName,
+          id: savedStudent.id,
+          nisn: savedStudent.nisn,
+          full_name: savedStudent.full_name || savedStudent.fullName,
           teacher_id: payload.teacher_id,
           teacher_name: payload.teacher_name,
-          created_at: createdStudent.created_at || createdStudent.createdAt
+          created_at: savedStudent.created_at || savedStudent.createdAt
         });
       } catch (e) {
         console.warn('Billing sync gagal, lanjutkan tanpa blokir.', e);
@@ -1102,7 +1111,8 @@ const saveStudent = async () => {
     }
     await fetchStudents();
     showForm.value = false;
-    form.value = { nisn: '', full_name: '', school: '', major: '', grade_level: '' };
+    editingStudentId.value = null;
+    form.value = { nisn: '', full_name: '', school: '', major: '', class_name: '', grade_level: '' };
   } catch (e: any) {
     console.error("Gagal menyimpan siswa", e);
     const msg = e.response?.data?.message || e.response?.data?.error || e.message || "Gagal menyimpan siswa";
@@ -1110,7 +1120,59 @@ const saveStudent = async () => {
   }
 };
 
+const editStudent = (student: Student) => {
+  editingStudentId.value = student.id;
+  form.value = {
+    nisn: student.nisn || '',
+    full_name: student.full_name || '',
+    school: student.school || '',
+    major: student.major || '',
+    class_name: student.class_name || '',
+    grade_level: student.grade_level ?? ''
+  };
+  showForm.value = true;
+};
+
+const cancelEdit = () => {
+  editingStudentId.value = null;
+  form.value = { nisn: '', full_name: '', school: '', major: '', class_name: '', grade_level: '' };
+  showForm.value = false;
+};
+
+const viewStudent = async (student: Student) => {
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  const items = [
+    { icon: '🆔', label: 'ID (NISN)', value: student.nisn || '-' },
+    { icon: '👤', label: 'Nama Siswa', value: student.full_name || '-' },
+    { icon: '🎓', label: 'Tingkat (Grade)', value: student.grade_level ?? '-' },
+    { icon: '🏷️', label: 'Class', value: student.class_name || '-' },
+    { icon: '🧭', label: 'Jurusan (Department)', value: student.major || '-' },
+    { icon: '🏫', label: 'Sekolah', value: student.school || '-' },
+    { icon: '👨‍🏫', label: 'Guru', value: resolveTeacherDisplay(student) || '-' },
+    { icon: '🕒', label: 'Waktu Dibuat', value: formatDateTime(student.created_at) || '-' },
+  ];
+  const rowsHtml = items
+    .map((item) => {
+      const safeValue = escapeHtml(String(item.value));
+      const safeLabel = escapeHtml(item.label);
+      return `<span class="text-base">${item.icon}</span><span>${safeLabel}</span><span class="text-slate-400">:</span><span class="font-medium text-white/90">${safeValue}</span>`;
+    })
+    .join('');
+  const detailsHtml = `<div class="grid grid-cols-[18px_auto_8px_1fr] gap-x-2 gap-y-1 text-sm">${rowsHtml}</div>`;
+  await dialog.alert(detailsHtml, 'Detail Siswa', 'info', 'html');
+};
+
 const deleteStudent = async (id: string) => {
+  if (!isAdmin) {
+    await dialog.alert('Hanya admin yang dapat menghapus siswa.', 'Akses Ditolak', 'warning');
+    return;
+  }
   const ok = await dialog.confirm('Yakin ingin menghapus siswa ini?', 'Hapus Siswa');
   if (!ok) return;
   try {
@@ -1147,6 +1209,10 @@ const resetStudentPassword = async (student: Student) => {
 };
 
 const handleBulkDelete = async () => {
+    if (!isAdmin) {
+        await dialog.alert('Hanya admin yang dapat menghapus siswa.', 'Akses Ditolak', 'warning');
+        return;
+    }
     const filterText = [
         searchQuery.value ? `Nama/ID: "${searchQuery.value}"` : '',
         filterSchool.value ? `Sekolah: ${filterSchool.value}` : '',
@@ -1208,7 +1274,7 @@ const processCSV = async (csvText: string) => {
 
     // Header Detection: Skip if first line contains any of these keywords
     let startIndex = 0;
-    const headerKeywords = ['id', 'nama', 'nisn', 'kelas', 'jurusan', 'grade', 'major', 'sekolah', 'school'];
+    const headerKeywords = ['id', 'nama', 'nisn', 'kelas', 'jurusan', 'grade', 'major', 'sekolah', 'school', 'class'];
     if (headerKeywords.some(key => firstLine.toLowerCase().includes(key))) {
         startIndex = 1;
     }
@@ -1221,12 +1287,17 @@ const processCSV = async (csvText: string) => {
             const grade = cols[2]?.trim();
             // Basic validation: grade must be numeric
             if (!isNaN(Number(grade)) && grade !== '') {
+                const hasClassColumn = cols.length >= 6;
+                const className = hasClassColumn ? cols[3]?.trim() || '' : '';
+                const majorCol = hasClassColumn ? cols[4] : cols[3];
+                const schoolCol = hasClassColumn ? cols[5] : cols[4];
                 studentsToImport.push({
                     nisn: cols[0]?.trim() || '',
                     name: cols[1]?.trim() || '',
                     grade: Number(grade),
-                    major: cols[3]?.trim() || '',
-                    school: cols[4]?.trim() || '',
+                    class_name: className,
+                    major: majorCol?.trim() || '',
+                    school: schoolCol?.trim() || '',
                     teacher_id: staffUser?.role === 'guru' ? teacherId : undefined,
                     teacher_name: staffUser?.role === 'guru' ? teacherName : undefined
                 });
@@ -1258,11 +1329,11 @@ const processCSV = async (csvText: string) => {
             fetchStudents();
         } catch (e: any) {
             const errorMsg = e.response?.data?.error || 'Gagal import CSV.';
-            await dialog.alert(`${errorMsg}\nPastikan format: ID, Nama Siswa, Kelas, Jurusan, Sekolah`);
+            await dialog.alert(`${errorMsg}\nPastikan format: ID, Nama Siswa, Grade, Kelas, Jurusan, Sekolah`);
             console.error(e);
         }
     } else {
-        await dialog.alert('Tidak ada data valid ditemukan di CSV. Pastikan kolom Kelas berisi angka.');
+        await dialog.alert('Tidak ada data valid ditemukan di CSV. Pastikan kolom Grade berisi angka.');
     }
 };
 

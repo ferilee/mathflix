@@ -2,12 +2,14 @@ import { reactive } from "vue";
 
 type DialogMode = "alert" | "confirm" | "prompt";
 type DialogVariant = "info" | "success" | "warning" | "danger";
+type DialogMessageType = "text" | "html";
 
 type DialogPayload = {
   title: string;
   message: string;
   mode?: DialogMode;
   variant?: DialogVariant;
+  messageType?: DialogMessageType;
   confirmLabel?: string;
   cancelLabel?: string;
   inputPlaceholder?: string;
@@ -20,6 +22,7 @@ type DialogState = {
   variant: DialogVariant;
   title: string;
   message: string;
+  messageType: DialogMessageType;
   confirmLabel: string;
   cancelLabel: string;
   inputValue: string;
@@ -32,6 +35,7 @@ const dialogState = reactive<DialogState>({
   variant: "info",
   title: "",
   message: "",
+  messageType: "text",
   confirmLabel: "OK",
   cancelLabel: "Batal",
   inputValue: "",
@@ -45,6 +49,7 @@ const openDialog = (payload: DialogPayload) => {
   dialogState.variant = payload.variant || "info";
   dialogState.title = payload.title;
   dialogState.message = payload.message;
+  dialogState.messageType = payload.messageType || "text";
   dialogState.confirmLabel =
     payload.confirmLabel || (dialogState.mode === "alert" ? "OK" : "Ya");
   dialogState.cancelLabel = payload.cancelLabel || "Batal";
@@ -71,6 +76,7 @@ export const useDialog = () => {
     message: string,
     title = "Pemberitahuan",
     variant: DialogVariant = "info",
+    messageType: DialogMessageType = "text",
   ) => {
     await openDialog({
       title,
@@ -78,6 +84,7 @@ export const useDialog = () => {
       mode: "alert",
       confirmLabel: "OK",
       variant,
+      messageType,
     });
     return true;
   };

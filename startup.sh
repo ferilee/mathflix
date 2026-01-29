@@ -7,11 +7,22 @@ else
   API_URL="http://localhost:3000"
 fi
 
-ADMIN_USERNAME="${VITE_ADMIN_USERNAME:-admin}"
-ADMIN_PASSWORD="${VITE_ADMIN_PASSWORD:-admin123}"
+if [ ! -z "$VITE_AUTH_STRATEGY" ]; then
+  AUTH_STRATEGY="$VITE_AUTH_STRATEGY"
+else
+  AUTH_STRATEGY="cookie"
+fi
+
+if [ ! -z "$VITE_STORAGE_URL" ]; then
+  STORAGE_URL="$VITE_STORAGE_URL"
+else
+  STORAGE_URL=""
+fi
 
 echo "Setting API URL to: $API_URL"
-sed "s|{{API_URL}}|$API_URL|g; s|{{ADMIN_USERNAME}}|$ADMIN_USERNAME|g; s|{{ADMIN_PASSWORD}}|$ADMIN_PASSWORD|g" \
+echo "Setting AUTH_STRATEGY to: $AUTH_STRATEGY"
+echo "Setting STORAGE_URL to: ${STORAGE_URL:-<default>}"
+sed "s|{{API_URL}}|$API_URL|g; s|{{AUTH_STRATEGY}}|$AUTH_STRATEGY|g; s|{{STORAGE_URL}}|$STORAGE_URL|g" \
   /usr/share/nginx/html/config.template.js > /usr/share/nginx/html/config.js
 
 # Start nginx

@@ -94,6 +94,22 @@
         </router-link>
           </div>
         </div>
+        <div v-if="isGuru" class="space-y-2">
+          <button
+            type="button"
+            class="w-full flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 hover:text-white"
+            @click="toggleSection('akun')"
+          >
+            Akun
+            <span class="text-xs">{{ openSections.akun ? '–' : '+' }}</span>
+          </button>
+          <div v-show="openSections.akun" class="space-y-2">
+        <router-link to="/admin/settings" class="nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 9 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 11H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Ubah Password
+        </router-link>
+          </div>
+        </div>
         <div v-if="isAdmin" class="space-y-2">
           <button
             type="button"
@@ -265,6 +281,13 @@
                 <router-link to="/admin/assignments" class="mobile-link" @click="showMenu = false">Tugas</router-link>
               </div>
 
+              <template v-if="isGuru">
+                <div class="text-xs uppercase tracking-[0.2em] text-slate-400 mt-4">Akun</div>
+                <div class="grid grid-cols-2 gap-3">
+                  <router-link to="/admin/settings" class="mobile-link" @click="showMenu = false">Ubah Password</router-link>
+                </div>
+              </template>
+
               <template v-if="isAdmin">
                 <div class="text-xs uppercase tracking-[0.2em] text-slate-400 mt-4">Laporan</div>
                 <div class="grid grid-cols-2 gap-3">
@@ -318,7 +341,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { clearStaffUser, getStaffDisplayName, getStaffUser } from '../utils/auth';
+import { clearStaffUser, getStaffDisplayName, getStaffUser, setAuthToken } from '../utils/auth';
 import DeveloperWidget from '../components/DeveloperWidget.vue';
 import { resolveStorageUrl } from '../utils/storage';
 
@@ -338,6 +361,8 @@ const staffRoleLabel = computed(() => {
 
 const handleLogout = () => {
   clearStaffUser();
+  setAuthToken(null);
+  localStorage.removeItem('student');
   window.location.href = '/login';
 };
 
@@ -349,6 +374,7 @@ const openSections = ref({
   kelas: true,
   laporan: true,
   sistem: true,
+  akun: true,
 });
 
 const toggleSection = (key: keyof typeof openSections.value) => {

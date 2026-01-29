@@ -15,8 +15,8 @@ A Vue 3 + Vite Admin Dashboard for the SMK Math Platform.
   - **Kuis**: Manage quizzes and questions with math support.
 
 ## Prerequisites
-- Node.js & npm (or Bun)
-- Backend API running on `http://localhost:3000` (configurable in `.env`)
+- Node.js & npm
+- Backend API running on `http://localhost:3000` (configurable in `.env` or `public/config.js`)
 
 ## Setup
 
@@ -30,13 +30,15 @@ A Vue 3 + Vite Admin Dashboard for the SMK Math Platform.
    ```
    VITE_API_URL=http://localhost:3000
    ```
-   The dev server is configured to run on port `9001` in `vite.config.ts`.
+   You can also provide runtime config via `public/config.js` (see `config.template.js`).
+   **Do not put credentials or secrets in client config files.**
+   The dev server is configured to run on port `9101` in `vite.config.ts`.
 
 3. **Run Development Server**
    ```bash
    npm run dev
    ```
-   Access the dashboard at `http://localhost:9001`.
+   Access the dashboard at `http://localhost:9101`.
 
 4. **Build for Production**
    ```bash

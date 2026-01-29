@@ -89,6 +89,15 @@
               </div>
               <p class="text-[10px] text-gray-500 mt-2">Masukkan password untuk melanjutkan.</p>
             </div>
+            <div class="mt-3 flex justify-end">
+              <button
+                type="button"
+                class="text-xs text-red-400 hover:text-red-300 font-semibold"
+                @click="openChangePassword"
+              >
+                Ubah Password
+              </button>
+            </div>
           </div>
 
           <div v-else-if="role === 'guru'" class="space-y-4">
@@ -129,6 +138,15 @@
                 </label>
               </div>
               <p class="text-[10px] text-gray-500 mt-2">Masukkan password untuk melanjutkan.</p>
+            </div>
+            <div class="mt-2 flex justify-end">
+              <button
+                type="button"
+                class="text-xs text-red-400 hover:text-red-300 font-semibold"
+                @click="openChangePassword"
+              >
+                Ubah Password
+              </button>
             </div>
             <div class="flex items-center justify-between text-xs text-gray-400">
               <span>Belum punya akun?</span>
@@ -287,6 +305,84 @@
   </Transition>
 
   <Transition name="modal">
+    <div v-if="passwordStage === 'change-password'" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="w-full max-w-md bg-gray-900 border border-emerald-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-600 to-lime-500"></div>
+        <button
+          @click="resetPasswordStage"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div class="p-8">
+          <p class="text-xs uppercase tracking-[0.2em] text-emerald-400">
+            {{ passwordRole === 'guru' ? 'Ubah Password Guru' : 'Ubah Password Siswa' }}
+          </p>
+          <h2 class="text-2xl font-bold text-white mt-2">Perbarui Password</h2>
+          <p class="text-sm text-gray-400 mt-2">Masukkan password lama dan password baru.</p>
+
+          <form @submit.prevent="handleChangePassword" class="mt-6 space-y-4">
+            <div class="relative">
+              <input
+                v-model="currentPassword"
+                type="password"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Password Saat Ini"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Password Saat Ini
+              </label>
+            </div>
+            <div class="relative">
+              <input
+                v-model="newPassword"
+                type="password"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Password Baru"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Password Baru
+              </label>
+            </div>
+            <div class="relative">
+              <input
+                v-model="confirmPassword"
+                type="password"
+                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
+                placeholder="Konfirmasi Password"
+                required
+              />
+              <label
+                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
+              >
+                Konfirmasi Password
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="loading"
+              class="w-full bg-emerald-500 text-black font-black py-3 rounded-xl hover:bg-emerald-400 transition disabled:opacity-50"
+            >
+              SIMPAN PASSWORD
+            </button>
+
+            <div v-if="studentPasswordError" class="bg-emerald-900/40 border border-emerald-500/50 text-emerald-200 p-3 rounded-xl text-xs text-center">
+              {{ studentPasswordError }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <Transition name="modal">
     <div v-if="showRegister" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div class="w-full max-w-md bg-gray-900 border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
         <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-rose-500"></div>
@@ -371,7 +467,7 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
 import { enableDemo, isDemoMode, resetDemo } from '../utils/demo';
-import { setStaffUser } from '../utils/auth';
+import { setAuthToken, setStaffUser } from '../utils/auth';
 import { findTeacherByNip } from '../utils/teachers';
 import { createTeacherRequest } from '../utils/teacherRequests';
 
@@ -387,7 +483,7 @@ const nisn = ref('');
 const nip = ref('');
 const username = ref('');
 const password = ref('');
-const passwordStage = ref<'login' | 'set-password'>('login');
+const passwordStage = ref<'login' | 'set-password' | 'change-password'>('login');
 const passwordRole = ref<'student' | 'guru' | null>(null);
 const pendingAccount = ref<any | null>(null);
 const studentPassword = ref('');
@@ -396,6 +492,7 @@ const studentPasswordPrompted = ref(false);
 const guruPasswordPrompted = ref(false);
 const newPassword = ref('');
 const confirmPassword = ref('');
+const currentPassword = ref('');
 const studentPasswordError = ref('');
 const loading = ref(false);
 const error = ref('');
@@ -408,6 +505,10 @@ const registerForm = ref({
 const registerLoading = ref(false);
 const registerError = ref('');
 const registerSuccess = ref('');
+
+const extractToken = (payload: any) => {
+  return payload?.token || payload?.access_token || payload?.accessToken || payload?.jwt || null;
+};
 
 // Reset fields when role changes
 watch(role, () => {
@@ -425,6 +526,7 @@ watch(role, () => {
   guruPasswordPrompted.value = false;
   newPassword.value = '';
   confirmPassword.value = '';
+  currentPassword.value = '';
   studentPasswordError.value = '';
 });
 
@@ -440,6 +542,7 @@ watch(
       guruPasswordPrompted.value = false;
       newPassword.value = '';
       confirmPassword.value = '';
+      currentPassword.value = '';
       studentPasswordError.value = '';
     }
   }
@@ -451,7 +554,31 @@ const resetPasswordStage = () => {
   pendingAccount.value = null;
   newPassword.value = '';
   confirmPassword.value = '';
+  currentPassword.value = '';
   studentPasswordError.value = '';
+};
+
+const openChangePassword = () => {
+  studentPasswordError.value = '';
+  if (role.value === 'student') {
+    if (!nisn.value.trim()) {
+      studentPasswordError.value = 'Masukkan NISN terlebih dahulu.';
+      return;
+    }
+    passwordRole.value = 'student';
+  } else if (role.value === 'guru') {
+    if (!nip.value.trim()) {
+      studentPasswordError.value = 'Masukkan NIP terlebih dahulu.';
+      return;
+    }
+    passwordRole.value = 'guru';
+  } else {
+    return;
+  }
+  passwordStage.value = 'change-password';
+  currentPassword.value = '';
+  newPassword.value = '';
+  confirmPassword.value = '';
 };
 
 const openRegister = () => {
@@ -524,6 +651,7 @@ const handleLogin = async () => {
         resetDemo();
       }
       localStorage.setItem('student', JSON.stringify(data.user));
+      setAuthToken(extractToken(data));
       emit('logged-in', data.user);
       emit('close');
       router.push('/student');
@@ -541,7 +669,7 @@ const handleLogin = async () => {
       if (isDemoMode()) {
         resetDemo();
       }
-      setStaffUser(data.user);
+      setStaffUser(data.user, extractToken(data));
       emit('logged-in', data.user);
       emit('close');
       router.push('/admin/dashboard');
@@ -555,7 +683,7 @@ const handleLogin = async () => {
       if (isDemoMode()) {
         resetDemo();
       }
-      setStaffUser(data.user);
+      setStaffUser(data.user, extractToken(data));
       emit('logged-in', data.user);
       emit('close');
       router.push('/admin/dashboard');
@@ -652,7 +780,7 @@ const handleSetPassword = async () => {
 
     const user = response?.data?.user;
     if (passwordRole.value === 'guru') {
-      setStaffUser(user);
+      setStaffUser(user, extractToken(response?.data));
       emit('logged-in', user);
       resetPasswordStage();
       emit('close');
@@ -661,12 +789,74 @@ const handleSetPassword = async () => {
     }
 
     localStorage.setItem('student', JSON.stringify(user));
+    setAuthToken(extractToken(response?.data));
     emit('logged-in', user);
     resetPasswordStage();
     emit('close');
     router.push('/student');
   } catch (e: any) {
     studentPasswordError.value = e?.response?.data?.error || e?.message || 'Gagal menyimpan password.';
+  }
+};
+
+const handleChangePassword = async () => {
+  studentPasswordError.value = '';
+  const nisnValue = nisn.value.trim();
+  const nipValue = nip.value.trim();
+  const passwordValue = newPassword.value.trim();
+  const confirmValue = confirmPassword.value.trim();
+  const currentValue = currentPassword.value.trim();
+
+  if (!currentValue || !passwordValue || !confirmValue) {
+    studentPasswordError.value = 'Semua field wajib diisi.';
+    return;
+  }
+  if (passwordValue.length < 6) {
+    studentPasswordError.value = 'Password minimal 6 karakter.';
+    return;
+  }
+  if (passwordValue !== confirmValue) {
+    studentPasswordError.value = 'Konfirmasi password tidak cocok.';
+    return;
+  }
+
+  try {
+    if (passwordRole.value === 'guru') {
+      await api.post('/auth/guru/change-password', {
+        nip: nipValue,
+        current_password: currentValue,
+        new_password: passwordValue,
+      });
+    } else {
+      await api.post('/auth/student/change-password', {
+        nisn: nisnValue,
+        current_password: currentValue,
+        new_password: passwordValue,
+      });
+    }
+    error.value = 'Password berhasil diubah. Silakan login.';
+    resetPasswordStage();
+  } catch (e: any) {
+    const code = e?.response?.data?.code;
+    if (code === 'PASSWORD_NOT_SET') {
+      try {
+        if (passwordRole.value === 'guru') {
+          await api.post('/auth/guru/set-password', { nip: nipValue, password: passwordValue });
+        } else {
+          await api.post('/auth/student/set-password', { nisn: nisnValue, password: passwordValue });
+        }
+        error.value = 'Password berhasil diubah. Silakan login.';
+        resetPasswordStage();
+        return;
+      } catch (fallbackError: any) {
+        studentPasswordError.value =
+          fallbackError?.response?.data?.error ||
+          fallbackError?.message ||
+          'Gagal mengubah password.';
+        return;
+      }
+    }
+    studentPasswordError.value = e?.response?.data?.error || e?.message || 'Gagal mengubah password.';
   }
 };
 

@@ -15,7 +15,17 @@
             <div>
               <p :class="['text-xs uppercase tracking-[0.2em]', eyebrowClass]">{{ eyebrowText }}</p>
               <h3 class="text-xl font-semibold mt-2">{{ state.title }}</h3>
-              <p class="text-sm text-slate-300 mt-3 whitespace-pre-line">{{ state.message }}</p>
+              <p
+                v-if="state.messageType === 'text'"
+                class="text-sm text-slate-300 mt-3 whitespace-pre-line"
+              >
+                {{ state.message }}
+              </p>
+              <div
+                v-else
+                class="text-sm text-slate-300 mt-3"
+                v-html="state.message"
+              ></div>
             </div>
             <button class="text-slate-400 hover:text-white" @click="handleCancel">✕</button>
           </div>

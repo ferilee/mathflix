@@ -5,7 +5,12 @@ import {
 } from "vue-router";
 import AdminLayout from "../layouts/AdminLayout.vue";
 import Dashboard from "../views/Dashboard.vue";
-import { getStaffUser } from "../utils/auth";
+import {
+  clearStaffUser,
+  getAuthStrategy,
+  getAuthToken,
+  getStaffUser,
+} from "../utils/auth";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -50,6 +55,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "s-badges",
         component: () => import("../views/StudentBadges.vue"),
+      },
+      {
+        path: "profile",
+        component: () => import("../views/StudentProfile.vue"),
       },
     ],
   },
@@ -180,7 +189,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "settings",
         name: "AdminSettings",
         component: () => import("../views/AdminSettings.vue"),
-        meta: { title: "Pengaturan", roles: ["admin"] },
+        meta: { title: "Pengaturan", roles: ["admin", "guru"] },
       },
       {
         path: "audit-log",
@@ -201,6 +210,11 @@ router.beforeEach((to) => {
   if (!to.path.startsWith("/admin")) return true;
   const staffUser = getStaffUser();
   if (!staffUser) {
+    return { path: "/login", query: { redirect: to.fullPath } };
+  }
+  const authStrategy = getAuthStrategy();
+  if (authStrategy === "token" && !getAuthToken()) {
+    clearStaffUser();
     return { path: "/login", query: { redirect: to.fullPath } };
   }
   const allowedRoles = to.meta.roles as string[] | undefined;

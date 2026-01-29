@@ -158,14 +158,32 @@
               {{ new Date(teacher.created_at).toLocaleDateString() }}
             </td>
             <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-2">
               <button
                 @click="resetPassword(teacher)"
-                class="text-emerald-600 hover:text-emerald-700"
+                class="p-2 rounded text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
+                title="Reset Password"
+                aria-label="Reset Password"
               >
-                Reset Password
+                <span aria-hidden="true">🔑</span>
               </button>
-              <button @click="remove(teacher.id)" class="text-red-600 hover:text-red-700">Hapus</button>
-              <button @click="openPayments(teacher)" class="ml-3 text-indigo-600 hover:text-indigo-700">Riwayat</button>
+              <button
+                @click="remove(teacher.id)"
+                class="p-2 rounded text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                title="Hapus"
+                aria-label="Hapus"
+              >
+                <span aria-hidden="true">🗑️</span>
+              </button>
+              <button
+                @click="openPayments(teacher)"
+                class="p-2 rounded text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                title="Riwayat"
+                aria-label="Riwayat"
+              >
+                <span aria-hidden="true">🧾</span>
+              </button>
+              </div>
             </td>
           </tr>
           <tr v-if="teachers.length === 0">

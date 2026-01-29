@@ -64,14 +64,24 @@
               </div>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400">Kelas</label>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400">Class</label>
               <div class="mt-2 flex flex-wrap gap-2">
-                <label v-for="cohort in cohorts" :key="cohort.id" class="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded">
-                  <input type="checkbox" class="mr-1" :value="cohort.id" v-model="form.target_cohorts">
-                  {{ cohort.name }}
+                <label v-for="className in classes" :key="className" class="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded">
+                  <input type="checkbox" class="mr-1" :value="className" v-model="form.target_classes">
+                  {{ className }}
                 </label>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400">Cohort</label>
+          <div class="mt-2 flex flex-wrap gap-2" :class="form.target_all ? 'opacity-50 pointer-events-none' : ''">
+            <label v-for="cohort in cohorts" :key="cohort.id" class="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded">
+              <input type="checkbox" class="mr-1" :value="cohort.id" v-model="form.target_cohorts">
+              {{ cohort.name }}
+            </label>
           </div>
         </div>
 
@@ -137,8 +147,9 @@
                  <div v-if="item.target_all" class="font-semibold">Semua siswa</div>
                  <div v-else class="space-y-1">
                    <div v-if="item.target_grades?.length">Grade: {{ item.target_grades.join(', ') }}</div>
-                   <div v-if="item.target_majors?.length">Jurusan: {{ item.target_majors.join(', ') }}</div>
-                   <div v-if="item.target_cohorts?.length">Kelas: {{ resolveCohortNames(item.target_cohorts).join(', ') }}</div>
+                   <div v-if="item.target_majors?.length">Department: {{ item.target_majors.join(', ') }}</div>
+                   <div v-if="item.target_classes?.length">Class: {{ item.target_classes.join(', ') }}</div>
+                   <div v-if="item.target_cohorts?.length">Cohort: {{ resolveCohortNames(item.target_cohorts).join(', ') }}</div>
                  </div>
                </td>
                <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
@@ -163,7 +174,9 @@
                      <div v-for="reader in readers" :key="reader.student_id" class="flex items-center justify-between p-2 border-b border-slate-200 dark:border-slate-700 text-xs">
                        <div>
                          <div class="font-semibold text-gray-700 dark:text-gray-200">{{ reader.full_name }} ({{ reader.nisn }})</div>
-                         <div class="text-[10px] text-gray-400">{{ reader.major }} · Grade {{ reader.grade_level }}</div>
+                         <div class="text-[10px] text-gray-400">
+                           {{ reader.major }} · Grade {{ reader.grade_level }} · Class {{ reader.class_name || '—' }}
+                         </div>
                        </div>
                        <div :class="reader.has_read ? 'text-emerald-600' : 'text-gray-500'">
                          {{ reader.has_read ? 'Dibaca' : 'Belum' }}
@@ -197,6 +210,7 @@ const form = ref({
   target_all: true,
   target_grades: [] as number[],
   target_majors: [] as string[],
+  target_classes: [] as string[],
   target_cohorts: [] as string[],
   attachments: [] as Array<{ type: string; url: string; name?: string; size?: number }>,
   is_pinned: false,
@@ -204,6 +218,7 @@ const form = ref({
 });
 const grades = ref<number[]>([]);
 const majors = ref<string[]>([]);
+const classes = ref<string[]>([]);
 const cohorts = ref<any[]>([]);
 const linkLabel = ref('');
 const linkUrl = ref('');
@@ -214,6 +229,8 @@ const readersLoading = ref(false);
 const staffUser = ref(getStaffUser());
 const actorId = ref(getStaffActorId(staffUser.value));
 const isGuru = ref(staffUser.value?.role === 'guru');
+const teacherId = staffUser.value?.nip || staffUser.value?.full_name || getStaffActorId(staffUser.value);
+const teacherName = staffUser.value?.full_name || staffUser.value?.nip || '';
 
 const loadData = async () => {
    try {
@@ -246,6 +263,7 @@ const createAnnouncement = async () => {
           target_all: true,
           target_grades: [],
           target_majors: [],
+          target_classes: [],
           target_cohorts: [],
           attachments: [],
           is_pinned: false,
@@ -287,19 +305,32 @@ const deleteAnnouncement = async (id: string) => {
 
 const loadTargets = async () => {
   try {
+    const studentParams: Record<string, any> = { limit: 5000 };
+    if (isGuru.value) {
+      studentParams.teacher_id = teacherId;
+      studentParams.teacher_name = teacherName;
+    }
     const [studentRes, cohortRes] = await Promise.all([
-      api.get('/students', { params: { limit: 5000 } }),
-      api.get('/cohorts')
+      api.get('/students', { params: studentParams }),
+      api.get('/cohorts', { params: isGuru.value ? { created_by: teacherId } : undefined })
     ]);
-    const studentList = studentRes.data?.data || studentRes.data || [];
+    let studentList = studentRes.data?.data || studentRes.data || [];
+    if (isGuru.value && studentList.length === 0 && teacherName) {
+      const fallback = await api.get('/students', { params: { limit: 5000, teacher_name: teacherName } });
+      studentList = fallback.data?.data || fallback.data || [];
+    }
     const uniqueMajors = new Set<string>();
     const uniqueGrades = new Set<number>();
+    const uniqueClasses = new Set<string>();
     studentList.forEach((s: any) => {
       if (s.major) uniqueMajors.add(s.major);
       if (s.grade_level) uniqueGrades.add(Number(s.grade_level));
+      const classValue = s.class_name || s.className || s.class || '';
+      if (classValue) uniqueClasses.add(String(classValue));
     });
     majors.value = Array.from(uniqueMajors).sort();
     grades.value = Array.from(uniqueGrades).sort((a, b) => a - b);
+    classes.value = Array.from(uniqueClasses).sort((a, b) => a.localeCompare(b));
     cohorts.value = cohortRes.data || [];
   } catch (e) {
     console.error('Failed to load targets', e);

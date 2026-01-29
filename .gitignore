@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 minio_data/.minio.sys/
+config.js
+public/config.js
 
 # Editor directories and files
 .vscode/*
