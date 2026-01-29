@@ -315,7 +315,7 @@
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr v-for="(student, index) in students" :key="student.id" class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+          <tr v-for="student in students" :key="student.id" class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
             <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300 font-mono text-center">{{ student.nisn }}</td>
             <td class="px-6 py-4 whitespace-nowrap font-medium text-center">{{ student.full_name }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-center">{{ student.grade_level }}</td>
@@ -767,14 +767,6 @@ const fetchLatestActivity = async () => {
   }
 };
 
-const formatDuration = (seconds?: number | null) => {
-  if (!seconds || seconds <= 0) return 'Durasi tidak tersedia';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  if (mins < 1) return `${secs}s`;
-  return `${mins}m ${secs}s`;
-};
-
 const formatRupiah = (value: number) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -1128,7 +1120,7 @@ const editStudent = (student: Student) => {
     school: student.school || '',
     major: student.major || '',
     class_name: student.class_name || '',
-    grade_level: student.grade_level ?? ''
+    grade_level: student.grade_level != null ? String(student.grade_level) : ''
   };
   showForm.value = true;
 };
@@ -1180,31 +1172,6 @@ const deleteStudent = async (id: string) => {
     await fetchStudents();
   } catch (e) {
     await dialog.alert("Gagal menghapus siswa");
-  }
-};
-
-const resetStudentPassword = async (student: Student) => {
-  const ok = await dialog.confirm(
-    `Reset password siswa ${student.full_name}? Sistem akan membuat password sementara.`,
-    'Konfirmasi Reset Password',
-  );
-  if (!ok) return;
-  try {
-    const { data } = await api.post('/auth/student/reset-password', {
-      nisn: student.nisn,
-    });
-    const tempPassword = data?.temp_password;
-    await dialog.alert(
-      tempPassword
-        ? `Password sementara: ${tempPassword}\\nSimpan sekarang, hanya ditampilkan sekali.`
-        : 'Password siswa berhasil direset.',
-      'Reset Password Siswa',
-    );
-  } catch (err: any) {
-    await dialog.alert(
-      err?.response?.data?.error || err?.message || 'Gagal reset password siswa.',
-      'Reset Password Siswa',
-    );
   }
 };
 

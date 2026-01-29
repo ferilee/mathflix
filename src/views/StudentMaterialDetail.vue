@@ -183,22 +183,46 @@ const currentStageToolType = computed(() => {
 });
 
 
+const normalizeTarget = (value: any) => String(value ?? '').trim().toLowerCase();
+const isAllTarget = (value: any) => {
+    const normalized = normalizeTarget(value);
+    return normalized === '' || normalized === 'semua' || normalized === 'all';
+};
+
 const isMaterialAllowed = (target: any, viewer: any) => {
     if (!viewer) return false;
     const targetGrade = target?.target_grade;
     const targetMajor = target?.major_target;
-    const matchesGrade = targetGrade === null || targetGrade === undefined || Number(targetGrade) === Number(viewer.grade_level);
-    const matchesMajor = !targetMajor || targetMajor === 'Semua' || targetMajor === viewer.major;
-    return matchesGrade && matchesMajor;
+    const targetClass = target?.target_class;
+    const targetSchool = target?.target_school;
+    const matchesGrade =
+        targetGrade === null ||
+        targetGrade === undefined ||
+        targetGrade === '' ||
+        Number(targetGrade) === Number(viewer.grade_level);
+    const matchesMajor =
+        isAllTarget(targetMajor) || normalizeTarget(targetMajor) === normalizeTarget(viewer.major);
+    const viewerClass = viewer.class_name || viewer.className || viewer.class;
+    const matchesClass =
+        isAllTarget(targetClass) || normalizeTarget(targetClass) === normalizeTarget(viewerClass);
+    const matchesSchool =
+        isAllTarget(targetSchool) || normalizeTarget(targetSchool) === normalizeTarget(viewer.school);
+    return matchesGrade && matchesMajor && matchesClass && matchesSchool;
 };
 
 const buildAccessMessage = (target: any) => {
     const parts: string[] = [];
-    if (target?.target_grade !== null && target?.target_grade !== undefined) {
+    if (target?.target_grade !== null && target?.target_grade !== undefined && target?.target_grade !== '') {
         parts.push(`kelas ${target.target_grade}`);
     }
-    if (target?.major_target && target.major_target !== 'Semua') {
+    if (target?.major_target && !isAllTarget(target.major_target)) {
         parts.push(`jurusan ${target.major_target}`);
+    }
+    if (target?.target_class && !isAllTarget(target.target_class)) {
+        parts.push(`class ${target.target_class}`);
+    }
+    if (target?.target_school && !isAllTarget(target.target_school)) {
+        parts.push(`sekolah ${target.target_school}`);
     }
     if (parts.length === 0) {
         return 'Materi ini tidak tersedia untuk akun Anda.';

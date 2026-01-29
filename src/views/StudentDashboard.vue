@@ -181,13 +181,31 @@ const stripHtml = (html: string) => {
    return tmp.textContent || tmp.innerText || "";
 }
 
+const normalizeTarget = (value: any) => String(value ?? '').trim().toLowerCase();
+const isAllTarget = (value: any) => {
+    const normalized = normalizeTarget(value);
+    return normalized === '' || normalized === 'semua' || normalized === 'all';
+};
+
 const isMaterialAllowed = (material: any) => {
     if (!student.value) return false;
     const targetGrade = material?.target_grade;
     const targetMajor = material?.major_target;
-    const matchesGrade = targetGrade === null || targetGrade === undefined || Number(targetGrade) === Number(student.value.grade_level);
-    const matchesMajor = !targetMajor || targetMajor === 'Semua' || targetMajor === student.value.major;
-    return matchesGrade && matchesMajor;
+    const targetClass = material?.target_class;
+    const targetSchool = material?.target_school;
+    const matchesGrade =
+        targetGrade === null ||
+        targetGrade === undefined ||
+        targetGrade === '' ||
+        Number(targetGrade) === Number(student.value.grade_level);
+    const matchesMajor =
+        isAllTarget(targetMajor) || normalizeTarget(targetMajor) === normalizeTarget(student.value.major);
+    const viewerClass = student.value.class_name || student.value.className || student.value.class;
+    const matchesClass =
+        isAllTarget(targetClass) || normalizeTarget(targetClass) === normalizeTarget(viewerClass);
+    const matchesSchool =
+        isAllTarget(targetSchool) || normalizeTarget(targetSchool) === normalizeTarget(student.value.school);
+    return matchesGrade && matchesMajor && matchesClass && matchesSchool;
 };
 
 const openMaterial = (id: string) => {

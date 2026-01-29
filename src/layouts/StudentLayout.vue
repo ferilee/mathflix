@@ -476,7 +476,8 @@ const refreshCropPreview = async () => {
 const handlePhotoSelected = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (!input.files || input.files.length === 0) return;
-  const file = input.files[0];
+  const file = input.files.item(0);
+  if (!file) return;
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   if (!allowedTypes.includes(file.type)) {
     photoError.value = 'Format file harus JPG/PNG/WEBP/GIF.';

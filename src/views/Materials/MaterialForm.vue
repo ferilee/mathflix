@@ -44,7 +44,7 @@
            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
             <div class="md:col-span-1">
                 <div class="relative z-0 w-full mb-6 group">
                     <select
@@ -53,7 +53,7 @@
                         class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     >
                         <option class="text-black" value="Semua">Semua Jurusan</option>
-                        <option v-for="major in MAJOR_OPTIONS" :key="major.value" :value="major.value" class="text-black">{{ major.label }}</option>
+                        <option v-for="major in majorOptions" :key="major.value" :value="major.value" class="text-black">{{ major.label }}</option>
                     </select>
                     <label
                         for="major"
@@ -83,11 +83,46 @@
                     </label>
                 </div>
             </div>
-            <div class="md:col-span-1 flex items-end pb-8">
-                 <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" v-model="form.is_featured" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
-                    <span class="text-sm font-medium text-gray-900 dark:text-gray-300">Featured Topic?</span>
-                 </label>
+            <div class="md:col-span-1">
+              <div class="relative z-0 w-full mb-6 group">
+                <input
+                  v-model="form.target_class"
+                  id="target_class"
+                  type="text"
+                  class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                  placeholder=" "
+                />
+                <label
+                  for="target_class"
+                  class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                >
+                  Kelas (Class) Target
+                </label>
+              </div>
+            </div>
+            <div class="md:col-span-1">
+              <div class="relative z-0 w-full mb-6 group">
+                <input
+                  v-model="form.target_school"
+                  id="target_school"
+                  type="text"
+                  class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                  placeholder=" "
+                />
+                <label
+                  for="target_school"
+                  class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                >
+                  Sekolah Target
+                </label>
+              </div>
+            </div>
+            <div class="md:col-span-2 flex items-center gap-3 pb-2">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" v-model="form.is_featured" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-300">Featured Topic?</span>
+              </label>
+              <span class="text-xs text-gray-400">Kosongkan target agar materi tersedia untuk semua siswa.</span>
             </div>
         </div>
       </div>
@@ -231,12 +266,17 @@ const isEdit = computed(() => !!route.params.id);
 const staffUser = getStaffUser();
 const staffActorId = getStaffActorId(staffUser);
 const dialog = useDialog();
+const teacherId = staffUser?.nip || staffUser?.full_name || '';
+const teacherName = staffUser?.full_name || '';
+const majorOptions = ref<{ label: string; value: string }[]>([...MAJOR_OPTIONS]);
 
 interface MaterialForm {
     title: string;
     description: string;
     major_target: string;
     target_grade: number | null;
+    target_class: string;
+    target_school: string;
     teacher_name: string;
     is_featured: boolean;
     embedded_tool_url: string; // Legacy
@@ -260,6 +300,8 @@ const form = ref<MaterialForm>({
   description: '',
   major_target: 'Semua',
   target_grade: null,
+  target_class: '',
+  target_school: '',
   teacher_name: 'Feri Dwi Hermawan', // Default
   is_featured: false,
   embedded_tool_url: '', // Legacy
@@ -324,7 +366,39 @@ const currentStageToolUrl = computed({
     }
 });
 
+const loadMajorOptions = async () => {
+  try {
+    const studentParams: Record<string, any> = { limit: 5000 };
+    if (staffUser?.role === 'guru') {
+      studentParams.teacher_id = teacherId;
+      studentParams.teacher_name = teacherName;
+    }
+    let studentListResponse = await api.get('/students', { params: studentParams });
+    let studentList = studentListResponse.data?.data || studentListResponse.data || [];
+    if (staffUser?.role === 'guru' && studentList.length === 0 && teacherName) {
+      const fallback = await api.get('/students', { params: { limit: 5000, teacher_name: teacherName } });
+      studentList = fallback.data?.data || fallback.data || [];
+    }
+    const majors = new Set<string>();
+    studentList.forEach((s: any) => {
+      if (s.major) majors.add(String(s.major));
+    });
+    const derived = Array.from(majors)
+      .filter((m) => m.trim() !== '')
+      .sort((a, b) => a.localeCompare(b))
+      .map((m) => ({ label: m, value: m }));
+    if (derived.length > 0) {
+      majorOptions.value = derived;
+    } else {
+      majorOptions.value = [...MAJOR_OPTIONS];
+    }
+  } catch (e) {
+    majorOptions.value = [...MAJOR_OPTIONS];
+  }
+};
+
 onMounted(async () => {
+  await loadMajorOptions();
   if (!isEdit.value && staffUser?.role === 'guru' && staffUser.full_name) {
     form.value.teacher_name = staffUser.full_name;
   }
@@ -335,6 +409,8 @@ onMounted(async () => {
       form.value.description = data.description || '';
       form.value.major_target = data.major_target || 'Semua';
       form.value.target_grade = data.target_grade ?? null;
+      form.value.target_class = data.target_class || '';
+      form.value.target_school = data.target_school || '';
       form.value.teacher_name = data.teacher_name || 'Feri Dwi Hermawan';
       form.value.is_featured = !!data.is_featured;
       form.value.embedded_tool_url = data.embedded_tool_url || '';
@@ -428,6 +504,8 @@ const saveMaterial = async () => {
             content: payload.content || '<p>Content not specified</p>',
             major_target: payload.major_target || 'Semua',
             target_grade: payload.target_grade ?? null,
+            target_class: payload.target_class || '',
+            target_school: payload.target_school || '',
             teacher_name: enforcedTeacherName,
             created_by: createdByValue || undefined,
             is_featured: Boolean(payload.is_featured),

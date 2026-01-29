@@ -88,9 +88,9 @@
             v-for="(item, index) in storageImages"
             :key="item.key || index"
             class="aspect-square rounded-md overflow-hidden cursor-pointer border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-all"
-            @click="selectSample(item.url)"
+            @click="selectStorageItem(item)"
           >
-            <img :src="resolveStorageUrl(item.url)" :alt="item.key" class="w-full h-full object-cover">
+            <img :src="resolveStorageUrl(getStoragePath(item))" :alt="item.key" class="w-full h-full object-cover">
           </div>
         </div>
       </div>
@@ -163,7 +163,7 @@ const uploading = ref(false);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const activeTab = ref<'url' | 'upload' | 'browse'>('url'); // Default to URL tab
 const isDragging = ref(false);
-const storageImages = ref<{ key: string; url: string }[]>([]);
+const storageImages = ref<{ key: string; url?: string; path?: string }[]>([]);
 const storageLoading = ref(false);
 const storageError = ref('');
 const previewSrc = computed(() => (localValue.value ? resolveStorageUrl(localValue.value) : ''));
@@ -354,6 +354,21 @@ const handleImageUpload = async (event: Event) => {
 };
 
 // Select a sample image
+const getStoragePath = (item: { key: string; url?: string; path?: string }) => {
+  if (item.url) return item.url;
+  if (item.path) return item.path;
+  if (item.key) return `/storage/${item.key}`;
+  return '';
+};
+
+const selectStorageItem = (item: { key: string; url?: string; path?: string }) => {
+  const path = getStoragePath(item);
+  if (!path) return;
+  localValue.value = path;
+  imageError.value = false;
+  activeTab.value = 'url';
+};
+
 const selectSample = (imageUrl: string) => {
   localValue.value = imageUrl;
   imageError.value = false;

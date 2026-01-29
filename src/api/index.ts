@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 import { clearStaffUser, getAuthStrategy, getAuthToken } from "../utils/auth";
 
 // Check for runtime configuration first, fallback to build-time env
@@ -20,10 +20,9 @@ api.interceptors.request.use((config) => {
   const token = getAuthToken();
   if (token) {
     const normalized = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-    config.headers = {
-      ...config.headers,
-      Authorization: normalized,
-    };
+    const headers = AxiosHeaders.from(config.headers);
+    headers.set("Authorization", normalized);
+    config.headers = headers;
   }
   return config;
 });

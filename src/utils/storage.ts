@@ -18,12 +18,24 @@ export const resolveStorageUrl = (path: string | null | undefined) => {
     import.meta.env.VITE_API_URL ||
     "http://localhost:3000";
 
+  const encodeStoragePath = (rawPath: string) => {
+    const prefix = "/storage/";
+    if (!rawPath.startsWith(prefix)) return rawPath;
+    const key = rawPath.slice(prefix.length);
+    const encodedKey = key
+      .split("/")
+      .map((segment) => encodeURIComponent(segment))
+      .join("/");
+    return `${prefix}${encodedKey}`;
+  };
+
   // If path starts with /storage/, replace it with the storage base
   if (path.startsWith("/storage/")) {
+    const safePath = encodeStoragePath(path);
     if (storageBase) {
-      return `${storageBase.replace(/\/$/, "")}${path}`;
+      return `${storageBase.replace(/\/$/, "")}${safePath}`;
     }
-    return `${apiBase.replace(/\/$/, "")}${path}`;
+    return `${apiBase.replace(/\/$/, "")}${safePath}`;
   }
 
   // Fallback for legacy /uploads/
