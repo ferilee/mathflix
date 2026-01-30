@@ -17,17 +17,35 @@ const renderedContent = computed(() => {
   // HOWEVER, the logic usually is:
   // 1. We receive HTML from Quill (which might contain text like "Compute $$x^2$$").
   // 2. We want to replace valid delimiters with KaTeX rendered HTML.
-  
+
   // Simple regex-based replacement for $$...$$ and \(...\)
-  // Note: This is a basic implementation. For production robust parsing, better libraries exist, 
+  // Note: This is a basic implementation. For production robust parsing, better libraries exist,
   // but for this task we implement a simple replacer.
 
   let html = props.content;
 
-  // Replace $$...$$ (Display Mode)
+  // Display mode only when $$...$$ is the only content in a paragraph.
+  html = html.replace(/<p>\s*\$\$(.+?)\$\$\s*<\/p>/g, (match, formula) => {
+    try {
+      return `<p>${katex.renderToString(formula, { displayMode: true, throwOnError: false })}</p>`;
+    } catch (e) {
+      return match;
+    }
+  });
+
+  // Replace remaining $$...$$ as inline to keep it on the same line with text.
   html = html.replace(/\$\$(.+?)\$\$/g, (match, formula) => {
     try {
-      return katex.renderToString(formula, { displayMode: true, throwOnError: false });
+      return katex.renderToString(formula, { displayMode: false, throwOnError: false });
+    } catch (e) {
+      return match;
+    }
+  });
+
+  // Replace $...$ as inline math (avoid $$...$$ which is handled above).
+  html = html.replace(/(?<!\\)\$(?!\$)(.+?)(?<!\\)\$/g, (match, formula) => {
+    try {
+      return katex.renderToString(formula, { displayMode: false, throwOnError: false });
     } catch (e) {
       return match;
     }
@@ -41,7 +59,7 @@ const renderedContent = computed(() => {
       return match;
     }
   });
-  
+
   // Also support \[...\] for Display Mode
    html = html.replace(/\\\[(.+?)\\\]/g, (match, formula) => {
     try {
