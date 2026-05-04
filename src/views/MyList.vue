@@ -6,7 +6,7 @@
       <div class="text-6xl mb-4">📂</div>
       <h2 class="text-xl font-bold text-gray-300">Belum ada konten di daftar Anda</h2>
       <p class="text-gray-500 mt-2">Tandai materi atau kuis favorit Anda untuk melihatnya di sini.</p>
-      <router-link to="/student" class="mt-6 bg-red-600 px-6 py-2 rounded text-white font-bold hover:bg-red-700 transition">
+      <router-link to="/" class="mt-6 bg-red-600 px-6 py-2 rounded text-white font-bold hover:bg-red-700 transition">
         Cari Konten
       </router-link>
     </div>
@@ -16,7 +16,7 @@
          v-for="item in myList"
          :key="item.id"
          class="bg-gray-800 rounded-md overflow-hidden hover:scale-105 transition duration-300 cursor-pointer relative group"
-         @click="$router.push(`/student/material/${item.id}`)"
+         @click="$router.push(`/material/${item.id}`)"
        >
           <!-- Placeholder Image -->
           <div class="h-40 w-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center p-4">

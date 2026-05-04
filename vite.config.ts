@@ -42,19 +42,27 @@ export default defineConfig({
     }),
   ],
   server: {
-    port: 9101,
+    port: 9111,
     strictPort: true,
     proxy: {
-      "/students": { target: "http://localhost:3001", changeOrigin: true },
-      "/materials": { target: "http://localhost:3001", changeOrigin: true },
-      "/quizzes": { target: "http://localhost:3001", changeOrigin: true },
-      "/questions": { target: "http://localhost:3001", changeOrigin: true },
-      "/announcements": { target: "http://localhost:3001", changeOrigin: true },
-      "/analytics": { target: "http://localhost:3001", changeOrigin: true },
-      "/discussions": { target: "http://localhost:3001", changeOrigin: true },
-      "/assignments": { target: "http://localhost:3001", changeOrigin: true },
-      "/reflections": { target: "http://localhost:3001", changeOrigin: true },
-      "/badges": { target: "http://localhost:3001", changeOrigin: true },
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router'],
+          'quill': ['@vueup/vue-quill'],
+          'katex': ['katex']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
+  }
 });

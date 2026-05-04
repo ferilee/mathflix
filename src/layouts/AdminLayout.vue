@@ -2,8 +2,8 @@
   <div class="admin-netflix flex min-h-screen transition-colors duration-300 dark">
     <!-- Sidebar (Desktop) -->
     <aside class="w-64 bg-black/70 text-white flex-col hidden md:flex border-r border-white/10 backdrop-blur">
-      <div class="p-6 text-2xl font-bold tracking-wide border-b border-white/10 admin-title">
-        Mathflix Guru
+      <div class="p-6 text-2xl font-black tracking-widest text-amber-500 uppercase border-b border-white/10 drop-shadow-md flex items-center gap-2">
+        <span class="text-3xl">👑</span> Guild Master
       </div>
       <nav class="flex-1 px-4 py-6 space-y-4">
         <div class="space-y-2">
@@ -12,7 +12,7 @@
             class="w-full flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 hover:text-white"
             @click="toggleSection('utama')"
           >
-            Utama
+            Realm
             <span class="text-xs">{{ openSections.utama ? '–' : '+' }}</span>
           </button>
           <div v-show="openSections.utama" class="space-y-2">
@@ -22,7 +22,7 @@
         </router-link>
         <router-link v-if="isAdmin || isGuru" to="/admin/students" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          Siswa
+          Heroes (Siswa)
         </router-link>
           </div>
         </div>
@@ -32,7 +32,7 @@
             class="w-full flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 hover:text-white"
             @click="toggleSection('konten')"
           >
-            Konten
+            Quests & Lore
             <span class="text-xs">{{ openSections.konten ? '–' : '+' }}</span>
           </button>
           <div v-show="openSections.konten" class="space-y-2">
@@ -42,15 +42,15 @@
         </router-link>
         <router-link to="/admin/materials" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-          Materi
+          Regions (Materi)
         </router-link>
         <router-link to="/admin/quizzes" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path></svg>
-           Kuis
+           Boss Battles (Kuis)
         </router-link>
         <router-link v-if="isAdmin" to="/admin/question-bank" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M8 6h8"></path><path d="M8 10h8"></path></svg>
-          Bank Soal
+          Lore Bank (Soal)
         </router-link>
         <router-link v-if="isAdmin" to="/admin/material-analytics" class="nav-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
@@ -64,17 +64,17 @@
             class="w-full flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 hover:text-white"
             @click="toggleSection('komunikasi')"
           >
-            Komunikasi
+            Tavern (Komunikasi)
             <span class="text-xs">{{ openSections.komunikasi ? '–' : '+' }}</span>
           </button>
           <div v-show="openSections.komunikasi" class="space-y-2">
         <router-link to="/admin/announcements" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-           Pengumuman
+           Town Crier (Info)
         </router-link>
         <router-link v-if="isAdmin" to="/admin/discuss" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-           Diskusi
+           Guild Chat (Diskusi)
         </router-link>
           </div>
         </div>
@@ -84,13 +84,13 @@
             class="w-full flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 hover:text-white"
             @click="toggleSection('kelas')"
           >
-            Kelas
+            Adventures
             <span class="text-xs">{{ openSections.kelas ? '–' : '+' }}</span>
           </button>
           <div v-show="openSections.kelas" class="space-y-2">
         <router-link to="/admin/assignments" class="nav-item">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-           Tugas
+           Bounties (Tugas)
         </router-link>
           </div>
         </div>

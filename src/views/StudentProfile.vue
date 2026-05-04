@@ -6,17 +6,63 @@
         <p class="text-sm text-slate-400">Kelola foto profil dan informasi dasar akun.</p>
       </div>
 
-      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div class="flex flex-col md:flex-row md:items-center gap-6">
-          <div class="w-24 h-24 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center">
-            <img v-if="student?.photo_profile" :src="resolveStorageUrl(student.photo_profile)" alt="Profile" class="w-full h-full object-cover">
-            <span v-else class="text-xs text-slate-500">Foto</span>
+      <div class="bg-gradient-to-br from-slate-900 to-black border-2 border-slate-700 rounded-2xl p-6 shadow-[0_0_20px_rgba(0,0,0,0.8)] relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute right-0 top-0 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-rose-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row md:items-center gap-8 relative z-10">
+          <div class="relative w-32 h-32 rounded-full border-4 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.6)] bg-slate-800 overflow-hidden flex items-center justify-center shrink-0">
+            <img v-if="student?.photo_profile" :src="resolveStorageUrl(student.photo_profile)" alt="Profile" class="w-full h-full object-cover relative z-10">
+            <span v-else class="text-4xl text-slate-500 font-black relative z-10">?</span>
+            <div class="absolute bottom-0 w-full h-8 bg-black/80 backdrop-blur-md flex items-center justify-center z-20">
+               <span class="text-xs font-bold text-indigo-300 uppercase tracking-widest drop-shadow-md">LVL. {{ student?.level || 1 }}</span>
+            </div>
           </div>
-          <div class="flex-1 space-y-2">
-            <div class="text-lg font-bold text-white">{{ student?.full_name || 'Siswa' }}</div>
-            <div class="text-xs text-slate-400">NISN: {{ student?.nisn || '-' }}</div>
-            <div class="text-xs text-slate-400">Jurusan: {{ student?.major || '-' }}</div>
-            <div class="text-xs text-slate-400">Grade: {{ student?.grade_level ?? '-' }}</div>
+          
+          <div class="flex-1 space-y-4">
+            <div>
+               <div class="text-3xl font-black text-white drop-shadow-md tracking-wider flex items-center gap-3">
+                  {{ student?.full_name || 'Unknown Hero' }}
+                  <span v-if="student?.status === 'Need Healing' || student?.status === 'DEBUFF'" class="text-[10px] bg-purple-900/80 text-purple-300 px-2 py-1 rounded border border-purple-500 uppercase tracking-widest">[DEBUFF]</span>
+               </div>
+               <div class="text-sm font-mono text-indigo-300 uppercase tracking-widest mt-1">Class: {{ student?.major || 'Novice' }}</div>
+            </div>
+            
+            <div class="space-y-3 mt-4 bg-black/40 p-4 rounded-xl border border-slate-800/50">
+               <!-- HP Bar (Health/Kehadiran) -->
+               <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                     <span class="text-rose-400 uppercase tracking-widest">❤️ HP (Kehadiran)</span>
+                     <span class="text-rose-300">{{ student?.hp ?? 100 }}/100</span>
+                  </div>
+                  <div class="h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                     <div class="h-full bg-gradient-to-r from-rose-700 to-rose-400 transition-all duration-1000" :style="`width: ${student?.hp ?? 100}%`"></div>
+                  </div>
+               </div>
+
+               <!-- XP Bar (Experience/Nilai) -->
+               <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                     <span class="text-blue-400 uppercase tracking-widest">🌟 XP (Experience)</span>
+                     <span class="text-blue-300">{{ student?.xp ?? 0 }} XP</span>
+                  </div>
+                  <div class="h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                     <div class="h-full bg-gradient-to-r from-blue-700 to-blue-400 transition-all duration-1000" :style="`width: ${Math.min(((student?.xp ?? 0) % 1000) / 10, 100)}%`"></div>
+                  </div>
+               </div>
+
+               <!-- AP Bar (Activity Points) -->
+               <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                     <span class="text-emerald-400 uppercase tracking-widest">⚡ AP (Activity)</span>
+                     <span class="text-emerald-300">{{ student?.ap ?? 0 }} AP</span>
+                  </div>
+                  <div class="h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800 shadow-inner">
+                     <div class="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-1000" :style="`width: ${Math.min(((student?.ap ?? 0) % 500) / 5, 100)}%`"></div>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </div>

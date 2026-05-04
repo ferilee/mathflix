@@ -42,25 +42,25 @@ type TourStep = {
 
 const steps: TourStep[] = [
   {
-    route: "/student",
+    route: "/",
     selector: '[data-tour="hero"]',
     title: "Dashboard",
     body: "Ini beranda utama. Di sini kamu lihat ringkasan materi unggulan.",
   },
   {
-    route: "/student",
+    route: "/",
     selector: '[data-tour="materials"]',
     title: "Materi Populer",
     body: "Gulir kartu materi untuk mulai belajar.",
   },
   {
-    route: "/student",
+    route: "/",
     selector: '[data-tour="recommendations"]',
     title: "Rekomendasi",
     body: "Sistem akan merekomendasikan materi sesuai progres.",
   },
   {
-    route: "/student",
+    route: "/",
     selector: '[data-tour="quizzes"]',
     title: "Kuis",
     body: "Kerjakan kuis untuk menguji pemahaman.",
@@ -138,8 +138,8 @@ const skip = () => {
 
 const start = async () => {
   active.value = true;
-  if (route.path !== "/student") {
-    await router.push("/student");
+  if (route.path !== "/") {
+    await router.push("/");
   }
   await goToStep(0);
 };

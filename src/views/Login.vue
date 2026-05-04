@@ -17,6 +17,6 @@ import LoginModal from '../components/LoginModal.vue';
 const router = useRouter();
 
 const handleClose = () => {
-  router.push('/student');
+  router.push('/');
 };
 </script>

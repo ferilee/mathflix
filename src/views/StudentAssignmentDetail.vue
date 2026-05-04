@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white p-6 md:p-12 pb-24">
-      <button @click="$router.push('/student/assignments')" class="text-gray-400 hover:text-white mb-6 flex items-center gap-2">
+      <button @click="$router.push('/assignments')" class="text-gray-400 hover:text-white mb-6 flex items-center gap-2">
           ← Kembali ke Daftar Tugas
       </button>
 

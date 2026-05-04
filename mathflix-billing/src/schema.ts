@@ -18,6 +18,12 @@ export const students = sqliteTable("students", {
   school: text("school"),
   teacherId: text("teacher_id"),
   teacherName: text("teacher_name"),
+  className: text("class_name"),
+  hp: integer("hp").default(100),
+  xp: integer("xp").default(0),
+  ap: integer("ap").default(0),
+  level: integer("level").default(1),
+  status: text("status").default("active"),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -56,4 +62,23 @@ export const appSettings = sqliteTable("app_settings", {
   key: text("key").primaryKey(),
   value: text("value"),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const shopItems = sqliteTable("shop_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  icon: text("icon"), // emoji or image url
+  apCost: integer("ap_cost").notNull(),
+  stock: integer("stock").default(-1), // -1 means infinite
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const studentInventory = sqliteTable("student_inventory", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id").notNull(),
+  itemId: text("item_id").notNull(),
+  isUsed: integer("is_used").default(0), // 0 or 1
+  purchasedAt: text("purchased_at").default(sql`CURRENT_TIMESTAMP`),
+  usedAt: text("used_at"),
 });

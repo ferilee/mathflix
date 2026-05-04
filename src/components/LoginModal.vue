@@ -1,876 +1,95 @@
 <template>
   <Transition name="modal">
-    <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center md:p-6 bg-black/90 backdrop-blur-md">
       <div
-        class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl overflow-hidden relative"
+        class="w-full h-full md:h-[600px] md:max-h-[90vh] md:max-w-5xl bg-gray-900 md:rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden relative flex flex-col md:flex-row"
         @click.stop
       >
         <!-- Close Button -->
         <button
           @click="$emit('close')"
-          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
+          class="absolute top-4 right-4 z-50 text-gray-400 hover:text-white transition bg-black/30 md:bg-gray-800/50 rounded-full p-2 hover:bg-black/50"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
 
-        <!-- Header -->
-        <div class="p-8 text-center bg-gradient-to-b from-red-600/20 to-transparent">
-          <h1 class="text-4xl font-black text-red-600 tracking-tighter mb-2 italic">MATHFLIX</h1>
-          <p class="text-gray-400 text-sm">Streaming Learning Experience</p>
+        <!-- Banner / Image (Top on Mobile, Left on Desktop) -->
+        <div class="relative w-full flex-1 md:w-1/2 md:flex-none bg-black overflow-hidden border-b md:border-b-0 md:border-r border-gray-800 flex items-center justify-center">
+          <!-- Gradient Overlays for smooth blending -->
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-gray-900 z-10"></div>
+          
+          <img src="/login-illustration.png" alt="Mathflix Hero" class="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-screen transform md:scale-105 hover:scale-110 transition duration-1000 ease-out" />
         </div>
 
-        <!-- Role Toggle -->
-        <div class="px-8 flex p-1 bg-gray-800/50 rounded-lg mx-8 mb-6">
-          <button
-            @click="role = 'student'"
-            :class="[
-              'flex-1 py-2 text-sm font-bold rounded-md transition-all',
-              role === 'student' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
-            ]"
-          >
-            Siswa
-          </button>
-          <button
-            @click="role = 'guru'"
-            :class="[
-              'flex-1 py-2 text-sm font-bold rounded-md transition-all',
-              role === 'guru' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
-            ]"
-          >
-            Guru
-          </button>
-          <button
-            @click="role = 'admin'"
-            :class="[
-              'flex-1 py-2 text-sm font-bold rounded-md transition-all',
-              role === 'admin' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
-            ]"
-          >
-            Admin
-          </button>
-        </div>
-
-        <!-- Form -->
-        <form @submit.prevent="handleLogin" class="px-8 pb-8 space-y-4">
-          <div v-if="role === 'student'">
-            <div class="relative">
-              <input
-                id="nisn"
-                v-model="nisn"
-                type="text"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="NISN"
-                required
-              />
-              <label
-                for="nisn"
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                NISN
-              </label>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-2">Login awal cukup dengan NISN. Setelah 5x login, sistem akan meminta password.</p>
-
-            <div v-if="studentPasswordPrompted" class="mt-4">
-              <div class="relative">
-                <input
-                  id="student_password"
-                  v-model="studentPassword"
-                  type="password"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Password"
-                />
-                <label
-                  for="student_password"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Password
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Masukkan password untuk melanjutkan.</p>
-            </div>
-            <div class="mt-3 flex justify-end">
-              <button
-                type="button"
-                class="text-xs text-red-400 hover:text-red-300 font-semibold"
-                @click="openChangePassword"
-              >
-                Ubah Password
-              </button>
-            </div>
+        <!-- Content (Bottom on Mobile, Right on Desktop) -->
+        <div class="w-full flex-none pb-10 pt-8 px-8 md:w-1/2 md:flex md:flex-col md:justify-center md:px-14 bg-gray-900 relative z-20">
+          <div class="text-center mb-8 md:mb-12">
+            <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-500 tracking-tighter mb-2 italic drop-shadow-2xl">MATHFLIX</h1>
+            <p class="text-gray-400 text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">Satu Pintu Akses Belajar</p>
           </div>
 
-          <div v-else-if="role === 'guru'" class="space-y-4">
-            <div>
-              <div class="relative">
-                <input
-                  id="nip"
-                  v-model="nip"
-                  type="text"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Nomor Induk (NIP)"
-                  required
-                />
-                <label
-                  for="nip"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Nomor Induk (NIP)
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Masukkan NIP yang sudah terdaftar admin.</p>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-2">Login awal cukup dengan NIP. Setelah 5x login, sistem akan meminta password.</p>
-            <div v-if="guruPasswordPrompted">
-              <div class="relative">
-                <input
-                  id="guru_password"
-                  v-model="guruPassword"
-                  type="password"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Password"
-                />
-                <label
-                  for="guru_password"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Password
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Masukkan password untuk melanjutkan.</p>
-            </div>
-            <div class="mt-2 flex justify-end">
-              <button
-                type="button"
-                class="text-xs text-red-400 hover:text-red-300 font-semibold"
-                @click="openChangePassword"
-              >
-                Ubah Password
-              </button>
-            </div>
-            <div class="flex items-center justify-between text-xs text-gray-400">
-              <span>Belum punya akun?</span>
-              <button
-                type="button"
-                class="text-red-400 hover:text-red-300 font-semibold"
-                @click="openRegister"
-              >
-                Daftar
-              </button>
-            </div>
-          </div>
-
-          <div v-else class="space-y-4">
-            <div>
-              <div class="relative">
-                <input
-                  id="admin_username"
-                  v-model="username"
-                  type="text"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Username / Email"
-                  required
-                />
-                <label
-                  for="admin_username"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Username / Email
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Akun admin hanya untuk pengelola sistem.</p>
-            </div>
-            <div>
-              <div class="relative">
-                <input
-                  id="admin_password"
-                  v-model="password"
-                  type="password"
-                  class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                  placeholder="Password"
-                  required
-                />
-                <label
-                  for="admin_password"
-                  class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-                >
-                  Password
-                </label>
-              </div>
-              <p class="text-[10px] text-gray-500 mt-2">Gunakan password admin yang sudah ditentukan.</p>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full bg-red-600 text-white font-black py-4 rounded-xl hover:bg-red-700 transition transform hover:scale-[1.02] active:scale-95 shadow-xl disabled:opacity-50 disabled:transform-none"
-          >
-            <span v-if="loading" class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              MEMERIKSA...
-            </span>
-            <span v-else>MASUK</span>
-          </button>
-
-          <button
-            v-if="role === 'student'"
-            type="button"
-            @click="handleDemo"
-            class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition"
-          >
-            Coba Demo
-          </button>
-
-          <div v-if="error" class="bg-red-900/40 border border-red-500/50 text-red-200 p-3 rounded-xl text-xs text-center animate-pulse">
-            {{ error }}
-          </div>
-        </form>
-
-        <div class="px-8 pb-8 text-center">
-          <p class="text-gray-500 text-xs">
-            {{ role === 'student'
-              ? 'Belum punya NISN? Hubungi Guru Admin.'
-              : role === 'guru'
-                ? 'Akses guru menggunakan NIP terdaftar.'
-                : 'Akses khusus administrator.' }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </Transition>
-
-  <Transition name="modal">
-    <div v-if="passwordStage === 'set-password'" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="w-full max-w-md bg-gray-900 border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
-        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-rose-500"></div>
-        <button
-          @click="resetPasswordStage"
-          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="p-8">
-          <p class="text-xs uppercase tracking-[0.2em] text-red-400">
-            {{ passwordRole === 'guru' ? 'Aktivasi Akun Guru' : 'Aktivasi Akun Siswa' }}
-          </p>
-          <h2 class="text-2xl font-bold text-white mt-2">Buat Password Baru</h2>
-          <p class="text-sm text-gray-400 mt-2">Password ini akan digunakan untuk login berikutnya.</p>
-
-          <form @submit.prevent="handleSetPassword" class="mt-6 space-y-4">
-            <div class="relative">
-              <input
-                v-model="newPassword"
-                type="password"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Password Baru"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Password Baru
-              </label>
-            </div>
-            <div class="relative">
-              <input
-                v-model="confirmPassword"
-                type="password"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Konfirmasi Password"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Konfirmasi Password
-              </label>
+          <div class="space-y-6">
+            <div class="text-center text-sm md:text-base text-gray-300 font-medium px-4">
+              Masuk dengan akun Google Anda untuk melanjutkan ke platform pembelajaran.
             </div>
 
             <button
-              type="submit"
-              :disabled="loading"
-              class="w-full bg-red-600 text-white font-black py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+              type="button"
+              @click="handleGoogleLogin"
+              class="w-full flex items-center justify-center gap-4 bg-white text-black font-black py-4 md:py-5 rounded-2xl hover:bg-gray-100 transition transform hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.15)] border border-gray-200"
             >
-              SIMPAN PASSWORD
+              <svg class="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              MASUK DENGAN GOOGLE
             </button>
-
-            <div v-if="studentPasswordError" class="bg-red-900/40 border border-red-500/50 text-red-200 p-3 rounded-xl text-xs text-center">
-              {{ studentPasswordError }}
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </Transition>
-
-  <Transition name="modal">
-    <div v-if="passwordStage === 'change-password'" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="w-full max-w-md bg-gray-900 border border-emerald-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
-        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-600 to-lime-500"></div>
-        <button
-          @click="resetPasswordStage"
-          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="p-8">
-          <p class="text-xs uppercase tracking-[0.2em] text-emerald-400">
-            {{ passwordRole === 'guru' ? 'Ubah Password Guru' : 'Ubah Password Siswa' }}
-          </p>
-          <h2 class="text-2xl font-bold text-white mt-2">Perbarui Password</h2>
-          <p class="text-sm text-gray-400 mt-2">Masukkan password lama dan password baru.</p>
-
-          <form @submit.prevent="handleChangePassword" class="mt-6 space-y-4">
-            <div class="relative">
-              <input
-                v-model="currentPassword"
-                type="password"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Password Saat Ini"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Password Saat Ini
-              </label>
-            </div>
-            <div class="relative">
-              <input
-                v-model="newPassword"
-                type="password"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Password Baru"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Password Baru
-              </label>
-            </div>
-            <div class="relative">
-              <input
-                v-model="confirmPassword"
-                type="password"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-emerald-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Konfirmasi Password"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-emerald-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Konfirmasi Password
-              </label>
-            </div>
 
             <button
-              type="submit"
-              :disabled="loading"
-              class="w-full bg-emerald-500 text-black font-black py-3 rounded-xl hover:bg-emerald-400 transition disabled:opacity-50"
+              type="button"
+              @click="handleDemoLogin"
+              class="w-full flex items-center justify-center gap-3 bg-gray-800 text-gray-300 font-bold py-3 md:py-4 rounded-2xl hover:bg-gray-700 hover:text-white transition transform hover:scale-[1.02] active:scale-95 border border-gray-700 mt-4"
             >
-              SIMPAN PASSWORD
+              <span class="text-xl">🎮</span>
+              COBA VERSI DEMO
             </button>
-
-            <div v-if="studentPasswordError" class="bg-emerald-900/40 border border-emerald-500/50 text-emerald-200 p-3 rounded-xl text-xs text-center">
-              {{ studentPasswordError }}
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
-  </Transition>
 
-  <Transition name="modal">
-    <div v-if="showRegister" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div class="w-full max-w-md bg-gray-900 border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden relative">
-        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-red-600 to-rose-500"></div>
-        <button
-          @click="closeRegister"
-          class="absolute top-4 right-4 text-gray-400 hover:text-white transition"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="p-8">
-          <p class="text-xs uppercase tracking-[0.2em] text-red-400">Pendaftaran Guru</p>
-          <h2 class="text-2xl font-bold text-white mt-2">Daftarkan Akun Guru</h2>
-          <p class="text-sm text-gray-400 mt-2">Akun akan aktif setelah dikonfirmasi admin.</p>
-
-          <form @submit.prevent="submitRegister" class="mt-6 space-y-4">
-            <div class="relative">
-              <input
-                v-model="registerForm.nip"
-                type="text"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Nomor Induk (NIP)"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Nomor Induk (NIP)
-              </label>
-            </div>
-            <div class="relative">
-              <input
-                v-model="registerForm.full_name"
-                type="text"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Nama Lengkap"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Nama Lengkap
-              </label>
-            </div>
-            <div class="relative">
-              <input
-                v-model="registerForm.school"
-                type="text"
-                class="peer w-full bg-gray-800 border-2 border-gray-700 rounded-xl p-4 text-white focus:border-red-500 focus:outline-none transition-all placeholder-transparent"
-                placeholder="Asal Sekolah"
-                required
-              />
-              <label
-                class="absolute left-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-widest transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-xs peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-red-400 peer-placeholder-shown:text-gray-500 bg-gray-900 px-1"
-              >
-                Asal Sekolah
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              :disabled="registerLoading"
-              class="w-full bg-red-600 text-white font-black py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
-            >
-              {{ registerLoading ? 'MENGIRIM...' : 'KIRIM PERMINTAAN' }}
-            </button>
-
-            <div v-if="registerError" class="bg-red-900/40 border border-red-500/50 text-red-200 p-3 rounded-xl text-xs text-center">
-              {{ registerError }}
-            </div>
-            <div v-if="registerSuccess" class="bg-emerald-900/40 border border-emerald-500/50 text-emerald-200 p-3 rounded-xl text-xs text-center">
-              {{ registerSuccess }}
-            </div>
-          </form>
-        </div>
       </div>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../api';
-import { enableDemo, isDemoMode, resetDemo } from '../utils/demo';
-import { setAuthToken, setStaffUser } from '../utils/auth';
-import { findTeacherByNip } from '../utils/teachers';
-import { createTeacherRequest } from '../utils/teacherRequests';
-
 const props = defineProps<{
   isOpen: boolean;
 }>();
 
 const emit = defineEmits(['close', 'logged-in']);
 
-const router = useRouter();
-const role = ref<'student' | 'guru' | 'admin'>('student');
-const nisn = ref('');
-const nip = ref('');
-const username = ref('');
-const password = ref('');
-const passwordStage = ref<'login' | 'set-password' | 'change-password'>('login');
-const passwordRole = ref<'student' | 'guru' | null>(null);
-const pendingAccount = ref<any | null>(null);
-const studentPassword = ref('');
-const guruPassword = ref('');
-const studentPasswordPrompted = ref(false);
-const guruPasswordPrompted = ref(false);
-const newPassword = ref('');
-const confirmPassword = ref('');
-const currentPassword = ref('');
-const studentPasswordError = ref('');
-const loading = ref(false);
-const error = ref('');
-const showRegister = ref(false);
-const registerForm = ref({
-  nip: '',
-  full_name: '',
-  school: '',
-});
-const registerLoading = ref(false);
-const registerError = ref('');
-const registerSuccess = ref('');
-
-const extractToken = (payload: any) => {
-  return payload?.token || payload?.access_token || payload?.accessToken || payload?.jwt || null;
+const handleGoogleLogin = () => {
+  // Redirect ke backend OAuth endpoint
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  window.location.href = `${apiUrl}/auth/google`;
 };
 
-// Reset fields when role changes
-watch(role, () => {
-  error.value = '';
-  nisn.value = '';
-  nip.value = '';
-  username.value = '';
-  password.value = '';
-  passwordStage.value = 'login';
-  passwordRole.value = null;
-  pendingAccount.value = null;
-  studentPassword.value = '';
-  guruPassword.value = '';
-  studentPasswordPrompted.value = false;
-  guruPasswordPrompted.value = false;
-  newPassword.value = '';
-  confirmPassword.value = '';
-  currentPassword.value = '';
-  studentPasswordError.value = '';
-});
+import { enableDemo } from '../utils/demo';
 
-watch(
-  () => props.isOpen,
-  (open) => {
-    if (!open) {
-      resetPasswordStage();
-      error.value = '';
-      studentPassword.value = '';
-      guruPassword.value = '';
-      studentPasswordPrompted.value = false;
-      guruPasswordPrompted.value = false;
-      newPassword.value = '';
-      confirmPassword.value = '';
-      currentPassword.value = '';
-      studentPasswordError.value = '';
-    }
-  }
-);
-
-const resetPasswordStage = () => {
-  passwordStage.value = 'login';
-  passwordRole.value = null;
-  pendingAccount.value = null;
-  newPassword.value = '';
-  confirmPassword.value = '';
-  currentPassword.value = '';
-  studentPasswordError.value = '';
-};
-
-const openChangePassword = () => {
-  studentPasswordError.value = '';
-  if (role.value === 'student') {
-    if (!nisn.value.trim()) {
-      studentPasswordError.value = 'Masukkan NISN terlebih dahulu.';
-      return;
-    }
-    passwordRole.value = 'student';
-  } else if (role.value === 'guru') {
-    if (!nip.value.trim()) {
-      studentPasswordError.value = 'Masukkan NIP terlebih dahulu.';
-      return;
-    }
-    passwordRole.value = 'guru';
-  } else {
-    return;
-  }
-  passwordStage.value = 'change-password';
-  currentPassword.value = '';
-  newPassword.value = '';
-  confirmPassword.value = '';
-};
-
-const openRegister = () => {
-  registerError.value = '';
-  registerSuccess.value = '';
-  registerForm.value = { nip: nip.value.trim(), full_name: '', school: '' };
-  showRegister.value = true;
-};
-
-const closeRegister = () => {
-  showRegister.value = false;
-};
-
-const submitRegister = async () => {
-  registerLoading.value = true;
-  registerError.value = '';
-  registerSuccess.value = '';
-  try {
-    const nipValue = registerForm.value.nip.trim();
-    const fullNameValue = registerForm.value.full_name.trim();
-    const schoolValue = registerForm.value.school.trim();
-
-    if (!nipValue || !fullNameValue || !schoolValue) {
-      registerError.value = 'Semua field wajib diisi.';
-      return;
-    }
-
-    const existing = await findTeacherByNip(nipValue, { status: 'any' });
-    if (existing?.status === 'approved') {
-      registerError.value = 'NIP sudah terdaftar. Silakan login.';
-      return;
-    }
-    if (existing?.status === 'pending') {
-      registerError.value = 'Permintaan dengan NIP ini sudah dikirim.';
-      return;
-    }
-
-    await createTeacherRequest({
-      nip: nipValue,
-      full_name: fullNameValue,
-      school: schoolValue,
-    });
-
-    registerSuccess.value = 'Permintaan terkirim. Tunggu konfirmasi admin.';
-    registerForm.value = { nip: '', full_name: '', school: '' };
-  } catch (e: any) {
-    registerError.value = e?.response?.data?.error || e?.message || 'Gagal mengirim permintaan.';
-  } finally {
-    registerLoading.value = false;
-  }
-};
-
-const handleLogin = async () => {
-  loading.value = true;
-  error.value = '';
-
-  try {
-    if (role.value === 'student') {
-      const nisnValue = nisn.value.trim();
-      if (!nisnValue) {
-        error.value = 'Lengkapi NISN.';
-        return;
-      }
-      const { data } = await api.post('/auth/student/login', {
-        nisn: nisnValue,
-        password: studentPassword.value.trim() || undefined,
-      });
-
-      if (isDemoMode()) {
-        resetDemo();
-      }
-      localStorage.setItem('student', JSON.stringify(data.user));
-      setAuthToken(extractToken(data));
-      emit('logged-in', data.user);
-      emit('close');
-      router.push('/student');
-    } else if (role.value === 'guru') {
-      const nipValue = nip.value.trim();
-
-      if (!nipValue) {
-        error.value = 'Lengkapi NIP.';
-        return;
-      }
-      const { data } = await api.post('/auth/guru/login', {
-        nip: nipValue,
-        password: guruPassword.value.trim() || undefined,
-      });
-      if (isDemoMode()) {
-        resetDemo();
-      }
-      setStaffUser(data.user, extractToken(data));
-      emit('logged-in', data.user);
-      emit('close');
-      router.push('/admin/dashboard');
-    } else {
-      const usernameValue = username.value.trim();
-      const passwordValue = password.value.trim();
-      const { data } = await api.post('/auth/admin/login', {
-        username: usernameValue,
-        password: passwordValue,
-      });
-      if (isDemoMode()) {
-        resetDemo();
-      }
-      setStaffUser(data.user, extractToken(data));
-      emit('logged-in', data.user);
-      emit('close');
-      router.push('/admin/dashboard');
-    }
-  } catch (e: any) {
-    const response = e?.response;
-    const code = response?.data?.code;
-    if (response?.status === 409 && (code === 'PASSWORD_NOT_SET' || code === 'PASSWORD_SETUP_REQUIRED')) {
-      pendingAccount.value = response?.data?.user || null;
-      passwordRole.value = role.value === 'guru' ? 'guru' : 'student';
-      passwordStage.value = 'set-password';
-      studentPassword.value = '';
-      guruPassword.value = '';
-      studentPasswordPrompted.value = false;
-      guruPasswordPrompted.value = false;
-      error.value = '';
-      return;
-    }
-    if (code === 'PASSWORD_REQUIRED') {
-      error.value = 'Masukkan password untuk melanjutkan.';
-      if (role.value === 'student') {
-        studentPasswordPrompted.value = true;
-      }
-      if (role.value === 'guru') {
-        guruPasswordPrompted.value = true;
-      }
-      return;
-    }
-    if (code === 'STATUS_PENDING') {
-      error.value = 'Akun guru masih menunggu konfirmasi admin.';
-      return;
-    }
-    if (code === 'STATUS_REJECTED') {
-      error.value = 'Permintaan guru ditolak. Hubungi admin untuk bantuan.';
-      return;
-    }
-    if (code === 'NOT_FOUND') {
-      error.value = role.value === 'guru' ? 'NIP tidak ditemukan.' : 'NISN tidak ditemukan.';
-      return;
-    }
-    if (response?.data?.error) {
-      error.value = response.data.error;
-      return;
-    }
-    const detail = e?.message || 'Terjadi kesalahan koneksi.';
-    error.value = `Gagal login: ${detail}`;
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleSetPassword = async () => {
-  studentPasswordError.value = '';
-  const nisnValue = nisn.value.trim();
-  const nipValue = nip.value.trim();
-  const passwordValue = newPassword.value.trim();
-  const confirmValue = confirmPassword.value.trim();
-
-  if (!pendingAccount.value) {
-    studentPasswordError.value = 'Akun tidak ditemukan. Silakan ulangi login.';
-    return;
-  }
-  if (!passwordValue || !confirmValue) {
-    studentPasswordError.value = 'Semua field wajib diisi.';
-    return;
-  }
-  if (passwordValue.length < 6) {
-    studentPasswordError.value = 'Password minimal 6 karakter.';
-    return;
-  }
-  if (passwordValue !== confirmValue) {
-    studentPasswordError.value = 'Konfirmasi password tidak cocok.';
-    return;
-  }
-
-  try {
-    let response: any = null;
-    if (passwordRole.value === 'guru') {
-      response = await api.post('/auth/guru/set-password', {
-        nip: pendingAccount.value.nip || nipValue,
-        password: passwordValue,
-      });
-    } else {
-      response = await api.post('/auth/student/set-password', {
-        nisn: pendingAccount.value.nisn || nisnValue,
-        password: passwordValue,
-      });
-    }
-
-    if (isDemoMode()) {
-      resetDemo();
-    }
-
-    const user = response?.data?.user;
-    if (passwordRole.value === 'guru') {
-      setStaffUser(user, extractToken(response?.data));
-      emit('logged-in', user);
-      resetPasswordStage();
-      emit('close');
-      router.push('/admin/dashboard');
-      return;
-    }
-
-    localStorage.setItem('student', JSON.stringify(user));
-    setAuthToken(extractToken(response?.data));
-    emit('logged-in', user);
-    resetPasswordStage();
-    emit('close');
-    router.push('/student');
-  } catch (e: any) {
-    studentPasswordError.value = e?.response?.data?.error || e?.message || 'Gagal menyimpan password.';
-  }
-};
-
-const handleChangePassword = async () => {
-  studentPasswordError.value = '';
-  const nisnValue = nisn.value.trim();
-  const nipValue = nip.value.trim();
-  const passwordValue = newPassword.value.trim();
-  const confirmValue = confirmPassword.value.trim();
-  const currentValue = currentPassword.value.trim();
-
-  if (!currentValue || !passwordValue || !confirmValue) {
-    studentPasswordError.value = 'Semua field wajib diisi.';
-    return;
-  }
-  if (passwordValue.length < 6) {
-    studentPasswordError.value = 'Password minimal 6 karakter.';
-    return;
-  }
-  if (passwordValue !== confirmValue) {
-    studentPasswordError.value = 'Konfirmasi password tidak cocok.';
-    return;
-  }
-
-  try {
-    if (passwordRole.value === 'guru') {
-      await api.post('/auth/guru/change-password', {
-        nip: nipValue,
-        current_password: currentValue,
-        new_password: passwordValue,
-      });
-    } else {
-      await api.post('/auth/student/change-password', {
-        nisn: nisnValue,
-        current_password: currentValue,
-        new_password: passwordValue,
-      });
-    }
-    error.value = 'Password berhasil diubah. Silakan login.';
-    resetPasswordStage();
-  } catch (e: any) {
-    const code = e?.response?.data?.code;
-    if (code === 'PASSWORD_NOT_SET') {
-      try {
-        if (passwordRole.value === 'guru') {
-          await api.post('/auth/guru/set-password', { nip: nipValue, password: passwordValue });
-        } else {
-          await api.post('/auth/student/set-password', { nisn: nisnValue, password: passwordValue });
-        }
-        error.value = 'Password berhasil diubah. Silakan login.';
-        resetPasswordStage();
-        return;
-      } catch (fallbackError: any) {
-        studentPasswordError.value =
-          fallbackError?.response?.data?.error ||
-          fallbackError?.message ||
-          'Gagal mengubah password.';
-        return;
-      }
-    }
-    studentPasswordError.value = e?.response?.data?.error || e?.message || 'Gagal mengubah password.';
-  }
-};
-
-const handleDemo = () => {
+const handleDemoLogin = () => {
   enableDemo();
   emit('close');
-  router.push('/student');
+  // Refresh page to ensure everything loads in demo mode
+  window.location.href = '/';
 };
 </script>
 
 <style scoped>
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .modal-enter-from,
@@ -880,11 +99,11 @@ const handleDemo = () => {
 
 .modal-enter-active .w-full,
 .modal-leave-active .w-full {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-enter-from .w-full,
 .modal-leave-to .w-full {
-  transform: scale(0.9) translateY(20px);
+  transform: scale(0.95) translateY(10px);
 }
 </style>

@@ -1,154 +1,157 @@
 <template>
-  <div>
+  <div class="bg-black min-h-screen">
 
-      <!-- Hero Section -->
-    <div class="relative h-[80vh] w-full" data-tour="hero">
+    <!-- Hero Section (Main Quest) -->
+    <div class="relative h-[85vh] w-full" data-tour="hero">
       <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop');">
-        <div class="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+        <!-- Cinematic gradient overlays -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
       </div>
 
-      <div class="relative z-10 flex flex-col justify-center h-full px-4 md:px-12 max-w-2xl space-y-4">
-        <span class="text-red-500 font-bold tracking-widest uppercase">Featured Topic</span>
-        <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight">
-          {{ featuredMaterial?.title || 'Selamat Datang' }}
+      <div class="relative z-10 flex flex-col justify-center h-full px-4 md:px-16 max-w-3xl space-y-4">
+        <!-- Netflix Style "Original" badge translated to RPG -->
+        <div class="flex items-center gap-2 mb-2">
+            <span class="text-3xl filter drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]">🔥</span>
+            <span class="text-yellow-400 font-black tracking-[0.2em] uppercase text-sm drop-shadow-md">Main Quest</span>
+        </div>
+        
+        <h1 class="text-5xl md:text-8xl font-black text-white leading-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]" style="-webkit-text-stroke: 1px rgba(255,255,255,0.1);">
+          {{ featuredMaterial?.title || 'Unknown Dungeon' }}
         </h1>
-        <p class="text-lg text-gray-300 line-clamp-3">
+        
+        <!-- RPG Stats for the quest -->
+        <div class="flex items-center gap-4 text-sm font-bold mt-2">
+           <span class="text-green-400 drop-shadow-md">98% Match</span>
+           <span class="border border-white/40 text-white/80 px-2 py-0.5 rounded-md backdrop-blur-sm">{{ featuredMaterial?.major_target || 'Umum' }}</span>
+           <span class="text-white/80 border border-white/40 px-2 py-0.5 rounded-md">Lvl. {{ student?.level || 1 }}+</span>
+        </div>
+
+        <p class="text-lg text-gray-300 line-clamp-3 mt-4 drop-shadow-md font-medium max-w-xl">
             {{ featuredMaterial?.description || stripHtml(featuredMaterial?.content || '') }}
         </p>
 
-        <div class="flex gap-4 pt-4" v-if="featuredMaterial">
-          <button @click="openMaterial(featuredMaterial.id)" class="flex items-center gap-2 bg-white text-black px-6 py-2 rounded font-bold hover:bg-gray-200 transition">
-            <span>▶</span> Mulai Belajar
+        <div class="flex gap-4 pt-6" v-if="featuredMaterial">
+          <button @click="openMaterial(featuredMaterial.id)" class="flex items-center gap-3 bg-white text-black px-8 py-3 rounded-lg font-black hover:bg-gray-200 transition transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <span class="text-xl">⚔️</span> <span>Continue Quest</span>
           </button>
-          <button @click="addToMyList(featuredMaterial)" class="flex items-center gap-2 bg-gray-600/70 text-white px-6 py-2 rounded font-bold hover:bg-gray-600 transition backdrop-blur-sm">
-            <span>+</span> Daftar Saya
+          <button @click="addToMyList(featuredMaterial)" class="flex items-center gap-3 bg-gray-600/70 text-white px-8 py-3 rounded-lg font-black hover:bg-gray-600 transition backdrop-blur-md border border-white/20 transform hover:scale-105">
+            <span class="text-xl">📜</span> <span>Add to Log</span>
           </button>
         </div>
       </div>
     </div>
 
     <!-- Content Rows -->
-    <div class="-mt-32 relative z-20 space-y-12 px-4 md:px-12 pb-20">
+    <div class="-mt-40 relative z-20 space-y-16 px-4 md:px-16 pb-20">
 
-      <!-- Materials Row -->
-      <section data-tour="materials">
-        <h3 class="text-xl font-semibold text-white mb-4 pl-1 hover:text-gray-300 cursor-pointer">Materi Populer</h3>
-        <div class="group relative">
-           <div class="flex gap-4 overflow-x-auto overflow-y-visible py-6 scrollbar-hide scroll-smooth">
-              <div
-                v-for="material in materials"
-                :key="material.id"
-                class="flex-none w-64 aspect-video bg-gray-900 rounded-lg overflow-hidden ring-1 ring-white/10 hover:ring-2 hover:ring-red-600 hover:scale-110 transition-all duration-300 cursor-pointer relative group/card shadow-2xl"
-                @click="openMaterial(material.id)"
-              >
-                <!-- Background Image or Gradient -->
-                <div
-                   class="h-full w-full flex items-center justify-center relative shadow-inner"
-                   :style="`background-image: url('${material.image_url ? resolveStorageUrl(material.image_url) : '/material-placeholder.png'}'); background-size: cover; background-position: center;`"
-                >
-                  <!-- Overlay for title -->
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4 group-hover/card:via-black/10 transition-all duration-300">
-                     <h4 class="text-xs md:text-sm font-bold text-white drop-shadow-lg leading-tight">{{ material.title }}</h4>
-                  </div>
-                  <!-- Logo/Badge Overlay (Netflix style) -->
-                  <div class="absolute top-2 left-2 w-5 h-5 bg-red-600 rounded-sm flex items-center justify-center shadow-lg transform -rotate-12 group-hover/card:rotate-0 transition-transform">
-                    <span class="text-[9px] text-white font-black italic">M</span>
-                  </div>
-                </div>
-
-                <!-- Hover Info -->
-                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                   <div class="transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
-                      <p class="text-[10px] text-green-400 font-bold mb-1">98% Match</p>
-                      <div class="flex items-center gap-2 mb-2">
-                        <span class="px-1.5 py-0.5 border border-gray-400 text-[9px] text-gray-300 rounded uppercase tracking-tighter">{{ material.major_target || 'Umum' }}</span>
-                      </div>
-                      <div class="flex gap-2">
-                        <button class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 shadow-lg text-xs">▶</button>
-                        <button @click.stop="addToMyList(material)" class="w-7 h-7 rounded-full border border-gray-400 text-white flex items-center justify-center hover:border-white hover:bg-gray-700/50 backdrop-blur-sm transition shadow-lg text-xs">+</button>
-                      </div>
-                   </div>
-                </div>
-              </div>
-           </div>
-        </div>
-      </section>
-
-      <!-- Recommendations Row -->
+      <!-- Recommendations -> Active Missions -->
       <section v-if="recommendations.length > 0" data-tour="recommendations">
-         <div class="flex items-center justify-between mb-4 px-1">
-            <h3 class="text-xl font-semibold text-white hover:text-gray-300 cursor-pointer transition">Rekomendasi Untukmu</h3>
-            <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Berdasarkan kuis terakhir</span>
+         <div class="flex items-center justify-between mb-2">
+            <h3 class="text-2xl font-black text-white hover:text-yellow-400 cursor-pointer transition drop-shadow-md tracking-wide">Active Missions</h3>
          </div>
-         <div class="flex gap-4 overflow-x-auto overflow-y-visible py-6 scrollbar-hide scroll-smooth">
+         <div class="flex gap-4 overflow-x-auto overflow-y-visible py-4 scrollbar-hide scroll-smooth">
              <div
                v-for="rec in recommendations"
                :key="rec.material_id"
-               class="flex-none w-64 aspect-video bg-gray-900 rounded-lg overflow-hidden ring-1 ring-white/10 hover:ring-2 hover:ring-emerald-500 hover:scale-110 transition-all duration-300 cursor-pointer relative group/card shadow-2xl"
+               class="flex-none w-72 bg-gray-900 rounded-md overflow-hidden ring-1 ring-white/10 hover:ring-2 hover:ring-emerald-500 hover:scale-105 transition-all duration-300 cursor-pointer relative group/card shadow-2xl"
                @click="openMaterial(rec.material_id)"
              >
+                <!-- Card Image -->
                 <div
-                   class="h-full w-full flex items-center justify-center relative shadow-inner"
+                   class="aspect-video w-full relative"
                    :style="`background-image: url('${rec.image_url ? resolveStorageUrl(rec.image_url) : '/material-placeholder.png'}'); background-size: cover; background-position: center;`"
                 >
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4 group-hover/card:via-black/10 transition-all duration-300">
-                     <h4 class="text-xs md:text-sm font-bold text-white drop-shadow-lg leading-tight">{{ rec.title }}</h4>
-                  </div>
-                  <div class="absolute top-2 left-2 bg-emerald-500 text-black text-[9px] font-black px-2 py-0.5 rounded shadow-lg tracking-widest">
-                    REK
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                  <!-- Top Badge -->
+                  <div class="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-black text-[10px] font-black px-2 py-1 rounded shadow-lg tracking-widest uppercase">
+                    Suggested
                   </div>
                 </div>
-                <div class="absolute inset-0 bg-black/70 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                   <div class="text-[10px] text-emerald-300 font-bold mb-2">{{ rec.reason }}</div>
-                   <div class="flex gap-2">
-                     <button class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 shadow-lg text-xs">▶</button>
-                     <button @click.stop="addToMyList(rec)" class="w-7 h-7 rounded-full border border-gray-400 text-white flex items-center justify-center hover:border-white hover:bg-gray-700/50 backdrop-blur-sm transition shadow-lg text-xs">+</button>
+                <!-- Card Content (Bottom) -->
+                <div class="p-3 bg-[#141414] border-t border-white/5 relative">
+                   <h4 class="text-sm font-bold text-white truncate mb-2">{{ rec.title }}</h4>
+                   <!-- Progress Bar (RPG style) -->
+                   <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+                      <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full w-[45%]"></div>
+                   </div>
+                   <div class="flex justify-between items-center mt-1">
+                      <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{{ rec.reason || 'In Progress' }}</span>
+                      <span class="text-[10px] text-gray-500 font-bold">45% Cleared</span>
                    </div>
                 </div>
              </div>
          </div>
       </section>
 
-      <!-- Quizzes Row -->
+      <!-- Quizzes -> Top 10 Hardest Quests (Netflix Top 10 Style) -->
       <section data-tour="quizzes">
-         <div class="flex items-center justify-between mb-4 px-1">
-            <h3 class="text-xl font-semibold text-white hover:text-gray-300 cursor-pointer transition">Kuis & Tantangan</h3>
-            <span class="text-xs text-indigo-400 font-bold hover:underline cursor-pointer uppercase tracking-widest">Lihat Semua</span>
+         <div class="flex items-center justify-between mb-2">
+            <h3 class="text-2xl font-black text-white hover:text-red-500 cursor-pointer transition drop-shadow-md tracking-wide">Top 10 Deadliest Quests</h3>
          </div>
-         <div class="flex gap-4 overflow-x-auto overflow-y-visible py-6 scrollbar-hide scroll-smooth">
+         <div class="flex gap-10 overflow-x-auto overflow-y-visible py-4 pl-8 scrollbar-hide scroll-smooth">
              <div
-               v-for="quiz in quizzes"
+               v-for="(quiz, index) in quizzes.slice(0, 10)"
                :key="quiz.id"
-               class="flex-none w-64 aspect-video bg-gray-900 rounded-lg overflow-hidden ring-1 ring-white/10 hover:ring-2 hover:ring-indigo-500 hover:scale-110 transition-all duration-300 cursor-pointer relative group/card shadow-2xl"
+               class="flex-none w-40 relative cursor-pointer group/card hover:scale-110 transition-transform duration-300"
                @click="openQuiz(quiz.id)"
              >
-                <!-- Background Image or Gradient -->
-                <div
-                   class="h-full w-full flex items-center justify-center relative shadow-inner"
-                   :style="`background-image: url('${quiz.image_url ? resolveStorageUrl(quiz.image_url) : '/quiz-placeholder.png'}'); background-size: cover; background-position: center;`"
-                >
-                  <!-- Overlay for title -->
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4 group-hover/card:via-black/20 transition-all duration-300">
-                     <h4 class="text-xs md:text-sm font-bold text-white drop-shadow-lg leading-tight">{{ quiz.title }}</h4>
-                  </div>
-                   <!-- Logo/Badge Overlay (Netflix style) -->
-                   <div class="absolute top-2 left-2 w-5 h-5 bg-indigo-600 rounded-sm flex items-center justify-center shadow-lg transform rotate-6 group-hover/card:rotate-0 transition-transform">
-                    <span class="text-[9px] text-white font-black italic">Q</span>
-                  </div>
+                <!-- Giant Number Behind -->
+                <div class="absolute -left-10 -bottom-4 text-[140px] font-black text-black leading-none pointer-events-none select-none z-0" style="-webkit-text-stroke: 4px #4b5563;">
+                   {{ index + 1 }}
                 </div>
-                <!-- Hover Overlay -->
-                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                   <div class="transform scale-90 group-hover/card:scale-100 transition-transform duration-300">
-                      <p class="text-[10px] text-indigo-400 font-black mb-1 tracking-widest uppercase">Target Score</p>
-                      <p class="text-2xl font-black text-white mb-3">{{ quiz.passing_score }}</p>
-                      <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-1.5 px-4 rounded shadow-xl text-[10px] uppercase tracking-tighter flex items-center justify-center gap-2">
-                         <span>⚡</span> Kerjakan
-                      </button>
+                <!-- Tall Card (Netflix Style Poster) -->
+                <div class="aspect-[2/3] bg-gray-900 rounded-md overflow-hidden ring-1 ring-white/10 relative z-10 shadow-2xl group-hover/card:ring-red-600">
+                   <div class="h-full w-full bg-cover bg-center relative" :style="`background-image: url('${quiz.image_url ? resolveStorageUrl(quiz.image_url) : '/quiz-placeholder.png'}');`">
+                      <div class="absolute inset-0 bg-gradient-to-t from-red-900/90 via-black/40 to-transparent flex flex-col justify-end p-3 text-center">
+                         <span class="text-4xl mb-2 drop-shadow-lg">☠️</span>
+                         <h4 class="text-sm font-black text-white drop-shadow-md leading-tight">{{ quiz.title }}</h4>
+                         <p class="text-[10px] text-red-300 font-bold mt-1 uppercase tracking-widest">Min. Score: {{ quiz.passing_score }}</p>
+                      </div>
                    </div>
                 </div>
              </div>
          </div>
+      </section>
+
+      <!-- Materials Row -> Unexplored Regions -->
+      <section data-tour="materials">
+        <h3 class="text-2xl font-black text-white mb-2 hover:text-blue-400 cursor-pointer transition drop-shadow-md tracking-wide">Unexplored Regions</h3>
+        <div class="flex gap-4 overflow-x-auto overflow-y-visible py-4 scrollbar-hide scroll-smooth">
+            <div
+              v-for="material in materials"
+              :key="material.id"
+              class="flex-none w-64 aspect-video bg-gray-900 rounded-md overflow-hidden ring-1 ring-white/10 hover:ring-2 hover:ring-blue-500 hover:scale-105 transition-all duration-300 cursor-pointer relative group/card shadow-2xl"
+              @click="openMaterial(material.id)"
+            >
+              <div
+                 class="h-full w-full flex items-center justify-center relative"
+                 :style="`background-image: url('${material.image_url ? resolveStorageUrl(material.image_url) : '/material-placeholder.png'}'); background-size: cover; background-position: center;`"
+              >
+                <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4 group-hover/card:via-black/20 transition-all duration-300">
+                   <h4 class="text-sm font-bold text-white drop-shadow-lg leading-tight">{{ material.title }}</h4>
+                </div>
+                <!-- Magic Card Badge -->
+                <div class="absolute top-2 left-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(37,99,235,0.8)] border border-blue-300">
+                  <span class="text-[10px] text-white font-black italic">M</span>
+                </div>
+              </div>
+
+              <!-- Hover Info (Netflix style drop down panel inside card) -->
+              <div class="absolute inset-0 bg-black/80 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 backdrop-blur-sm">
+                 <div class="transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                    <p class="text-[10px] text-green-400 font-black mb-1 tracking-widest uppercase">New Quest</p>
+                    <div class="flex items-center gap-2 mb-3">
+                      <span class="px-1.5 py-0.5 border border-gray-400 text-[9px] text-gray-300 rounded uppercase tracking-widest font-bold">{{ material.major_target || 'Umum' }}</span>
+                    </div>
+                    <div class="flex gap-2">
+                      <button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.5)] text-sm">▶</button>
+                      <button @click.stop="addToMyList(material)" class="w-8 h-8 rounded-full border-2 border-gray-400 text-white flex items-center justify-center hover:border-white hover:bg-gray-700/50 transition shadow-lg text-sm">+</button>
+                    </div>
+                 </div>
+              </div>
+            </div>
+        </div>
       </section>
 
     </div>
@@ -211,18 +214,18 @@ const isMaterialAllowed = (material: any) => {
 const openMaterial = (id: string) => {
     if (!student.value) {
         // Redirect to login with return path
-        router.push(`/login?redirect=/student/material/${id}`);
+        router.push(`/login?redirect=/material/${id}`);
     } else {
-        router.push(`/student/material/${id}`);
+        router.push(`/material/${id}`);
     }
 };
 
 const openQuiz = (id: string) => {
     const student = localStorage.getItem('student');
     if (!student) {
-         router.push(`/login?redirect=/student/quiz/${id}`);
+         router.push(`/login?redirect=/quiz/${id}`);
     } else {
-         router.push(`/student/quiz/${id}`);
+         router.push(`/quiz/${id}`);
     }
 };
 

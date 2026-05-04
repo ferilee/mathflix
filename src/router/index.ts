@@ -18,7 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/Login.vue"),
   },
   {
-    path: "/student",
+    path: "/oauth/callback",
+    component: () => import("../views/OAuthCallback.vue"),
+  },
+  {
+    path: "/",
     component: () => import("../layouts/StudentLayout.vue"),
     children: [
       { path: "", component: () => import("../views/StudentDashboard.vue") },
@@ -26,6 +30,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "leaderboard",
         component: () => import("../views/Leaderboard.vue"),
+      },
+      {
+        path: "shop",
+        component: () => import("../views/Shop.vue"),
       },
       { path: "my-list", component: () => import("../views/MyList.vue") },
       {
@@ -62,10 +70,7 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
-  {
-    path: "/",
-    redirect: "/student",
-  },
+
   {
     path: "/admin",
     component: AdminLayout,

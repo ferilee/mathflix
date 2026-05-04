@@ -8,8 +8,11 @@ import {
   teacherExemptions,
   teacherPolicies,
   appSettings,
+  shopItems,
+  studentInventory,
 } from "./schema";
 import { asc, eq, inArray } from "drizzle-orm";
+import crypto from "node:crypto";
 
 const app = new Hono();
 
@@ -77,6 +80,12 @@ const normalizeStudentPayload = (input: any) => {
     teacherId: input?.teacher_id || input?.teacherId || null,
     teacherName:
       (input?.teacher_name || input?.teacherName || null)?.trim() || null,
+    className: input?.class_name || input?.className || null,
+    hp: input?.hp ?? 100,
+    xp: input?.xp ?? 0,
+    ap: input?.ap ?? 0,
+    level: input?.level ?? 1,
+    status: input?.status ?? "active",
     createdAt: createdAt || new Date().toISOString(),
   };
 };
@@ -248,6 +257,216 @@ app.get("/billing/students", async (c) => {
   const teacherId = c.req.query("teacher_id");
   const { statuses } = await buildStatusList(teacherId);
   return c.json(statuses);
+});
+
+app.get("/students", async (c) => {
+  const teacherId = c.req.query("teacher_id");
+  const teacherName = c.req.query("teacher_name");
+  const search = c.req.query("search")?.toLowerCase();
+  const major = c.req.query("major")?.toLowerCase();
+  const school = c.req.query("school")?.toLowerCase();
+  const grade = c.req.query("grade");
+  const page = Number(c.req.query("page") || 1);
+  const limit = Number(c.req.query("limit") || 10);
+  
+  let baseQuery = db.select().from(students);
+  let rows = await baseQuery;
+
+  // Manual filtering (for simplicity)
+  if (teacherId) rows = rows.filter(r => r.teacherId === teacherId);
+  if (teacherName) rows = rows.filter(r => r.teacherName?.toLowerCase().includes(teacherName.toLowerCase()));
+  if (search) rows = rows.filter(r => r.fullName?.toLowerCase().includes(search) || r.nisn?.includes(search) || r.id?.toLowerCase().includes(search));
+  if (major) rows = rows.filter(r => r.major?.toLowerCase().includes(major));
+  if (school) rows = rows.filter(r => r.school?.toLowerCase().includes(school));
+  if (grade) rows = rows.filter(r => r.gradeLevel === Number(grade));
+
+  const total = rows.length;
+  const totalPages = Math.ceil(total / limit);
+  const offset = (page - 1) * limit;
+  const paginatedRows = rows.slice(offset, offset + limit);
+
+  // Map to snake_case for frontend compatibility
+  const mappedData = paginatedRows.map(r => ({
+    id: r.id,
+    nisn: r.nisn,
+    full_name: r.fullName,
+    major: r.major,
+    grade_level: r.gradeLevel,
+    class_name: r.className,
+    school: r.school,
+    teacher_id: r.teacherId,
+    teacher_name: r.teacherName,
+    hp: r.hp,
+    xp: r.xp,
+    ap: r.ap,
+    level: r.level,
+    status: r.status,
+    created_at: r.createdAt
+  }));
+
+  return c.json({
+    data: mappedData,
+    total,
+    page,
+    limit,
+    totalPages
+  });
+});
+
+app.delete("/students/:id", async (c) => {
+  const id = c.req.param("id");
+  await db.delete(students).where(eq(students.id, id));
+  await db.delete(studentBilling).where(eq(studentBilling.studentId, id));
+  await db.delete(studentInventory).where(eq(studentInventory.studentId, id));
+  return c.json({ status: "ok", deleted: id });
+});
+
+app.get("/billing/leaderboard", async (c) => {
+  const teacherId = c.req.query("teacher_id");
+  const studentRows = await getStudentsForTeacher(teacherId);
+  
+  // Create Leaderboard array
+  const leaderboard = studentRows.map(s => ({
+    id: s.id,
+    student_name: s.fullName,
+    full_name: s.fullName,
+    grade_level: s.gradeLevel,
+    class_name: s.className,
+    major: s.major,
+    hp: s.hp,
+    xp: s.xp,
+    ap: s.ap,
+    level: s.level,
+    status: s.status,
+    total_score: s.xp, // Primary score is XP
+  })).sort((a, b) => b.total_score - a.total_score);
+
+  return c.json(leaderboard);
+});
+
+// ---- SHOP / MERCHANT ROUTES ----
+app.get("/billing/shop/items", async (c) => {
+  const items = await db.select().from(shopItems);
+  return c.json(items);
+});
+
+app.post("/billing/shop/buy", async (c) => {
+  const body = await c.req.json();
+  const studentId = body?.student_id;
+  const itemId = body?.item_id;
+
+  if (!studentId || !itemId) {
+    return c.json({ error: "student_id and item_id required" }, 400);
+  }
+
+  // Check student
+  const studentRows = await db.select().from(students).where(eq(students.id, studentId));
+  if (studentRows.length === 0) return c.json({ error: "Student not found" }, 404);
+  const student = studentRows[0];
+
+  // Check item
+  const itemRows = await db.select().from(shopItems).where(eq(shopItems.id, itemId));
+  if (itemRows.length === 0) return c.json({ error: "Item not found" }, 404);
+  const item = itemRows[0];
+
+  if ((student.ap || 0) < item.apCost) {
+    return c.json({ error: "Not enough AP to buy this item." }, 400);
+  }
+
+  // Deduct AP
+  await db.update(students)
+    .set({ ap: (student.ap || 0) - item.apCost })
+    .where(eq(students.id, studentId));
+
+  // Add to inventory
+  const inventoryId = crypto.randomUUID();
+  await db.insert(studentInventory).values({
+    id: inventoryId,
+    studentId,
+    itemId,
+    isUsed: 0,
+    purchasedAt: new Date().toISOString(),
+  });
+
+  return c.json({ status: "ok", message: "Item purchased successfully!", remaining_ap: (student.ap || 0) - item.apCost });
+});
+
+app.get("/billing/shop/inventory", async (c) => {
+  const studentId = c.req.query("student_id");
+  if (!studentId) return c.json({ error: "student_id required" }, 400);
+
+  // Join inventory with items
+  const inventory = await db.select({
+    id: studentInventory.id,
+    item_id: shopItems.id,
+    name: shopItems.name,
+    description: shopItems.description,
+    icon: shopItems.icon,
+    is_used: studentInventory.isUsed,
+    purchased_at: studentInventory.purchasedAt,
+    used_at: studentInventory.usedAt,
+  })
+  .from(studentInventory)
+  .leftJoin(shopItems, eq(studentInventory.itemId, shopItems.id))
+  .where(eq(studentInventory.studentId, studentId));
+
+  return c.json(inventory);
+});
+
+app.post("/billing/shop/use", async (c) => {
+  const body = await c.req.json();
+  const inventoryId = body?.inventory_id;
+  const studentId = body?.student_id;
+
+  if (!inventoryId || !studentId) {
+    return c.json({ error: "inventory_id and student_id required" }, 400);
+  }
+
+  const invRows = await db.select().from(studentInventory).where(eq(studentInventory.id, inventoryId));
+  if (invRows.length === 0) return c.json({ error: "Inventory item not found" }, 404);
+  const inv = invRows[0];
+
+  if (inv.studentId !== studentId) return c.json({ error: "Unauthorized" }, 403);
+  if (inv.isUsed) return c.json({ error: "Item already used" }, 400);
+
+  // If item is 'Potion of Revival', restore HP
+  const itemRows = await db.select().from(shopItems).where(eq(shopItems.id, inv.itemId));
+  if (itemRows.length > 0) {
+    const item = itemRows[0];
+    if (item.name.toLowerCase().includes("potion") || item.name.toLowerCase().includes("healing")) {
+      await db.update(students).set({ hp: 100, status: 'active' }).where(eq(students.id, studentId));
+    }
+  }
+
+  await db.update(studentInventory)
+    .set({ isUsed: 1, usedAt: new Date().toISOString() })
+    .where(eq(studentInventory.id, inventoryId));
+
+  return c.json({ status: "ok", message: "Item used successfully!" });
+});
+
+app.put("/billing/students/:studentId/gamification", async (c) => {
+  const studentId = c.req.param("studentId");
+  const body = await c.req.json();
+  const hp = body?.hp !== undefined ? Number(body.hp) : undefined;
+  const ap = body?.ap !== undefined ? Number(body.ap) : undefined;
+
+  const updateData: any = {};
+  if (hp !== undefined) updateData.hp = Math.max(0, Math.min(100, hp)); // Cap HP at 100
+  if (ap !== undefined) updateData.ap = Math.max(0, ap);
+
+  if (hp !== undefined && updateData.hp < 60) {
+    updateData.status = 'debuff';
+  } else if (hp !== undefined && updateData.hp >= 60) {
+    updateData.status = 'active';
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    await db.update(students).set(updateData).where(eq(students.id, studentId));
+  }
+
+  const updatedRows = await db.select().from(students).where(eq(students.id, studentId));
+  return c.json(updatedRows[0] || {});
 });
 
 app.get("/billing/access", async (c) => {
@@ -504,6 +723,11 @@ app.post("/billing/students/sync", async (c) => {
           school: normalized.school,
           teacherId: normalized.teacherId,
           teacherName: normalized.teacherName,
+          hp: normalized.hp,
+          xp: normalized.xp,
+          ap: normalized.ap,
+          level: normalized.level,
+          status: normalized.status,
           createdAt: normalized.createdAt || now,
         },
       });
@@ -578,6 +802,95 @@ app.post("/billing/pay", async (c) => {
     paid_students: targetIds.length,
     paid_until: paidUntil.toISOString(),
   });
+});
+
+// ---- OAUTH ROUTES ----
+app.get('/auth/google', (c) => {
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/google/callback';
+
+    console.log('[OAUTH] Initiating Google Auth with ClientID:', clientId.substring(0, 10) + '...');
+    
+    if (!clientId) {
+      return c.text('Error: GOOGLE_CLIENT_ID is not configured.', 500);
+    }
+
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile`;
+    return c.redirect(url);
+  } catch (err) {
+    console.error('[OAUTH] Error in /auth/google:', err);
+    return c.text('Internal Server Error: ' + (err instanceof Error ? err.message : String(err)), 500);
+  }
+});
+
+app.get('/auth/google/callback', async (c) => {
+  const code = c.req.query('code');
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/google/callback';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:9111';
+
+  if (!code) return c.text('No code provided', 400);
+
+  try {
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId!,
+        client_secret: clientSecret!,
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri
+      })
+    });
+    const tokenData = await tokenRes.json();
+    if (tokenData.error) {
+      return c.text('Error from Google: ' + tokenData.error_description, 400);
+    }
+
+    const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` }
+    });
+    const userData = await userRes.json();
+    const email = userData.email as string;
+
+    let role = 'student';
+    if (email === 'the.real.ferilee@gmail.com') {
+      role = 'admin';
+    } else if (
+      email.endsWith('@guru.smk.belajar.id') ||
+      email.endsWith('@guru.sma.belajar.id') ||
+      email.endsWith('@guru.smp.belajar.id') ||
+      email.endsWith('@guru.sd.belajar.id')
+    ) {
+      role = 'guru';
+    }
+
+    const mathflixToken = "temporary_dummy_token";
+    const userDataString = JSON.stringify({
+      id: email,
+      email: email,
+      role: role,
+      full_name: userData.name,
+      photo_profile: userData.picture
+    });
+
+    return c.redirect(`${frontendUrl}/oauth/callback?token=${mathflixToken}&user=${encodeURIComponent(userDataString)}`);
+  } catch (error) {
+    console.error('[OAUTH] Fatal Error in /auth/google/callback:', error);
+    return c.text('Internal Server Error during OAuth process: ' + (error instanceof Error ? error.message : String(error)), 500);
+  }
+});
+
+// Mock Routes untuk mengatasi 404 pada Frontend
+app.get('/billing/access', (c) => c.json({ access: true, status: 'active' }));
+app.get('/materials', (c) => c.json([]));
+app.get('/quizzes', (c) => c.json([]));
+
+app.all('*', (c) => {
+  return c.json([]);
 });
 
 const port = Number(process.env.PORT || 3000);

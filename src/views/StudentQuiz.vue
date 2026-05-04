@@ -62,8 +62,8 @@
              <div class="text-xl text-gray-300 mb-6" v-else>Terima kasih telah bermain!</div>
 
              <div class="flex justify-center gap-4">
-                <button @click="$router.push('/student')" class="hex-btn bg-gray-600 hover:bg-gray-500 p-3 rounded">Main Menu</button>
-                <button @click="$router.push('/student/leaderboard')" class="hex-btn bg-yellow-600 hover:bg-yellow-500 p-3 rounded text-black font-bold">Leaderboard</button>
+                <button @click="$router.push('/')" class="hex-btn bg-gray-600 hover:bg-gray-500 p-3 rounded">Main Menu</button>
+                <button @click="$router.push('/leaderboard')" class="hex-btn bg-yellow-600 hover:bg-yellow-500 p-3 rounded text-black font-bold">Leaderboard</button>
              </div>
         </div>
 
@@ -197,7 +197,7 @@
                  <div class="text-6xl font-extrabold text-[#E50914] mb-2">{{ result.score }}%</div>
                  <div class="text-sm text-gray-500 uppercase tracking-widest mb-8">Final Score</div>
 
-                 <button @click="$router.push('/student')" class="bg-white text-black px-8 py-3 rounded hover:bg-gray-200 transition font-bold uppercase tracking-wide">
+                 <button @click="$router.push('/')" class="bg-white text-black px-8 py-3 rounded hover:bg-gray-200 transition font-bold uppercase tracking-wide">
                     Back to Dashboard
                  </button>
             </div>

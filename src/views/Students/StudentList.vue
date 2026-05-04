@@ -570,6 +570,16 @@
                             Class
                         </th>
                         <th
+                            class="px-6 py-3 text-center text-xs font-bold text-red-500 uppercase tracking-wider"
+                        >
+                            HP (Hadir)
+                        </th>
+                        <th
+                            class="px-6 py-3 text-center text-xs font-bold text-amber-500 uppercase tracking-wider"
+                        >
+                            AP (Aktif)
+                        </th>
+                        <th
                             class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                         >
                             Aksi
@@ -609,6 +619,36 @@
                             class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300 text-center"
                         >
                             {{ student.class_name || "—" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button
+                                    @click="updateGamification(student, 'hp', -10)"
+                                    class="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 font-bold"
+                                >-</button>
+                                <span class="font-bold w-8" :class="student.hp < 60 ? 'text-red-500 animate-pulse' : 'text-emerald-500'">
+                                    {{ student.hp }}
+                                </span>
+                                <button
+                                    @click="updateGamification(student, 'hp', 10)"
+                                    class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-200 font-bold"
+                                >+</button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button
+                                    @click="updateGamification(student, 'ap', -50)"
+                                    class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold"
+                                >-</button>
+                                <span class="font-bold text-amber-500 w-10">
+                                    {{ student.ap }}
+                                </span>
+                                <button
+                                    @click="updateGamification(student, 'ap', 50)"
+                                    class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 hover:bg-amber-200 font-bold"
+                                >+</button>
+                            </div>
                         </td>
                         <td
                             class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
@@ -763,10 +803,12 @@ interface Student {
     grade_level: number;
     school?: string;
     created_at?: string;
-    teacher_id?: string;
     teacher_name?: string;
     teacherId?: string;
     teacherName?: string;
+    hp: number;
+    ap: number;
+    status: string;
 }
 
 const students = ref<Student[]>([]);
@@ -1638,6 +1680,33 @@ const editStudent = (student: Student) => {
             student.grade_level != null ? String(student.grade_level) : "",
     };
     showForm.value = true;
+};
+
+const updateGamification = async (student: Student, type: 'hp' | 'ap', amount: number) => {
+    try {
+        const newValue = student[type] + amount;
+        const payload = type === 'hp' ? { hp: newValue } : { ap: newValue };
+        
+        // Optimistic update
+        const originalValue = student[type];
+        student[type] = newValue;
+        if (type === 'hp') {
+            student.status = newValue < 60 ? 'debuff' : 'active';
+        }
+
+        const res = await api.put(`/billing/students/${student.id}/gamification`, payload);
+        
+        // Sync with server res
+        if (res.data) {
+            student.hp = res.data.hp;
+            student.ap = res.data.ap;
+            student.status = res.data.status;
+        }
+    } catch (e: any) {
+        console.error("Gagal mengupdate status hero", e);
+        // revert logic would go here if needed
+        fetchStudents(); // Refresh data as fallback
+    }
 };
 
 const cancelEdit = () => {

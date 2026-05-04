@@ -1,12 +1,16 @@
 <template>
   <div class="space-y-6">
-    <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 flex justify-between items-center transition-colors backdrop-blur">
-      <div>
-           <h2 class="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">Dashboard Guru</h2>
-           <p class="text-gray-600 dark:text-gray-400">Overview performa siswa dan aktivitas terbaru (Tahap Assess).</p>
+    <!-- Header: Guild Master Dashboard -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-amber-500 p-6 rounded-2xl shadow-lg shadow-black/40 flex justify-between items-center transition-colors backdrop-blur relative overflow-hidden">
+      <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+         <span class="text-8xl">👑</span>
       </div>
-      <div class="flex items-center gap-3">
-        <button @click="loadAnalytics" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-bold">Aggregated Real-time</button>
+      <div class="relative z-10">
+           <h2 class="text-3xl font-black mb-1 text-white uppercase tracking-widest drop-shadow-md">Guild Master Board</h2>
+           <p class="text-slate-400 font-bold text-sm">Overview performa Hero (Siswa) dan pantauan aktivitas (Tahap Assess).</p>
+      </div>
+      <div class="relative z-10 flex items-center gap-3">
+        <button @click="loadAnalytics" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-400 px-4 py-2 rounded-lg text-sm font-black tracking-widest uppercase shadow-md active:translate-y-1 transition-all">Refresh Realm</button>
       </div>
     </div>
 
@@ -20,14 +24,14 @@
     <div v-if="isAdmin && pendingTeacherRequests.length" class="bg-red-950/60 border border-red-500/40 text-red-100 px-4 py-4 rounded-2xl text-sm">
       <div class="flex items-center justify-between gap-4">
         <div>
-          <div class="font-semibold">Permintaan Akun Guru Baru</div>
+          <div class="font-semibold uppercase tracking-widest text-red-400">New Guild Master Request</div>
           <div class="text-xs text-red-200/70 mt-1">
             {{ pendingTeacherRequests.length }} permintaan menunggu konfirmasi.
           </div>
         </div>
         <button
           type="button"
-          class="text-xs font-semibold px-3 py-2 rounded bg-red-500 text-black hover:bg-red-400"
+          class="text-xs font-black px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500 tracking-widest uppercase shadow-[0_4px_0_#991b1b] active:translate-y-1 active:shadow-none transition-all"
           @click="openPendingRequests"
         >
           Tinjau
@@ -35,57 +39,61 @@
       </div>
     </div>
 
-
-    <!-- Stats Row -->
+    <!-- Stats Row (RPG Style) -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 border-l-4 border-blue-500 transition-colors backdrop-blur">
-            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Total Siswa</h3>
-            <div class="text-4xl font-bold text-gray-800 dark:text-white mt-2">{{ totalStudentsDisplay }}</div>
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform">🛡️</div>
+            <h3 class="text-blue-400 text-xs font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">Total Heroes</h3>
+            <div class="text-5xl font-black text-white drop-shadow-md">{{ totalStudentsDisplay }}</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Siswa Terdaftar</div>
         </div>
-        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 border-l-4 border-green-500 transition-colors backdrop-blur">
-            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Rata-rata Nilai Kuis</h3>
-            <div class="text-4xl font-bold text-gray-800 dark:text-white mt-2">{{ averageScoreDisplay }}</div>
-            <div class="text-xs text-gray-400 mt-1">Acuan ketuntasan: 75</div>
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform">⚔️</div>
+            <h3 class="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">Avg. Battle Prowess</h3>
+            <div class="text-5xl font-black text-white drop-shadow-md">{{ averageScoreDisplay }}</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Rata-rata Nilai (Target: 75)</div>
         </div>
-        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 border-l-4 border-purple-500 transition-colors backdrop-blur">
-            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Jurnal Refleksi Hari Ini</h3>
-            <div class="text-4xl font-bold text-gray-800 dark:text-white mt-2">{{ stats.today_reflections || 0 }}</div>
-            <div class="text-xs text-gray-400 mt-1">Siswa aktif merefleksi</div>
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform">🏕️</div>
+            <h3 class="text-purple-400 text-xs font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">Campfire Stories</h3>
+            <div class="text-5xl font-black text-white drop-shadow-md">{{ stats.today_reflections || 0 }}</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Jurnal Refleksi Hari Ini</div>
         </div>
-        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 border-l-4 border-amber-500 transition-colors backdrop-blur">
-            <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase">Tagihan Kelas Berbayar</h3>
-            <div class="text-3xl font-bold text-gray-800 dark:text-white mt-2">{{ formatRupiah(billingAmount) }}</div>
-            <div class="text-xs text-gray-400 mt-1">
-              Gratis {{ freeQuotaDisplay }} siswa ({{ freeClassDisplay }} kelas), {{ paidClassCount }} kelas berbayar
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:scale-110 transition-transform">💰</div>
+            <h3 class="text-amber-400 text-xs font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">Guild Treasury</h3>
+            <div class="text-3xl font-black text-white drop-shadow-md">{{ formatRupiah(billingAmount) }}</div>
+            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+              Gratis {{ freeQuotaDisplay }} siswa ({{ freeClassDisplay }} kelas), {{ paidClassCount }} berbayar
               <span v-if="overdueStudents">• {{ overdueStudents }} tertunda</span>
             </div>
             <button
               v-if="billingAmount > 0"
               :disabled="billingLoading"
               @click="handleGoToBilling"
-              class="mt-3 text-xs font-bold px-3 py-2 rounded bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-60"
+              class="mt-3 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded bg-amber-500 text-black hover:bg-amber-400 shadow-[0_4px_0_#b45309] active:translate-y-1 active:shadow-none transition-all disabled:opacity-60 disabled:shadow-none disabled:translate-y-0"
             >
-              {{ billingLoading ? 'Memuat...' : 'Atur Pembayaran' }}
+              {{ billingLoading ? 'Loading...' : 'Atur Pembayaran' }}
             </button>
         </div>
     </div>
 
-    <div v-if="isAdmin && unpaidTeachers.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded shadow transition-colors">
+    <div v-if="isAdmin && unpaidTeachers.length > 0" class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-white/5">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="font-bold text-lg text-gray-800 dark:text-white">Guru Belum Bayar</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Lebih dari 1 kelas ({{ STUDENTS_PER_CLASS }} siswa) terdaftar.</p>
+           <h3 class="font-black text-xl text-white uppercase tracking-widest">Guild Master Belum Bayar</h3>
+           <p class="text-sm text-slate-400 font-bold">Lebih dari 1 kelas ({{ STUDENTS_PER_CLASS }} siswa) terdaftar.</p>
         </div>
-        <router-link to="/admin/students" class="text-indigo-600 dark:text-indigo-400 text-sm hover:underline">Lihat Manajemen Siswa</router-link>
+        <router-link to="/admin/students" class="text-blue-400 text-sm font-bold uppercase tracking-widest hover:text-blue-300">Lihat Daftar Master</router-link>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div v-for="item in unpaidTeachers" :key="item.key" class="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded px-4 py-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-for="item in unpaidTeachers" :key="item.key" class="flex items-center justify-between bg-slate-900 border-l-4 border-amber-500 rounded-r-xl px-5 py-4 shadow-md">
           <div>
-            <div class="text-sm font-semibold text-gray-800 dark:text-white">{{ item.name }}</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.total }} siswa</div>
+            <div class="text-sm font-black text-white">{{ item.name }}</div>
+            <div class="text-xs text-slate-400 font-bold">{{ item.total }} siswa</div>
           </div>
-          <div class="text-sm font-bold text-amber-700 dark:text-amber-300">
-            {{ item.unpaid }} kelas belum bayar
+          <div class="text-sm font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-md">
+            {{ item.unpaid }} kelas unpaid
           </div>
         </div>
       </div>
@@ -95,95 +103,84 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Recent Reflections Feed -->
-        <div class="lg:col-span-2 bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 transition-colors backdrop-blur">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg text-gray-800 dark:text-white">Jurnal Refleksi Terbaru</h3>
-                <router-link to="/admin/reflections" class="text-indigo-600 dark:text-indigo-400 text-sm hover:underline">Lihat Semua</router-link>
+        <div class="lg:col-span-2 bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl backdrop-blur flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-black text-xl text-white flex items-center gap-2 tracking-widest uppercase drop-shadow-md">
+                   <span>🏕️</span> Campfire Stories (Jurnal)
+                </h3>
+                <router-link to="/admin/reflections" class="text-purple-400 font-bold text-xs uppercase tracking-widest hover:text-purple-300">Lihat Semua</router-link>
             </div>
 
-            <div v-if="loading" class="text-gray-500 italic">Memuat data...</div>
-            <div v-else-if="stats.recent_reflections?.length === 0" class="text-gray-500">Belum ada jurnal.</div>
+            <div v-if="loading" class="text-slate-500 italic font-bold">Mendengarkan cerita...</div>
+            <div v-else-if="stats.recent_reflections?.length === 0" class="text-slate-500 font-bold">Belum ada cerita hari ini.</div>
 
-            <div v-else class="space-y-4">
+            <div v-else class="space-y-4 flex-1">
                 <template v-for="ref in stats.recent_reflections" :key="ref.id">
-                    <div v-if="ref.student" class="border-b dark:border-slate-700 pb-3 last:border-0 last:pb-0">
-                        <div class="flex justify-between items-start">
+                    <div v-if="ref.student" class="bg-slate-800/50 rounded-xl p-4 border border-white/5 shadow-inner">
+                        <div class="flex justify-between items-start mb-2">
                             <div>
-                                <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">{{ ref.student.full_name }}</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">({{ ref.student.grade_level }} {{ ref.student.major }})</span>
+                                <span class="font-black text-white text-sm tracking-wider">{{ ref.student.full_name }}</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-2 bg-slate-900 px-2 py-0.5 rounded">Lvl {{ ref.student.grade_level }} {{ ref.student.major }}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-xl">{{ getMoodEmoji(ref.mood) }}</span>
+                                <span class="text-2xl filter drop-shadow-md">{{ getMoodEmoji(ref.mood) }}</span>
                                 <button
                                     type="button"
-                                    class="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200"
+                                    class="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 bg-red-500/10 px-2 py-1 rounded"
                                     @click="deleteReflection(ref.id)"
                                 >
                                     Hapus
                                 </button>
                             </div>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mt-1 italic line-clamp-2">"{{ ref.content }}"</p>
-                        <div class="text-xs text-gray-400 mt-1">{{ new Date(ref.created_at).toLocaleString() }}</div>
+                        <p class="text-slate-300 text-sm italic font-medium">"{{ ref.content }}"</p>
+                        <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-3">{{ new Date(ref.created_at).toLocaleString() }}</div>
                     </div>
                 </template>
             </div>
         </div>
 
         <!-- At-Risk Monitor -->
-        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 transition-colors backdrop-blur">
-            <h3 class="font-bold text-lg text-red-600 dark:text-red-400 mb-4 flex items-center gap-2">
-                ⚠️ Perlu Perhatian
+        <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-xl backdrop-blur">
+            <h3 class="font-black text-xl text-red-500 mb-2 flex items-center gap-2 tracking-widest uppercase drop-shadow-md">
+                <span class="animate-pulse">⚠️</span> Heroes in Danger
             </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Siswa dengan rata-rata nilai kuis di bawah 60.</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">Siswa dengan rata-rata Kuis < 60 (Terkena Debuff)</p>
 
-            <div v-if="loading" class="text-gray-500 italic">Menganalisis...</div>
-            <div v-else-if="stats.at_risk_students?.length === 0" class="text-center py-6 text-green-600 dark:text-green-400">
-                <div class="text-2xl mb-2">✅</div>
-                Tidak ada siswa "at-risk". <br>Semua aman!
+            <div v-if="loading" class="text-slate-500 italic font-bold">Mencari hero yang terluka...</div>
+            <div v-else-if="stats.at_risk_students?.length === 0" class="text-center py-10 bg-slate-800/50 rounded-xl border border-white/5">
+                <div class="text-4xl mb-3 drop-shadow-md">🛡️</div>
+                <div class="font-black text-emerald-400 uppercase tracking-widest text-sm">Semua Hero Aman!</div>
+                <div class="text-xs text-slate-500 font-bold mt-1">Tidak ada yang terkena debuff.</div>
             </div>
 
             <div v-else class="space-y-3">
-                 <div v-for="(student, idx) in stats.at_risk_students" :key="idx" class="flex justify-between items-center bg-red-50 dark:bg-red-900/30 p-3 rounded">
-                     <span class="font-medium text-gray-700 dark:text-gray-200">{{ student.name }}</span>
-                     <span class="bg-red-200 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-bold px-2 py-1 rounded">Avg: {{ student.average }}</span>
+                 <div v-for="(student, idx) in stats.at_risk_students" :key="idx" class="flex justify-between items-center bg-red-950/40 border border-red-500/30 p-3 rounded-xl shadow-inner">
+                     <span class="font-black text-red-200 text-sm truncate">{{ student.name }}</span>
+                     <span class="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-widest shadow-md">Avg: {{ student.average }}</span>
                  </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Recent Student Activity -->
-    <div class="bg-slate-900/80 border border-white/10 p-6 rounded-2xl shadow-lg shadow-black/40 transition-colors backdrop-blur">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg text-gray-800 dark:text-white">Aktivitas Siswa Terakhir</h3>
-            <router-link to="/admin/activity" class="text-indigo-600 dark:text-indigo-400 text-sm hover:underline">Lihat Aktivitas</router-link>
-        </div>
-        <div v-if="activityLoading" class="text-gray-500 italic">Memuat aktivitas...</div>
-        <div v-else-if="recentActivity.length === 0" class="text-gray-500">Belum ada aktivitas siswa.</div>
-        <div v-else class="space-y-3">
-            <div v-for="item in recentActivity" :key="item.student_id" class="flex items-center justify-between bg-gray-50 dark:bg-slate-700 p-3 rounded">
-                <div>
-                    <div class="font-semibold text-gray-800 dark:text-gray-100 text-sm">
-                        {{ item.student_name }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ item.material_title || 'Materi tidak diketahui' }}
-                    </div>
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-300">
-                    {{ formatDuration(item.duration_seconds) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Navigation (Compact) -->
+    <!-- Quick Navigation (RPG Menu) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <router-link to="/admin/students" class="bg-slate-900/70 border border-white/10 p-4 rounded-2xl text-center hover:border-red-500/70 transition font-bold text-red-300">Manajemen Siswa</router-link>
-        <router-link to="/admin/materials" class="bg-slate-900/70 border border-white/10 p-4 rounded-2xl text-center hover:border-emerald-400/70 transition font-bold text-emerald-300">Manajemen Materi</router-link>
-        <router-link to="/admin/quizzes" class="bg-slate-900/70 border border-white/10 p-4 rounded-2xl text-center hover:border-rose-400/70 transition font-bold text-rose-300">Manajemen Kuis</router-link>
-        <router-link to="/admin/assignments" class="bg-slate-900/70 border border-white/10 p-4 rounded-2xl text-center hover:border-amber-400/70 transition font-bold text-amber-300">Manajemen Tugas</router-link>
+        <router-link to="/admin/students" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-5 rounded-2xl text-center shadow-lg hover:border-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex flex-col items-center gap-2">
+            <span class="text-3xl drop-shadow-md group-hover:scale-110 transition-transform">👥</span>
+            <span class="font-black text-blue-400 uppercase tracking-widest text-[10px]">Manajemen Hero</span>
+        </router-link>
+        <router-link to="/admin/materials" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-5 rounded-2xl text-center shadow-lg hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex flex-col items-center gap-2">
+            <span class="text-3xl drop-shadow-md group-hover:scale-110 transition-transform">📜</span>
+            <span class="font-black text-emerald-400 uppercase tracking-widest text-[10px]">Quest & Regions</span>
+        </router-link>
+        <router-link to="/admin/quizzes" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-5 rounded-2xl text-center shadow-lg hover:border-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] transition-all flex flex-col items-center gap-2">
+            <span class="text-3xl drop-shadow-md group-hover:scale-110 transition-transform">☠️</span>
+            <span class="font-black text-rose-400 uppercase tracking-widest text-[10px]">Boss Battles</span>
+        </router-link>
+        <router-link to="/admin/assignments" class="group bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 p-5 rounded-2xl text-center shadow-lg hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all flex flex-col items-center gap-2">
+            <span class="text-3xl drop-shadow-md group-hover:scale-110 transition-transform">⚔️</span>
+            <span class="font-black text-amber-400 uppercase tracking-widest text-[10px]">Bounties (Tugas)</span>
+        </router-link>
     </div>
 
     <div v-if="showPendingRequests" class="fixed inset-0 z-[140] flex items-center justify-center">

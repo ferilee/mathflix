@@ -110,7 +110,7 @@
                 </button>
                 <button
                   v-else-if="activeStageIndex === 4"
-                  @click="$router.push('/student')"
+                  @click="$router.push('/')"
                   class="bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-green-700 hover:scale-105 transition"
                 >
                   Selesai Belajar 🎉
@@ -247,7 +247,7 @@ const fetchMaterial = async () => {
     }
     const saved = localStorage.getItem('student');
     if (!saved) {
-        router.push(`/login?redirect=/student/material/${materialId}`);
+        router.push(`/login?redirect=/material/${materialId}`);
         return;
     }
     student.value = JSON.parse(saved);

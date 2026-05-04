@@ -6,7 +6,7 @@ const runtimeConfig = (window as any).APP_CONFIG;
 const baseURL =
   runtimeConfig?.API_URL ||
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+  "/api";
 
 const api = axios.create({
   baseURL,

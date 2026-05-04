@@ -16,7 +16,7 @@
                   <span class="flex items-center gap-1">
                       📅 Due: {{ new Date(task.due_date).toLocaleDateString() }}
                   </span>
-                  <button @click="$router.push(`/student/assignments/${task.id}`)" class="bg-white text-black px-3 py-1 rounded hover:bg-gray-200 font-bold transition">Detail & Kumpulkan</button>
+                  <button @click="$router.push(`/assignments/${task.id}`)" class="bg-white text-black px-3 py-1 rounded hover:bg-gray-200 font-bold transition">Detail & Kumpulkan</button>
               </div>
           </div>
 

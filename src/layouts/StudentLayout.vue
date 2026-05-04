@@ -1,61 +1,39 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white font-sans">
     <!-- Navbar -->
-    <nav class="fixed top-0 z-50 w-full bg-gradient-to-b from-black/80 to-transparent transition-all duration-300" :class="{ 'bg-black': isScrolled }">
-      <div class="px-4 md:px-12 py-4 flex items-center justify-between">
+    <nav class="fixed top-0 z-50 w-full flex flex-col bg-gradient-to-b from-black/90 to-black/40 backdrop-blur-sm transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)]" :class="{ 'bg-black': isScrolled }">
+      <!-- Top Row: Logo & Profile -->
+      <div class="px-4 md:px-12 py-4 flex items-center justify-between w-full relative z-20">
         <div class="flex items-center gap-8">
-          <router-link to="/student" class="text-2xl font-bold text-red-600 tracking-wider">MATHFLIX</router-link>
-          <ul class="hidden md:flex gap-6 text-sm text-gray-300">
+          <router-link to="/" class="text-2xl font-bold text-red-600 tracking-wider leading-none">MATHFLIX</router-link>
+          
+          <ul class="hidden md:flex gap-6 text-sm text-gray-300 ml-4">
             <li>
               <router-link
-                to="/student"
+                to="/"
                 class="transition"
-                :class="isMenuDisabled('/student') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+                :class="isMenuDisabled('/') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
               >Home</router-link>
             </li>
             <li>
               <router-link
-                to="/student/leaderboard"
+                to="/leaderboard"
                 class="transition"
-                :class="isMenuDisabled('/student/leaderboard') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+                :class="isMenuDisabled('/leaderboard') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
               >Leaderboard</router-link>
             </li>
             <li>
               <router-link
-                to="/student/my-list"
-                class="transition"
-                :class="isMenuDisabled('/student/my-list') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
-              >Daftar Saya</router-link>
+                to="/shop"
+                class="transition font-black text-orange-400"
+                :class="isMenuDisabled('/shop') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-orange-300 drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]'"
+              >🛒 Merchant</router-link>
             </li>
             <li>
                 <router-link
-                  to="/student/assignments"
+                  to="/announcements"
                   class="transition relative"
-                  :class="isMenuDisabled('/student/assignments') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
-                >
-                    Tugas Saya
-                    <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
-                </router-link>
-            </li>
-            <li>
-              <router-link
-                to="/student/reflections"
-                class="transition"
-                :class="isMenuDisabled('/student/reflections') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
-              >Jurnal</router-link>
-            </li>
-            <li>
-              <router-link
-                to="/student/s-badges"
-                class="transition"
-                :class="isMenuDisabled('/student/s-badges') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
-              >Pencapaian</router-link>
-            </li>
-            <li>
-                <router-link
-                  to="/student/announcements"
-                  class="transition relative"
-                  :class="isMenuDisabled('/student/announcements') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+                  :class="isMenuDisabled('/announcements') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
                 >
                     Pengumuman
                     <span v-if="hasNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
@@ -63,9 +41,40 @@
             </li>
             <li>
                 <router-link
-                  to="/student/discuss"
+                  to="/assignments"
                   class="transition relative"
-                  :class="isMenuDisabled('/student/discuss') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+                  :class="isMenuDisabled('/assignments') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+                >
+                    Tugas Saya
+                    <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
+                </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/reflections"
+                class="transition"
+                :class="isMenuDisabled('/reflections') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+              >Jurnal</router-link>
+            </li>
+            <li>
+              <router-link
+                to="/s-badges"
+                class="transition"
+                :class="isMenuDisabled('/s-badges') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+              >Pencapaian</router-link>
+            </li>
+            <li>
+              <router-link
+                to="/my-list"
+                class="transition"
+                :class="isMenuDisabled('/my-list') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
+              >Daftar Saya</router-link>
+            </li>
+            <li>
+                <router-link
+                  to="/discuss"
+                  class="transition relative"
+                  :class="isMenuDisabled('/discuss') ? 'text-gray-500 cursor-not-allowed' : 'hover:text-white'"
                 >
                     Diskusi
                     <span v-if="hasDiscussNotification" class="absolute -top-1 -right-2 w-2 h-2 bg-red-600 rounded-full"></span>
@@ -74,6 +83,17 @@
           </ul>
         </div>
         <div class="flex items-center gap-4 text-sm font-medium relative">
+           <!-- My List Button (Floating Bookmark) -->
+           <router-link
+             v-if="student"
+             to="/my-list"
+             class="w-10 h-10 flex items-center justify-center bg-gray-800/80 backdrop-blur-md border border-gray-600 rounded-full hover:bg-red-600 hover:border-red-500 shadow-lg transition-all duration-300 relative group"
+           >
+             <span class="text-xl filter drop-shadow-sm group-hover:scale-110 transition-transform">🔖</span>
+             <!-- Tooltip -->
+             <span class="absolute -bottom-8 opacity-0 group-hover:opacity-100 text-[10px] font-bold bg-black/90 px-2 py-1 rounded text-white whitespace-nowrap transition-opacity pointer-events-none z-50">Daftar Saya</span>
+           </router-link>
+
            <!-- Profile Dropdown Trigger -->
            <div
              v-if="student"
@@ -108,7 +128,7 @@
                  </div>
 
                  <router-link
-                   to="/student/profile"
+                   to="/profile"
                    class="text-left px-4 py-3 hover:bg-gray-800/50 text-emerald-400 flex items-center gap-3 transition"
                    @click="showMenu = false"
                  >
@@ -139,10 +159,38 @@
            </transition>
         </div>
       </div>
+
+      <!-- Separator -->
+      <div class="w-full h-[1px] bg-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.9)] relative z-20"></div>
+
+      <!-- Bottom Row: Game Badges -->
+      <div class="w-full px-4 md:px-12 py-3 flex justify-center md:justify-start gap-8 relative z-10 bg-black/30">
+        <!-- Game Style Ranking Button -->
+        <router-link to="/leaderboard" class="relative cursor-pointer transform transition hover:scale-105 active:scale-95 block w-36">
+          <div class="h-9 w-full bg-gradient-to-b from-[#7a8cff] to-[#3f4ebd] rounded-xl border-t-2 border-white/30 border-b-2 border-black/40 shadow-lg flex items-center justify-center relative overflow-hidden">
+            <div class="absolute top-0 left-[5%] w-[90%] h-[35%] bg-white/25 rounded-full blur-[0.5px]"></div>
+            <span class="text-white font-black text-[12px] uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] z-10 ml-4 text-shadow-sm">Rank 12</span>
+          </div>
+          <div class="absolute -left-4 -top-2 filter drop-shadow-[0_3px_3px_rgba(0,0,0,0.4)] z-20">
+            <span class="text-[42px]">🏆</span>
+          </div>
+        </router-link>
+
+        <!-- Game Style Achievement Button -->
+        <router-link to="/s-badges" class="relative cursor-pointer transform transition hover:scale-105 active:scale-95 block w-36">
+          <div class="h-9 w-full bg-gradient-to-b from-[#ff6b9e] to-[#b51d58] rounded-xl border-t-2 border-white/30 border-b-2 border-black/40 shadow-lg flex items-center justify-center relative overflow-hidden">
+            <div class="absolute top-0 left-[5%] w-[90%] h-[35%] bg-white/25 rounded-full blur-[0.5px]"></div>
+            <span class="text-white font-black text-[12px] uppercase tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] z-10 mr-4 text-shadow-sm">VIP</span>
+          </div>
+          <div class="absolute -right-4 -top-2 filter drop-shadow-[0_3px_3px_rgba(0,0,0,0.4)] z-20">
+            <span class="text-[42px]">💎</span>
+          </div>
+        </router-link>
+      </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="pt-16 pb-20 md:pb-0">
+    <div class="pt-[130px] pb-20 md:pb-0">
       <transition name="fade">
         <div
           v-if="toastMessage"
@@ -181,109 +229,76 @@
             Selama masa tenggang, hanya Pengumuman, Leaderboard, dan Diskusi yang bisa diakses.
           </p>
           <div class="flex flex-wrap justify-center gap-3 text-sm">
-            <router-link to="/student/announcements" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Pengumuman</router-link>
-            <router-link to="/student/leaderboard" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Leaderboard</router-link>
-            <router-link to="/student/discuss" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Diskusi</router-link>
+            <router-link to="/announcements" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Pengumuman</router-link>
+            <router-link to="/leaderboard" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Leaderboard</router-link>
+            <router-link to="/discuss" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Diskusi</router-link>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Expandable Menu (FAB) -->
-    <div class="md:hidden fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
-      <transition name="fade">
-        <div v-if="showMenu" class="flex flex-col gap-2 mb-2">
-          <router-link
-            to="/student/leaderboard"
-            class="p-3 rounded-full shadow-lg flex items-center gap-2"
-            :class="isMenuDisabled('/student/leaderboard') ? 'bg-gray-700 text-gray-300 cursor-not-allowed' : 'bg-red-600 text-white'"
-            @click="showMenu = false"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2h-6c-1.1 0-2 .9-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4c0-1.1-.9-2-2-2Z"/></svg>
-            <span class="text-sm font-bold pr-2">Leaderboard</span>
-          </router-link>
-          <router-link
-            to="/student/my-list"
-            class="p-3 rounded-full shadow-lg flex items-center gap-2"
-            :class="isMenuDisabled('/student/my-list') ? 'bg-gray-700 text-gray-300 cursor-not-allowed' : 'bg-red-600 text-white'"
-            @click="showMenu = false"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-            <span class="text-sm font-bold pr-2">Daftar Saya</span>
-          </router-link>
-          <router-link
-            to="/student/s-badges"
-            class="p-3 rounded-full shadow-lg flex items-center gap-2"
-            :class="isMenuDisabled('/student/s-badges') ? 'bg-gray-700 text-gray-300 cursor-not-allowed' : 'bg-red-600 text-white'"
-            @click="showMenu = false"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-            <span class="text-sm font-bold pr-2">Pencapaian</span>
-          </router-link>
-        </div>
-      </transition>
-      <button @click="showMenu = !showMenu" class="bg-yellow-500 text-black p-4 rounded-full shadow-lg hover:bg-yellow-400 transition transform hover:scale-105">
-         <svg v-if="!showMenu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-         <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
+    <!-- FAB Dihapus karena fungsinya sudah dipindahkan -->
 
-    <!-- Bottom Navigation (Mobile Only) -->
-    <div class="md:hidden fixed bottom-0 w-full bg-black/90 border-t border-gray-800 flex justify-around p-3 z-50 text-xs backdrop-blur-md">
-      <router-link
-        to="/student"
-        class="flex flex-col items-center gap-1"
-        :class="isMenuDisabled('/student') ? 'text-gray-600' : 'text-gray-400 hover:text-white'"
-        active-class="text-red-600"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Home</span>
+    <!-- Bottom Navigation (Mobile Only) - Game Style -->
+    <div class="md:hidden fixed bottom-0 w-full bg-[#1E88E5] border-t-[4px] border-[#FFA000] grid grid-cols-6 z-[100] shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
+      
+      <!-- Home -->
+      <router-link to="/" custom v-slot="{ isExactActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300 border-r border-black/20" :class="[isExactActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <span class="filter drop-shadow-md transition-all duration-300 z-10" :class="[isExactActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">🏰</span>
+          <span v-if="isExactActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Home</span>
+        </div>
       </router-link>
-      <router-link
-        to="/student/assignments"
-        class="flex flex-col items-center gap-1 relative"
-        :class="isMenuDisabled('/student/assignments') ? 'text-gray-600' : 'text-gray-400 hover:text-white'"
-        active-class="text-red-600"
-      >
-         <div class="relative">
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-             <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border border-black"></span>
-         </div>
-         <span>Tugas</span>
+
+      <!-- Tugas -->
+      <router-link to="/assignments" custom v-slot="{ isActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300 border-r border-black/20" :class="[isActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <div class="relative filter drop-shadow-md transition-all duration-300 z-10" :class="[isActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">
+            ⚔️
+            <span v-if="hasAssignmentNotification" class="absolute -top-1 -right-2 w-5 h-5 bg-gradient-to-b from-red-500 to-red-700 rounded-full border-2 border-white flex items-center justify-center text-white text-[12px] font-black shadow-md">!</span>
+          </div>
+          <span v-if="isActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Tugas</span>
+        </div>
       </router-link>
-      <router-link
-        to="/student/reflections"
-        class="flex flex-col items-center gap-1"
-        :class="isMenuDisabled('/student/reflections') ? 'text-gray-600' : 'text-gray-400 hover:text-white'"
-        active-class="text-red-600"
-      >
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-         <span>Jurnal</span>
+
+      <!-- Jurnal -->
+      <router-link to="/reflections" custom v-slot="{ isActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300 border-r border-black/20" :class="[isActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <span class="filter drop-shadow-md transition-all duration-300 z-10" :class="[isActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">📖</span>
+          <span v-if="isActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Jurnal</span>
+        </div>
       </router-link>
-      <router-link
-        to="/student/announcements"
-        class="flex flex-col items-center gap-1 relative"
-        :class="isMenuDisabled('/student/announcements') ? 'text-gray-600' : 'text-gray-400 hover:text-white'"
-        active-class="text-red-600"
-      >
-         <div class="relative">
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-             <span v-if="hasNotification" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border border-black"></span>
-         </div>
-         <span>Info</span>
+
+      <!-- Merchant / Shop -->
+      <router-link to="/shop" custom v-slot="{ isActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300 border-r border-black/20" :class="[isActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <span class="filter drop-shadow-md transition-all duration-300 z-10" :class="[isActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">🛒</span>
+          <span v-if="isActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Merchant</span>
+        </div>
       </router-link>
-      <router-link
-        to="/student/discuss"
-        class="flex flex-col items-center gap-1 relative"
-        :class="isMenuDisabled('/student/discuss') ? 'text-gray-600' : 'text-gray-400 hover:text-white'"
-        active-class="text-red-600"
-      >
-         <div class="relative">
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-             <span v-if="hasDiscussNotification" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border border-black"></span>
-         </div>
-         <span>Diskusi</span>
+
+      <!-- Info -->
+      <router-link to="/announcements" custom v-slot="{ isActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300 border-r border-black/20" :class="[isActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <div class="relative filter drop-shadow-md transition-all duration-300 z-10" :class="[isActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">
+            📢
+            <span v-if="hasNotification" class="absolute -top-1 -right-2 w-5 h-5 bg-gradient-to-b from-green-400 to-green-600 rounded-full border-2 border-white flex items-center justify-center text-white text-[12px] font-black shadow-md">1</span>
+          </div>
+          <span v-if="isActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Info</span>
+        </div>
       </router-link>
+
+      <!-- Diskusi -->
+      <router-link to="/discuss" custom v-slot="{ isActive, navigate }">
+        <div @click="navigate" class="relative flex flex-col items-center cursor-pointer transition-all duration-300" :class="[isActive ? 'bg-[#42A5F5] -mt-4 h-[80px] rounded-t-xl border-t-[3px] border-[#FFCA28] shadow-[0_-5px_10px_rgba(0,0,0,0.2)] z-10 justify-end pb-1.5' : 'h-16 justify-center hover:bg-blue-500/50']">
+          <div class="relative filter drop-shadow-md transition-all duration-300 z-10" :class="[isActive ? 'text-[38px] -translate-y-1' : 'text-[28px] translate-y-1 opacity-80']">
+            🛡️
+            <span v-if="hasDiscussNotification" class="absolute -top-1 -right-2 w-5 h-5 bg-gradient-to-b from-red-500 to-red-700 rounded-full border-2 border-white flex items-center justify-center text-white text-[12px] font-black shadow-md">!</span>
+          </div>
+          <span v-if="isActive" class="text-white font-black text-[10px] uppercase tracking-wider drop-shadow-md leading-none text-shadow-sm mt-1">Diskusi</span>
+        </div>
+      </router-link>
+
     </div>
 
      <!-- Foto Profil Modal -->
@@ -363,6 +378,9 @@
 
      <!-- Developer Widget (Modal) -->
      <DeveloperWidget :is-open="showDevInfo" @close="showDevInfo = false" />
+
+     <!-- Profiling Modal (Wajib isi) -->
+     <ProfilingModal :is-open="showProfilingModal" :student-data="student" @saved="handleProfileSaved" />
   </div>
 </template>
 
@@ -371,6 +389,7 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import DeveloperWidget from '../components/DeveloperWidget.vue';
 import LoginModal from '../components/LoginModal.vue';
+import ProfilingModal from '../components/ProfilingModal.vue';
 import api from '../api';
 import billingApi from '../api/billing';
 import { isDemoMode, enableDemo, resetDemo, getDemoStudent } from '../utils/demo';
@@ -385,6 +404,7 @@ const showMenu = ref(false);
 const showDevInfo = ref(false);
 const showLoginModal = ref(false);
 const showPhotoModal = ref(false);
+const showProfilingModal = ref(false);
 const photoFile = ref<File | null>(null);
 const photoPreview = ref<string>('');
 const photoImage = ref<HTMLImageElement | null>(null);
@@ -623,6 +643,43 @@ const checkDiscussNotifications = async (): Promise<void> => {
     }
 };
 
+const handleProfileSaved = async (profileData: any) => {
+    if(!student.value) return;
+    try {
+        const payload = {
+            id: student.value.id, // Email
+            nisn: profileData.nisn,
+            full_name: student.value.full_name,
+            school: profileData.school,
+            grade_level: profileData.grade_level,
+            class_name: profileData.class_name,
+            major: profileData.major,
+            hp: 100, // starting hp
+            ap: 0,
+            xp: 0,
+            level: 1,
+            status: 'active'
+        };
+
+        // Sync to backend via billing endpoint which acts as local DB
+        await api.post('/billing/students/sync', payload);
+
+        // Update local storage
+        const updatedStudent = { ...student.value, ...payload };
+        localStorage.setItem('student', JSON.stringify(updatedStudent));
+        student.value = updatedStudent;
+        
+        // Hide modal and dispatch event
+        showProfilingModal.value = false;
+        window.dispatchEvent(new Event(STUDENT_UPDATED_EVENT));
+        
+        alert("Profil pahlawan berhasil disimpan!");
+    } catch(e) {
+        console.error("Gagal menyimpan profil:", e);
+        alert("Terjadi kesalahan saat menyimpan profil");
+    }
+};
+
 const markAllDiscussionsRead = async () => {
     if (demoMode.value || !student.value?.id) return;
     try {
@@ -716,7 +773,7 @@ const initials = computed(() => {
     return student.value?.full_name ? student.value.full_name.charAt(0).toUpperCase() : 'S';
 });
 
-const graceAllowedPrefixes = ['/student/announcements', '/student/leaderboard', '/student/discuss'];
+const graceAllowedPrefixes = ['/announcements', '/leaderboard', '/discuss'];
 const isGraceRestricted = computed(() => {
     if (accessStatus.value !== 'grace') return false;
     return !graceAllowedPrefixes.some((prefix) => route.path.startsWith(prefix));
@@ -745,6 +802,11 @@ onMounted(() => {
     window.addEventListener('scroll', handleScroll);
     window.addEventListener(STUDENT_UPDATED_EVENT, handleStudentUpdated);
     loadStudent();
+    if (!demoMode.value && student.value && student.value.role === 'student') {
+        if (!student.value.school || !student.value.grade_level || !student.value.class_name) {
+            showProfilingModal.value = true;
+        }
+    }
     if (!demoMode.value) {
         checkNotifications();
         checkAssignmentNotifications();
@@ -762,20 +824,20 @@ onMounted(() => {
 watch(() => route.path, (path) => {
     if (accessStatus.value === 'grace' && !graceAllowedPrefixes.some((prefix) => path.startsWith(prefix))) {
         showToast('Akses terbatas');
-        router.push('/student/announcements');
+        router.push('/announcements');
         return;
     }
-    if (path.startsWith('/student/assignments')) {
+    if (path.startsWith('/assignments')) {
         checkAssignmentNotifications().then((latestTimestamp) => {
             if (latestTimestamp) {
                 markAssignmentsRead(latestTimestamp);
             }
         });
     }
-    if (path.startsWith('/student/announcements')) {
+    if (path.startsWith('/announcements')) {
         markAllAnnouncementsRead();
     }
-    if (path.startsWith('/student/discuss')) {
+    if (path.startsWith('/discuss')) {
         markAllDiscussionsRead();
     }
 });

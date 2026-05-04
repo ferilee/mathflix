@@ -1,37 +1,12 @@
 services:
-  api:
-    build:
-      context: /home/ferilee/API-Mathflix-update
-    container_name: mathflix-api
-    command: ["bun", "run", "index.ts"]
-    ports:
-      - "3001:3000"
-    environment:
-      - DB_PATH=/app/data/sqlite.db
-      - MINIO_ENDPOINT=mathflix-minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=admin
-      - MINIO_SECRET_KEY=password123
-      - MINIO_BUCKET=mathflix
-      - MINIO_USE_SSL=false
-      - ADMIN_USERNAME=ferilee
-      - ADMIN_PASSWORD=F3r!-lee
-    env_file:
-      - .env
-    volumes:
-      - ./data:/app/data
-    restart: always
-
   frontend:
     build:
       context: .
     container_name: mathflix-frontend
     ports:
-      - "9001:80"
+      - "9111:80"
     env_file:
       - .env
-    depends_on:
-      - api
     restart: always
 
   minio:

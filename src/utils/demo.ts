@@ -5,9 +5,14 @@ const DEMO_ASSIGNMENT_SUBMISSIONS_KEY = "demo_assignment_submissions";
 export const demoStudent = {
   id: "demo-student",
   nisn: "DEMO-1001",
-  full_name: "Siswa Demo",
+  full_name: "Demo Hero",
   major: "TKJ",
   grade_level: 10,
+  hp: 100,
+  xp: 15400,
+  ap: 750,
+  level: 15,
+  status: "active",
 };
 
 export const demoMaterials = [
