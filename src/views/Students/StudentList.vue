@@ -806,6 +806,7 @@ interface Student {
     teacher_name?: string;
     teacherId?: string;
     teacherName?: string;
+    teacher_id?: string;
     hp: number;
     ap: number;
     status: string;
@@ -1688,7 +1689,6 @@ const updateGamification = async (student: Student, type: 'hp' | 'ap', amount: n
         const payload = type === 'hp' ? { hp: newValue } : { ap: newValue };
         
         // Optimistic update
-        const originalValue = student[type];
         student[type] = newValue;
         if (type === 'hp') {
             student.status = newValue < 60 ? 'debuff' : 'active';

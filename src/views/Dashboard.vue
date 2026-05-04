@@ -440,13 +440,6 @@ const loadRecentActivity = async () => {
     }
 };
 
-const formatDuration = (seconds?: number | null) => {
-    if (!seconds || seconds <= 0) return 'Durasi tidak tersedia';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
-    if (mins < 1) return `${secs}s`;
-    return `${mins}m ${secs}s`;
-};
 
 const formatRupiah = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
