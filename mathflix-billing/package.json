@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
-    "db:push": "bun x drizzle-kit push"
+    "db:push": "bun x drizzle-kit push",
+    "test": "bun test"
   },
   "dependencies": {
     "drizzle-orm": "^0.30.10",

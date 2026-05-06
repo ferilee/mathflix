@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 minio_data/.minio.sys/
+rustfs_data/
 config.js
 public/config.js
 

@@ -9,18 +9,19 @@ services:
       - .env
     restart: always
 
-  minio:
-    image: minio/minio
-    container_name: mathflix-minio
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: mathflix-rustfs
     ports:
       - "9000:9000"
       - "9005:9001"
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: password123
+      RUSTFS_ACCESS_KEY: admin
+      RUSTFS_SECRET_KEY: password123
+      RUSTFS_CONSOLE_ENABLE: "true"
     volumes:
-      - /home/ferilee/mathflix-minio/minio_data:/data
-    command: server /data --console-address ":9001"
+      - /home/ferilee/mathflix-rustfs/data:/data
+    command: /data
     restart: always
 # Ensure the data directory exists or is created by the container
 # The API uses SQLite, likely at ./mathflix.db or src/db/mathflix.db.

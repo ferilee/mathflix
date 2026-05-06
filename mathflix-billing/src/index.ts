@@ -14,7 +14,7 @@ import {
 import { asc, eq, inArray } from "drizzle-orm";
 import crypto from "node:crypto";
 
-const app = new Hono();
+export const app = new Hono();
 
 app.use(
   "*",
@@ -893,11 +893,13 @@ app.all('*', (c) => {
   return c.json([]);
 });
 
-const port = Number(process.env.PORT || 3000);
+if (import.meta.main) {
+  const port = Number(process.env.PORT || 3000);
+  console.log(`[mathflix-billing] listening on http://localhost:${port}`);
+  Bun.serve({
+    port,
+    fetch: app.fetch,
+  });
+}
 
-console.log(`[mathflix-billing] listening on http://localhost:${port}`);
-
-Bun.serve({
-  port,
-  fetch: app.fetch,
-});
+export default app;

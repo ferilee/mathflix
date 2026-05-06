@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:billing": "cd mathflix-billing && bun run dev",
     "dev:all": "concurrently \"bun run dev\" \"bun run dev:billing\"",
+    "test:backend": "cd api && bun test && cd ../mathflix-billing && bun test",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "bump:patch": "npm version patch",

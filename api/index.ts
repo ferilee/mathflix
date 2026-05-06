@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
-const app = new Hono();
+export const app = new Hono();
 
 app.use('*', cors());
 
@@ -97,8 +97,10 @@ app.all('*', (c) => {
   return c.json([]);
 });
 
-// Start the Bun server
-export default {
-  port: 3000,
-  fetch: app.fetch,
-};
+if (import.meta.main) {
+  const port = Number(process.env.PORT || 3000);
+  Bun.serve({ port, fetch: app.fetch });
+  console.log(`[mathflix-api] listening on http://localhost:${port}`);
+}
+
+export default app;
