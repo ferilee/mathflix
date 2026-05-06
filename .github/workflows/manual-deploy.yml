@@ -18,6 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate GHCR token
+        run: |
+          if [ -z "${{ secrets.GHCR_TOKEN }}" ]; then
+            echo "GHCR_TOKEN is empty or missing"
+            exit 1
+          fi
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
