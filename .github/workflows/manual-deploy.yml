@@ -18,19 +18,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate GHCR token
+      - name: GHCR token status
         run: |
           if [ -z "${{ secrets.GHCR_TOKEN }}" ]; then
-            echo "GHCR_TOKEN is empty or missing"
-            exit 1
+            echo "GHCR_TOKEN not set, fallback to GITHUB_TOKEN"
+          else
+            echo "Using GHCR_TOKEN from repository secrets"
           fi
 
-      - name: Log in to the Container registry
+      - name: Log in to GHCR with GHCR_TOKEN
+        if: ${{ secrets.GHCR_TOKEN != '' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ferilee
           password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Log in to GHCR with GITHUB_TOKEN
+        if: ${{ secrets.GHCR_TOKEN == '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
