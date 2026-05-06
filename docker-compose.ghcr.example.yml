@@ -4,6 +4,8 @@ services:
     container_name: mathflix
     ports:
       - "9111:80"
+    restart: unless-stopped
+
+    # Optional: sesuaikan URL API backend Anda
     environment:
       - VITE_API_URL=/api
-    restart: unless-stopped
