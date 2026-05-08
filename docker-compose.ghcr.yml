@@ -1,9 +1,17 @@
 services:
   mathflix:
     image: ghcr.io/ferilee/mathflix:latest
-    container_name: mathflix
+    container_name: mathflix-prod
     ports:
       - "9111:80"
+    env_file:
+      - .env
     environment:
       - VITE_API_URL=/api
+    networks:
+      - ferileenet
     restart: unless-stopped
+
+networks:
+  ferileenet:
+    external: true

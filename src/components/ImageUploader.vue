@@ -79,7 +79,7 @@
     <!-- Browse Tab -->
     <div v-if="activeTab === 'browse'" class="mb-4">
       <div class="mb-4">
-        <p class="text-xs text-gray-400 mb-2">Dari Storage (MinIO)</p>
+        <p class="text-xs text-gray-400 mb-2">Dari Storage (RustFS)</p>
         <div v-if="storageLoading" class="text-xs text-gray-500">Memuat gambar...</div>
         <div v-else-if="storageError" class="text-xs text-red-400">{{ storageError }}</div>
         <div v-else-if="storageImages.length === 0" class="text-xs text-gray-500">Belum ada gambar di storage.</div>

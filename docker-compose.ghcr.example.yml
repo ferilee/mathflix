@@ -4,8 +4,14 @@ services:
     container_name: mathflix
     ports:
       - "9111:80"
-    restart: unless-stopped
-
-    # Optional: sesuaikan URL API backend Anda
+    env_file:
+      - .env
     environment:
       - VITE_API_URL=/api
+    networks:
+      - ferileenet
+    restart: unless-stopped
+
+networks:
+  ferileenet:
+    external: true

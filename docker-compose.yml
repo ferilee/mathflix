@@ -7,23 +7,13 @@ services:
       - "9111:80"
     env_file:
       - .env
+    networks:
+      - ferileenet
     restart: always
 
-  rustfs:
-    image: rustfs/rustfs:latest
-    container_name: mathflix-rustfs
-    ports:
-      - "9000:9000"
-      - "9005:9001"
-    environment:
-      RUSTFS_ACCESS_KEY: admin
-      RUSTFS_SECRET_KEY: password123
-      RUSTFS_CONSOLE_ENABLE: "true"
-    volumes:
-      - /home/ferilee/mathflix-rustfs/data:/data
-    command: /data
-    restart: always
-# Ensure the data directory exists or is created by the container
-# The API uses SQLite, likely at ./mathflix.db or src/db/mathflix.db.
-# We need to ensure persistence.
-# Check where db is configured. usually ./mathflix.db
+networks:
+  ferileenet:
+    external: true
+
+# Catatan: Layanan Storage (RustFS) telah dipindahkan ke folder _infrastructure
+# untuk digunakan secara global oleh semua proyek melalui network 'ferileenet'.
