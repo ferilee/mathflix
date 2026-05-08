@@ -5,7 +5,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ferilee/mathflix
+  # Menggunakan lowercase untuk menghindari masalah case-sensitivity di GHCR
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -14,32 +15,23 @@ jobs:
       contents: read
       packages: write
     
-    env:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to GHCR
-        if: env.GHCR_TOKEN != ''
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ferilee
-          password: ${{ env.GHCR_TOKEN }}
-
-      - name: Log in to GHCR (Fallback to GITHUB_TOKEN)
-        if: env.GHCR_TOKEN == ''
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
+          # Gunakan GHCR_TOKEN jika ada, jika tidak gunakan GITHUB_TOKEN bawaan
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GHCR_TOKEN || github.token }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # Mengonversi nama image ke lowercase (standar Docker/GHCR)
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/mathflix:latest
